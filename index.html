@@ -141,6 +141,21 @@
             border: 1px solid #d0c8b0;
             background: #faf8f0;
             overflow-y: auto;
+            position: relative;
+        }
+        .day-cell.has-event {
+            background: #e8a0a0 !important;
+            border: 2px solid #c04040 !important;
+        }
+        .day-cell.has-event .day-number {
+            background: rgba(200,50,50,0.3);
+        }
+        .viking-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.9rem;
+            opacity: 0.8;
         }
         .day-cell:active {
             transform: scale(0.98);
@@ -168,13 +183,13 @@
             font-size: 0.55rem;
             font-weight: 500;
             margin: 1px 0;
-            cursor: pointer;
             text-align: left;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
             flex-shrink: 0;
             border-left: 2px solid #c0d0a0;
+            pointer-events: none;
         }
         .attendees-info {
             font-size: 0.55rem;
@@ -209,43 +224,88 @@
         }
         .selected-event-desc {
             color: #6a7b5a;
-            margin-bottom: 14px;
-            padding-bottom: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid #d0c8b0;
             font-size: 0.85rem;
             line-height: 1.4;
         }
-        .attendees-list-title {
+        .event-link {
+            color: #6a7b5a;
+            margin-bottom: 10px;
+            font-size: 0.8rem;
+        }
+        .event-link a {
+            color: #4a7a3a;
+            text-decoration: none;
+            word-break: break-all;
+        }
+        .vote-section {
+            margin: 10px 0;
+        }
+        .vote-title {
             font-weight: 700;
-            margin: 12px 0 8px 0;
+            margin: 10px 0 6px 0;
             font-size: 0.85rem;
             color: #5a6b4a;
+            text-align: center;
         }
-        .attendees-list {
+        .vote-columns {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .vote-column {
+            flex: 1;
+            min-width: 140px;
             background: #faf8f0;
             border-radius: 14px;
-            padding: 6px;
-            max-height: 200px;
-            overflow-y: auto;
+            padding: 8px;
         }
-        .attendee-item {
-            padding: 6px 10px;
-            border-bottom: 1px solid #e0d8c8;
-            font-size: 0.8rem;
+        .vote-column.green {
+            background: #d0e8c0;
+            border: 1px solid #8aae6a;
+        }
+        .vote-column.red {
+            background: #e8c0c0;
+            border: 1px solid #c08080;
+        }
+        .vote-column-title {
+            font-weight: 700;
+            text-align: center;
+            padding: 4px;
+            border-radius: 10px;
+            margin-bottom: 6px;
+            font-size: 0.75rem;
+        }
+        .vote-column.green .vote-column-title {
+            background: #6aae4a;
+            color: white;
+        }
+        .vote-column.red .vote-column-title {
+            background: #c06060;
+            color: white;
+        }
+        .attendee-vote-item {
+            padding: 4px 6px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+            font-size: 0.7rem;
             display: flex;
-            gap: 8px;
-            color: #5a6b4a;
+            gap: 5px;
         }
-        .attendee-number {
+        .vote-number {
             color: #8a9e6a;
             font-weight: 600;
-            min-width: 28px;
+            min-width: 22px;
         }
-        .no-attendees {
+        .vote-name {
+            color: #4a5b3a;
+        }
+        .no-votes {
             color: #b0a890;
             text-align: center;
-            padding: 16px;
-            font-size: 0.8rem;
+            padding: 10px;
+            font-size: 0.65rem;
         }
         .event-selector select {
             width: 100%;
@@ -286,25 +346,63 @@
             font-weight: 600;
             font-size: 0.85rem;
         }
-        .btn-attend-small {
-            background: #8a9e6a;
-            color: #f5f0e8;
-            border: none;
+        .vote-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 10px 0;
+        }
+        .vote-btn {
+            background: #e8e4d8;
+            border: 1px solid #c0b8a0;
             border-radius: 30px;
-            padding: 8px 12px;
-            font-size: 0.75rem;
+            padding: 6px 20px;
+            font-size: 0.8rem;
             cursor: pointer;
-            margin-top: 10px;
-            width: 100%;
+            transition: 0.1s;
             font-weight: 500;
         }
-        .btn-danger {
-            background: #c0a080;
+        .vote-btn:active {
+            transform: scale(0.95);
         }
-        .btn-outline {
-            background: #c0b8a0;
-            color: #4a5b3a;
-            margin-top: 6px;
+        .vote-btn.yes {
+            background: #d0e8c0;
+            border-color: #6aae4a;
+        }
+        .vote-btn.no {
+            background: #e8c0c0;
+            border-color: #c06060;
+        }
+        .vote-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .current-vote {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-top: 8px;
+            padding: 4px;
+            border-radius: 20px;
+        }
+        .current-vote.yes {
+            background: #d0e8c0;
+            color: #4a6a2a;
+        }
+        .current-vote.no {
+            background: #e8c0c0;
+            color: #a04040;
+        }
+        .change-btn {
+            background: #8a7a5a;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
         }
         small {
             color: #b0a890;
@@ -342,15 +440,17 @@
             body { padding: 8px; }
             .container { padding: 12px; }
             .day-cell { min-height: 70px; }
-            .event-badge { font-size: 0.5rem; white-space: normal; line-height: 1.2; }
+            .event-badge { font-size: 0.5rem; white-space: normal; line-height: 1.2; pointer-events: none; }
             .weekday { font-size: 0.6rem; }
+            .vote-columns { flex-direction: column; }
+            .vote-btn { padding: 4px 12px; font-size: 0.7rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>🎖️ КАЛЕНДАРЬ ИГР</h1>
-    <div class="mode-badge" id="modeBadge">👁️ РЕЖИМ ПРОСМОТРА</div>
+    <h1>⚔️ КАЛЕНДАРЬ ИГР</h1>
+    <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
     
     <div class="sync-status">
         <span id="syncStatusText">🔄 ЗАГРУЗКА...</span>
@@ -374,7 +474,7 @@
     <div class="details-section" id="detailsSection">
         <div id="selectedEventInfo">
             <small style="display: block; text-align: center; padding: 12px;">
-                👈 НАЖМИТЕ НА СОБЫТИЕ В КАЛЕНДАРЕ
+                👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ
             </small>
         </div>
     </div>
@@ -382,7 +482,8 @@
     <div id="editForms" style="display: none;">
         <div class="add-event-form">
             <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ" />
-            <textarea id="newEventDesc" placeholder="КРАТКОЕ ОПИСАНИЕ (ВРЕМЯ, МЕСТО, КОМАНДА)"></textarea>
+            <textarea id="newEventDesc" placeholder="КРАТКОЕ ОПИСАНИЕ"></textarea>
+            <input type="text" id="newEventLink" placeholder="ССЫЛКА НА СОБЫТИЕ (НЕОБЯЗАТЕЛЬНО)" />
             <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
         </div>
     </div>
@@ -398,9 +499,7 @@
 <script>
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3B0byEj4fgNtBXAxVxxrYiOD6rxkzt0dlVLOULKeOOx9Tjw35vjHTPbeARN_FaF-cqA/exec";
     
-    // ========== НАСТРОЙКИ ДОСТУПА ==========
     const ADMIN_CODE = "orden.sparta";
-    // =======================================
     
     let eventsDB = {};
     let currentYear = 2026;
@@ -408,6 +507,14 @@
     let selectedDateStr = "";
     let selectedEventId = null;
     let isAdmin = false;
+    
+    function formatDate(dateStr) {
+        let parts = dateStr.split('-');
+        if (parts.length === 3) {
+            return `${parts[2]}.${parts[1]}.${parts[0].slice(2)}`;
+        }
+        return dateStr;
+    }
     
     function checkStoredAccess() {
         const stored = localStorage.getItem('gameCalendarAdmin');
@@ -421,7 +528,6 @@
     
     function checkAccess() {
         const code = document.getElementById('accessCode').value;
-        
         if (code === ADMIN_CODE) {
             isAdmin = true;
             localStorage.setItem('gameCalendarAdmin', 'true');
@@ -439,28 +545,15 @@
         document.getElementById('modeBadge').style.background = '#d0c8b0';
         document.getElementById('adminPanel').classList.add('show');
         document.getElementById('editForms').style.display = 'block';
-        renderCalendar();
-        if (selectedDateStr) {
-            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
-            else showDayEvents(selectedDateStr);
-        }
     }
     
     function exitEditMode() {
         isAdmin = false;
         localStorage.removeItem('gameCalendarAdmin');
-        document.getElementById('modeBadge').innerHTML = '👁️ РЕЖИМ ПРОСМОТРА';
+        document.getElementById('modeBadge').innerHTML = '🗳️ РЕЖИМ ГОЛОСОВАНИЯ';
         document.getElementById('modeBadge').style.background = '#e0d8c8';
         document.getElementById('adminPanel').classList.remove('show');
         document.getElementById('editForms').style.display = 'none';
-        
-        saveToLocal();
-        renderCalendar();
-        
-        if (selectedDateStr) {
-            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
-            else showDayEvents(selectedDateStr);
-        }
     }
     
     function getDateKey(year, month, day) {
@@ -477,25 +570,30 @@
                 eventsDB = data.events;
                 for (let date in eventsDB) {
                     eventsDB[date] = eventsDB[date].map(ev => ({
-                        ...ev,
-                        attendees: ev.attendees || [],
-                        description: ev.description || ""
+                        id: ev.id,
+                        name: ev.name,
+                        description: ev.description || "",
+                        link: ev.link || "",
+                        yesVotes: ev.yesVotes || ev.attendees || [],
+                        noVotes: ev.noVotes || []
                     }));
                 }
                 saveToLocal();
-                statusSpan.innerHTML = "✅ СИНХРОНИЗИРОВАНО";
+                statusSpan.innerHTML = "✅ ГОТОВО";
                 return true;
             }
             throw new Error("Нет данных");
         } catch (e) {
+            console.log("Ошибка загрузки", e);
             loadFromLocal();
-            statusSpan.innerHTML = "📱 ОФЛАЙН РЕЖИМ";
+            statusSpan.innerHTML = "📱 ЛОКАЛЬНО";
             return false;
         }
     }
     
     async function saveToCloud() {
-        if (!isAdmin) return;
+        const statusSpan = document.getElementById('syncStatusText');
+        statusSpan.innerHTML = "💾 СОХРАНЕНИЕ...";
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
@@ -503,12 +601,16 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ events: eventsDB })
             });
-            document.getElementById('syncStatusText').innerHTML = "✅ СОХРАНЕНО";
+            statusSpan.innerHTML = "✅ СОХРАНЕНО";
             setTimeout(() => {
-                if (document.getElementById('syncStatusText').innerHTML === "✅ СОХРАНЕНО")
-                    document.getElementById('syncStatusText').innerHTML = "✅ СИНХРОНИЗИРОВАНО";
+                if (statusSpan.innerHTML === "✅ СОХРАНЕНО") {
+                    statusSpan.innerHTML = "✅ ГОТОВО";
+                }
             }, 1500);
-        } catch (e) {}
+        } catch (e) {
+            console.log("Ошибка сохранения", e);
+            statusSpan.innerHTML = "⚠️ ОШИБКА";
+        }
     }
     
     function saveToLocal() {
@@ -522,14 +624,14 @@
         } else {
             eventsDB = {
                 "2026-06-02": [
-                    { id: Date.now() + 1, name: "🔫 ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00, DISCORD. КОМАНДА: АЛЬФА", attendees: ["АННА", "ИВАН"] },
-                    { id: Date.now() + 2, name: "🎯 СНАЙПЕРСКАЯ ЗАСАДА", description: "НУЖНЫ 2 СНАЙПЕРА", attendees: ["МАРИЯ"] }
+                    { id: Date.now() + 1, name: "ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00", link: "https://discord.gg/example", yesVotes: ["АННА", "ИВАН"], noVotes: [] },
+                    { id: Date.now() + 2, name: "СНАЙПЕРСКАЯ ЗАСАДА", description: "НУЖНЫ 2 СНАЙПЕРА", link: "", yesVotes: ["МАРИЯ"], noVotes: [] }
                 ],
                 "2026-06-03": [
-                    { id: Date.now() + 3, name: "⚔️ ЗАХВАТ ТЕРРИТОРИИ", description: "ТАКТИКА 5Х5", attendees: ["ОЛЕГ"] }
+                    { id: Date.now() + 3, name: "ЗАХВАТ ТЕРРИТОРИИ", description: "ТАКТИКА 5Х5", link: "", yesVotes: ["ОЛЕГ"], noVotes: [] }
                 ],
                 "2026-06-07": [
-                    { id: Date.now() + 4, name: "🎲 ВОЕННО-ТАКТИЧЕСКАЯ НАСТОЛКА", description: "МАФИЯ ТАКТИЧЕСКАЯ, UNO АРМИЯ", attendees: ["ЛЕНА", "ДИМА"] }
+                    { id: Date.now() + 4, name: "ВОЕННО-ТАКТИЧЕСКАЯ НАСТОЛКА", description: "МАФИЯ, UNO", link: "", yesVotes: ["ЛЕНА", "ДИМА"], noVotes: [] }
                 ]
             };
         }
@@ -540,15 +642,17 @@
         return eventsDB[dateStr];
     }
     
-    async function addEventToDate(dateStr, eventName, eventDesc) {
-        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ ИГРЫ!"); return false; }
+    async function addEventToDate(dateStr, eventName, eventDesc, eventLink) {
+        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ СОБЫТИЯ!"); return false; }
         if (!eventName.trim()) return false;
         const events = getEventsForDate(dateStr);
         events.push({
             id: Date.now(),
             name: eventName.trim().toUpperCase(),
             description: eventDesc.trim() || "",
-            attendees: []
+            link: eventLink.trim() || "",
+            yesVotes: [],
+            noVotes: []
         });
         saveToLocal();
         await saveToCloud();
@@ -556,13 +660,24 @@
         return true;
     }
     
-    async function toggleAttendee(eventId, dateStr, userName) {
+    async function vote(eventId, dateStr, userName, voteType) {
         if (!userName.trim()) userName = "Гость";
         const ev = eventsDB[dateStr]?.find(e => e.id == eventId);
         if (!ev) return;
-        const idx = ev.attendees.indexOf(userName.toUpperCase());
-        idx === -1 ? ev.attendees.push(userName.toUpperCase()) : ev.attendees.splice(idx, 1);
-        ev.attendees.sort((a,b) => a.localeCompare(b));
+        
+        const userNameUpper = userName.trim().toUpperCase();
+        ev.yesVotes = ev.yesVotes.filter(v => v !== userNameUpper);
+        ev.noVotes = ev.noVotes.filter(v => v !== userNameUpper);
+        
+        if (voteType === 'yes') {
+            ev.yesVotes.push(userNameUpper);
+        } else if (voteType === 'no') {
+            ev.noVotes.push(userNameUpper);
+        }
+        
+        ev.yesVotes.sort((a,b) => a.localeCompare(b));
+        ev.noVotes.sort((a,b) => a.localeCompare(b));
+        
         saveToLocal();
         await saveToCloud();
         renderCalendar();
@@ -570,7 +685,7 @@
     }
     
     async function deleteEvent(eventId, dateStr) {
-        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ УДАЛЯТЬ СОБЫТИЕ!"); return; }
+        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ УДАЛЯТЬ!"); return; }
         if (!eventsDB[dateStr]) return;
         eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id != eventId);
         if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
@@ -582,36 +697,13 @@
         await saveToCloud();
         renderCalendar();
         if (selectedDateStr) showDayEvents(selectedDateStr);
-        else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИ НА СОБЫТИЕ В КАЛЕНДАРЕ</small></div>`;
-    }
-    
-    function getDayColor(dateStr, hasEvents, dayOfWeek) {
-        const today = new Date();
-        today.setHours(0,0,0,0);
-        const cellDate = new Date(dateStr);
-        
-        // Выходные (суббота 6, воскресенье 0) - зеленоватые
-        if (dayOfWeek === 0 || dayOfWeek === 6) {
-            if (hasEvents) return '#b8d8b0';
-            if (cellDate < today) return '#d8e0c8';
-            if (cellDate > today) return '#c8e0c0';
-            return '#c8e0b8';
-        }
-        
-        // Будни
-        if (hasEvents) return '#c8d8b0';
-        if (cellDate < today) return '#f0ece0';
-        if (cellDate > today) return '#f8f4e8';
-        return '#f0f0e0';
+        else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     }
     
     function renderCalendar() {
-        // Определяем первый день месяца, НО настраиваем чтобы неделя начиналась с понедельника
         const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
-        // getDay(): 0 - вс, 1 - пн, 2 - вт... 6 - сб
-        // Нам нужно смещение для начала с понедельника
         let startOffset = firstDayOfMonth.getDay() - 1;
-        if (startOffset === -1) startOffset = 6; // если воскресенье (0), то смещение 6
+        if (startOffset === -1) startOffset = 6;
         
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const todayStr = new Date().toISOString().split('T')[0];
@@ -623,7 +715,6 @@
             gridHtml += `<div class="weekday">${day}</div>`;
         });
         
-        // Пустые ячейки до первого дня месяца
         for (let i = 0; i < startOffset; i++) {
             gridHtml += `<div class="day-cell" style="background:#e8e4d8;"><div class="empty-day">—</div></div>`;
         }
@@ -634,10 +725,7 @@
             const hasEvents = events.length > 0;
             const dateObj = new Date(currentYear, currentMonth, d);
             let dayOfWeek = dateObj.getDay();
-            // Преобразуем: если воскресенье (0), делаем 7 для правильного определения выходного
             let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
-            
-            const bgColor = getDayColor(dateKey, hasEvents, dayOfWeek);
             const isToday = (dateKey === todayStr);
             const isSelected = (selectedDateStr === dateKey);
             
@@ -645,17 +733,29 @@
             if (isToday) border = '3px solid #c0a040';
             if (isSelected) border = '3px solid #8a9e6a';
             
-            gridHtml += `<div class="day-cell ${isWeekend ? 'weekend' : ''}" data-date="${dateKey}" style="background:${bgColor}; border:${border};">`;
-            gridHtml += `<div class="day-number">${d}</div>`;
-            
+            let bgColor = '';
             if (hasEvents) {
+                bgColor = '#e8a0a0';
+            } else if (isWeekend) {
+                bgColor = '#d8e8d0';
+            } else if (dateKey < todayStr) {
+                bgColor = '#f0ece0';
+            } else {
+                bgColor = '#f8f4e8';
+            }
+            
+            gridHtml += `<div class="day-cell ${hasEvents ? 'has-event' : ''} ${isWeekend ? 'weekend' : ''}" data-date="${dateKey}" style="background:${bgColor}; border:${border};">`;
+            gridHtml += `<div class="day-number">${d}</div>`;
+            if (hasEvents) {
+                gridHtml += `<div class="viking-icon">⚔️</div>`;
                 events.forEach(ev => {
-                    let shortName = ev.name.length > 20 ? ev.name.substring(0, 18) + '..' : ev.name;
-                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">🎖️ ${shortName}</div>`;
+                    let shortName = ev.name.length > 22 ? ev.name.substring(0, 20) + '..' : ev.name;
+                    gridHtml += `<div class="event-badge">🏷️ ${shortName}</div>`;
                 });
-                const totalAtt = events.reduce((acc, e) => acc + e.attendees.length, 0);
-                if (totalAtt > 0) {
-                    gridHtml += `<div class="attendees-info">👥 ${totalAtt} БОЙЦОВ</div>`;
+                const totalYes = events.reduce((acc, e) => acc + (e.yesVotes?.length || 0), 0);
+                const totalNo = events.reduce((acc, e) => acc + (e.noVotes?.length || 0), 0);
+                if (totalYes + totalNo > 0) {
+                    gridHtml += `<div class="attendees-info">✅ ${totalYes} | ❌ ${totalNo}</div>`;
                 }
             } else {
                 gridHtml += `<div class="empty-day" style="font-size:0.6rem; margin-top:12px;">➕</div>`;
@@ -663,7 +763,6 @@
             gridHtml += `</div>`;
         }
         
-        // Заполняем оставшиеся ячейки до конца строки
         const totalCells = startOffset + daysInMonth;
         const remaining = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remaining; i++) {
@@ -674,21 +773,8 @@
         const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
         document.getElementById("currentMonthLabel").innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
         
-        document.querySelectorAll('.event-badge').forEach(badge => {
-            badge.addEventListener('click', (e) => {
-                e.stopPropagation();
-                const dateStr = badge.getAttribute('data-date');
-                const eventId = parseInt(badge.getAttribute('data-event-id'));
-                selectedDateStr = dateStr;
-                selectedEventId = eventId;
-                renderCalendar();
-                showEventDetails(dateStr, eventId);
-            });
-        });
-        
         document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
             cell.addEventListener('click', (e) => {
-                if (e.target.classList.contains('event-badge')) return;
                 const dateStr = cell.getAttribute('data-date');
                 selectedDateStr = dateStr;
                 selectedEventId = null;
@@ -703,7 +789,7 @@
         if (!events.length) {
             document.getElementById('detailsSection').innerHTML = `
                 <div id="selectedEventInfo">
-                    <div class="selected-event-title">📅 ${dateStr}</div>
+                    <div class="selected-event-title">📅 ${formatDate(dateStr)}</div>
                     <div style="color:#8a9e6a; font-size:0.85rem;">НЕТ СОБЫТИЙ</div>
                     ${isAdmin ? `<button class="btn-attend-small btn-outline" onclick="document.getElementById('newEventName').focus()">➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
                 </div>`;
@@ -712,7 +798,7 @@
         
         let html = `
             <div id="selectedEventInfo">
-                <div class="selected-event-title">📅 ${dateStr}</div>
+                <div class="selected-event-title">📅 ${formatDate(dateStr)}</div>
                 <div class="event-selector">
                     <select id="eventSelect" onchange="switchEvent(this.value)">
                         <option value="">ВЫБЕРИ СОБЫТИЕ</option>
@@ -720,7 +806,7 @@
                     </select>
                 </div>
                 <div id="eventDetailView">
-                    <small style="color:#8a9e6a;">ВЫБЕРИ СОБЫТИЕ ИЗ СПИСКА</small>
+                    <small style="color:#8a9e6a;">ВЫБЕРИТЕ СОБЫТИЕ ИЗ СПИСКА</small>
                 </div>
             </div>
         `;
@@ -741,28 +827,54 @@
         const event = eventsDB[dateStr]?.find(e => e.id === eventId);
         if (!event) return;
         
-        const sortedAttendees = [...event.attendees].sort((a,b) => a.localeCompare(b));
-        const attendeesList = sortedAttendees.length ? 
-            sortedAttendees.map((name, idx) => `<div class="attendee-item"><span class="attendee-number">${idx+1}.</span><span class="attendee-name">${name}</span></div>`).join('') :
-            '<div class="no-attendees">😴 ПОКА НИКТО НЕ ЗАПИСАЛСЯ</div>';
+        const sortedYesVotes = [...(event.yesVotes || [])].sort((a,b) => a.localeCompare(b));
+        const sortedNoVotes = [...(event.noVotes || [])].sort((a,b) => a.localeCompare(b));
+        
+        const yesList = sortedYesVotes.length ? 
+            sortedYesVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') :
+            '<div class="no-votes">😴 ПОКА НИКТО</div>';
+        
+        const noList = sortedNoVotes.length ? 
+            sortedNoVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') :
+            '<div class="no-votes">😴 ПОКА НИКТО</div>';
         
         let editButtons = '';
         if (isAdmin) {
-            editButtons = `
-                <button class="btn-attend-small btn-danger" onclick="if(confirm('УДАЛИТЬ ИГРУ?')) deleteEvent(${event.id}, '${dateStr}')" style="background:#c0a080; margin-top:8px;">🗑 УДАЛИТЬ ИГРУ</button>
-            `;
+            editButtons = `<button class="change-btn" onclick="if(confirm('УДАЛИТЬ СОБЫТИЕ?')) deleteEvent(${event.id}, '${dateStr}')" style="background:#c0a080;">🗑 УДАЛИТЬ</button>`;
         }
+        
+        const userName = localStorage.getItem('userName') || "";
+        const hasVotedYes = sortedYesVotes.includes(userName);
+        const hasVotedNo = sortedNoVotes.includes(userName);
+        const currentVote = hasVotedYes ? "yes" : (hasVotedNo ? "no" : null);
         
         const html = `
             <div id="selectedEventInfo">
-                <div class="selected-event-title">🎖️ ${event.name}</div>
+                <div class="selected-event-title">⚔️ ${event.name}</div>
                 ${event.description ? `<div class="selected-event-desc">📝 ${event.description}</div>` : ''}
-                <div class="attendees-list-title">👥 ЗАПИСАЛИСЬ (${event.attendees.length} БОЙЦОВ)</div>
-                <div class="attendees-list">
-                    ${attendeesList}
+                ${event.link ? `<div class="event-link">🔗 <a href="${event.link}" target="_blank">ССЫЛКА НА СОБЫТИЕ</a></div>` : ''}
+                
+                <div class="vote-row">
+                    <button class="vote-btn yes ${hasVotedYes ? 'disabled' : ''}" onclick="voteClick(${event.id}, '${dateStr}', 'yes')">✅ ИДУ</button>
+                    <button class="vote-btn no ${hasVotedNo ? 'disabled' : ''}" onclick="voteClick(${event.id}, '${dateStr}', 'no')">❌ НЕ ИДУ</button>
                 </div>
-                <button class="btn-attend-small" onclick="promptAndAttend(${event.id}, '${dateStr}')">✅ Я ИДУ!</button>
-                <button class="btn-attend-small btn-danger" onclick="promptAndRemove(${event.id}, '${dateStr}')" style="background:#c0a080; margin-top:8px;">❌ ОТКАЗАТЬСЯ</button>
+                
+                <div class="vote-section">
+                    <div class="vote-title">РЕЗУЛЬТАТЫ</div>
+                    <div class="vote-columns">
+                        <div class="vote-column green">
+                            <div class="vote-column-title">✅ ИДУ (${sortedYesVotes.length})</div>
+                            <div class="attendees-list">${yesList}</div>
+                        </div>
+                        <div class="vote-column red">
+                            <div class="vote-column-title">❌ НЕ ИДУ (${sortedNoVotes.length})</div>
+                            <div class="attendees-list">${noList}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                ${currentVote ? `<div class="current-vote ${currentVote}">🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${currentVote === 'yes' ? '✅ ИДУ' : '❌ НЕ ИДУ'}</div>` : ''}
+                <button class="change-btn" onclick="changeVote(${event.id}, '${dateStr}')">🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ ГОЛОС</button>
                 ${editButtons}
             </div>
         `;
@@ -772,17 +884,34 @@
         else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo">${html}</div>`;
     }
     
-    window.promptAndAttend = async (eventId, dateStr) => {
-        let name = prompt("ВВЕДИ ПОЗЫВНОЙ", localStorage.getItem('userName') || "");
-        if (name && name.trim()) {
-            localStorage.setItem('userName', name.trim().toUpperCase());
-            await toggleAttendee(eventId, dateStr, name.trim().toUpperCase());
+    window.voteClick = async (eventId, dateStr, voteType) => {
+        let name = localStorage.getItem('userName');
+        if (!name) {
+            name = prompt("ВВЕДИ ПОЗЫВНОЙ");
+            if (name && name.trim()) {
+                localStorage.setItem('userName', name.trim().toUpperCase());
+            } else {
+                return;
+            }
         }
+        await vote(eventId, dateStr, name.trim().toUpperCase(), voteType);
     };
     
-    window.promptAndRemove = async (eventId, dateStr) => {
-        let name = prompt("ВВЕДИ ПОЗЫВНОЙ ДЛЯ ОТКАЗА", localStorage.getItem('userName') || "");
-        if (name && name.trim()) await toggleAttendee(eventId, dateStr, name.trim().toUpperCase());
+    window.changeVote = async (eventId, dateStr) => {
+        let name = prompt("ВВЕДИ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ ГОЛОСА", localStorage.getItem('userName') || "");
+        if (name && name.trim()) {
+            const userNameUpper = name.trim().toUpperCase();
+            const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
+            if (ev) {
+                ev.yesVotes = ev.yesVotes.filter(v => v !== userNameUpper);
+                ev.noVotes = ev.noVotes.filter(v => v !== userNameUpper);
+                saveToLocal();
+                await saveToCloud();
+                renderCalendar();
+                showEventDetails(dateStr, eventId);
+                alert("ГОЛОС УДАЛЕН!");
+            }
+        }
     };
     
     window.manualSync = async () => {
@@ -796,20 +925,22 @@
     };
     
     document.getElementById("addEventBtn")?.addEventListener("click", async () => {
-        if (!isAdmin) { alert("ДОБАВЛЯТЬ ИГРЫ МОЖЕТ ТОЛЬКО АДМИНИСТРАТОР!"); return; }
+        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ!"); return; }
         if (!selectedDateStr) {
-            alert("СНАЧАЛА НАЖМИТЕ НА ДЕНЬ В КАЛЕНДАРЕ");
+            alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ В КАЛЕНДАРЕ");
             return;
         }
         const newName = document.getElementById("newEventName").value;
         if (!newName.trim()) {
-            alert("ВВЕДИТЕ НАЗВАНИЕ ИГРЫ");
+            alert("ВВЕДИТЕ НАЗВАНИЕ");
             return;
         }
         const newDesc = document.getElementById("newEventDesc").value;
-        await addEventToDate(selectedDateStr, newName, newDesc);
+        const newLink = document.getElementById("newEventLink").value;
+        await addEventToDate(selectedDateStr, newName, newDesc, newLink);
         document.getElementById("newEventName").value = "";
         document.getElementById("newEventDesc").value = "";
+        document.getElementById("newEventLink").value = "";
         renderCalendar();
         showDayEvents(selectedDateStr);
     });
@@ -820,7 +951,7 @@
         selectedDateStr = "";
         selectedEventId = null;
         renderCalendar();
-        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ИГРУ В КАЛЕНДАРЕ</small></div>`;
+        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     });
     
     document.getElementById("nextMonthBtn").addEventListener("click", () => {
@@ -829,13 +960,18 @@
         selectedDateStr = "";
         selectedEventId = null;
         renderCalendar();
-        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ИГРУ В КАЛЕНДАРЕ</small></div>`;
+        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     });
     
-    loadFromLocal();
-    renderCalendar();
-    loadFromCloud().then(() => renderCalendar());
-    checkStoredAccess();
+    async function init() {
+        loadFromLocal();
+        renderCalendar();
+        await loadFromCloud();
+        renderCalendar();
+        checkStoredAccess();
+    }
+    
+    init();
 </script>
 </body>
 </html>
