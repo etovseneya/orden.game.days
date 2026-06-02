@@ -393,7 +393,12 @@
             background: #e8c0c0;
             color: #a04040;
         }
-        .change-btn {
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .action-btn {
             background: #8a7a5a;
             color: white;
             border: none;
@@ -401,8 +406,46 @@
             padding: 5px 12px;
             font-size: 0.7rem;
             cursor: pointer;
-            margin-top: 8px;
+            flex: 1;
+            text-align: center;
+        }
+        .action-btn.edit {
+            background: #4a7a6a;
+        }
+        .action-btn.delete {
+            background: #c0a080;
+        }
+        .edit-form {
+            background: #e8e4d8;
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 12px;
+            display: none;
+        }
+        .edit-form.show {
+            display: block;
+        }
+        .edit-form input, .edit-form textarea {
             width: 100%;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 12px;
+            border: 1px solid #c0b8a0;
+            background: #faf8f0;
+            font-size: 0.8rem;
+        }
+        .edit-form button {
+            background: #6aae4a;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            margin-right: 5px;
+        }
+        .edit-form button.cancel {
+            background: #c0a080;
         }
         small {
             color: #b0a890;
@@ -444,6 +487,7 @@
             .weekday { font-size: 0.6rem; }
             .vote-columns { flex-direction: column; }
             .vote-btn { padding: 4px 12px; font-size: 0.7rem; }
+            .action-buttons { flex-direction: column; }
         }
     </style>
 </head>
@@ -545,6 +589,9 @@
         document.getElementById('modeBadge').style.background = '#d0c8b0';
         document.getElementById('adminPanel').classList.add('show');
         document.getElementById('editForms').style.display = 'block';
+        if (selectedDateStr && selectedEventId) {
+            showEventDetails(selectedDateStr, selectedEventId);
+        }
     }
     
     function exitEditMode() {
@@ -554,6 +601,9 @@
         document.getElementById('modeBadge').style.background = '#e0d8c8';
         document.getElementById('adminPanel').classList.remove('show');
         document.getElementById('editForms').style.display = 'none';
+        if (selectedDateStr && selectedEventId) {
+            showEventDetails(selectedDateStr, selectedEventId);
+        }
     }
     
     function getDateKey(year, month, day) {
@@ -657,6 +707,20 @@
         saveToLocal();
         await saveToCloud();
         renderCalendar();
+        return true;
+    }
+    
+    async function editEvent(eventId, dateStr, newName, newDesc, newLink) {
+        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ РЕДАКТИРОВАТЬ!"); return false; }
+        const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
+        if (!ev) return false;
+        if (newName.trim()) ev.name = newName.trim().toUpperCase();
+        ev.description = newDesc.trim() || "";
+        ev.link = newLink.trim() || "";
+        saveToLocal();
+        await saveToCloud();
+        renderCalendar();
+        if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
         return true;
     }
     
@@ -791,7 +855,7 @@
                 <div id="selectedEventInfo">
                     <div class="selected-event-title">📅 ${formatDate(dateStr)}</div>
                     <div style="color:#8a9e6a; font-size:0.85rem;">НЕТ СОБЫТИЙ</div>
-                    ${isAdmin ? `<button class="btn-attend-small btn-outline" onclick="document.getElementById('newEventName').focus()">➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
+                    ${isAdmin ? `<button class="vote-btn" style="width:100%; margin-top:10px;" onclick="document.getElementById('newEventName').focus()">➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
                 </div>`;
             return;
         }
@@ -838,15 +902,27 @@
             sortedNoVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') :
             '<div class="no-votes">😴 ПОКА НИКТО</div>';
         
-        let editButtons = '';
-        if (isAdmin) {
-            editButtons = `<button class="change-btn" onclick="if(confirm('УДАЛИТЬ СОБЫТИЕ?')) deleteEvent(${event.id}, '${dateStr}')" style="background:#c0a080;">🗑 УДАЛИТЬ</button>`;
-        }
-        
         const userName = localStorage.getItem('userName') || "";
         const hasVotedYes = sortedYesVotes.includes(userName);
         const hasVotedNo = sortedNoVotes.includes(userName);
         const currentVote = hasVotedYes ? "yes" : (hasVotedNo ? "no" : null);
+        
+        let actionButtons = '';
+        if (isAdmin) {
+            actionButtons = `
+                <div class="action-buttons">
+                    <button class="action-btn edit" onclick="toggleEditForm(${event.id}, '${dateStr}')">✏️ РЕДАКТИРОВАТЬ</button>
+                    <button class="action-btn delete" onclick="if(confirm('УДАЛИТЬ СОБЫТИЕ?')) deleteEvent(${event.id}, '${dateStr}')">🗑 УДАЛИТЬ</button>
+                </div>
+                <div id="editForm-${event.id}" class="edit-form">
+                    <input type="text" id="editName-${event.id}" value="${event.name.replace(/"/g, '&quot;')}" placeholder="НАЗВАНИЕ">
+                    <textarea id="editDesc-${event.id}" placeholder="ОПИСАНИЕ">${event.description || ''}</textarea>
+                    <input type="text" id="editLink-${event.id}" value="${event.link || ''}" placeholder="ССЫЛКА">
+                    <button onclick="saveEdit(${event.id}, '${dateStr}')">💾 СОХРАНИТЬ</button>
+                    <button class="cancel" onclick="toggleEditForm(${event.id}, '${dateStr}')">❌ ОТМЕНА</button>
+                </div>
+            `;
+        }
         
         const html = `
             <div id="selectedEventInfo">
@@ -875,7 +951,7 @@
                 
                 ${currentVote ? `<div class="current-vote ${currentVote}">🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${currentVote === 'yes' ? '✅ ИДУ' : '❌ НЕ ИДУ'}</div>` : ''}
                 <button class="change-btn" onclick="changeVote(${event.id}, '${dateStr}')">🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ ГОЛОС</button>
-                ${editButtons}
+                ${actionButtons}
             </div>
         `;
         
@@ -883,6 +959,25 @@
         if (detailView) detailView.innerHTML = html;
         else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo">${html}</div>`;
     }
+    
+    window.toggleEditForm = (eventId, dateStr) => {
+        const form = document.getElementById(`editForm-${eventId}`);
+        if (form) {
+            form.classList.toggle('show');
+        }
+    };
+    
+    window.saveEdit = async (eventId, dateStr) => {
+        const newName = document.getElementById(`editName-${eventId}`).value;
+        const newDesc = document.getElementById(`editDesc-${eventId}`).value;
+        const newLink = document.getElementById(`editLink-${eventId}`).value;
+        if (!newName.trim()) {
+            alert("ВВЕДИТЕ НАЗВАНИЕ!");
+            return;
+        }
+        await editEvent(eventId, dateStr, newName, newDesc, newLink);
+        toggleEditForm(eventId, dateStr);
+    };
     
     window.voteClick = async (eventId, dateStr, voteType) => {
         let name = localStorage.getItem('userName');
