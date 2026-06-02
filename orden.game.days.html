@@ -2,12 +2,12 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>Календарь мероприятий с отметками</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Календарь мероприятий — общая база участников</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            font-family: system-ui, 'Segoe UI', sans-serif;
         }
         body {
             background: #f0f2f5;
@@ -20,7 +20,6 @@
             background: white;
             border-radius: 28px;
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            overflow: hidden;
             padding: 20px 24px 32px;
         }
         h1 {
@@ -34,7 +33,7 @@
             border-left: 4px solid #3b82f6;
             padding-left: 16px;
         }
-        .share-info {
+        .sync-status {
             background: #e0f2fe;
             padding: 10px 16px;
             border-radius: 16px;
@@ -47,13 +46,17 @@
             flex-wrap: wrap;
             gap: 10px;
         }
-        .share-link {
-            background: white;
+        .sync-btn {
+            background: #0284c7;
+            color: white;
+            border: none;
             padding: 6px 12px;
             border-radius: 12px;
-            font-family: monospace;
-            font-size: 0.8rem;
-            word-break: break-all;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        .sync-btn:hover {
+            background: #0369a1;
         }
         .month-nav {
             display: flex;
@@ -61,10 +64,6 @@
             justify-content: space-between;
             margin-bottom: 20px;
             flex-wrap: wrap;
-            gap: 12px;
-        }
-        .month-buttons {
-            display: flex;
             gap: 12px;
         }
         .month-buttons button {
@@ -75,8 +74,7 @@
             padding: 8px 16px;
             border-radius: 40px;
             cursor: pointer;
-            transition: all 0.2s;
-            color: #1e40af;
+            transition: 0.2s;
         }
         .month-buttons button:hover {
             background: #dbeafe;
@@ -88,7 +86,6 @@
             background: #f8fafc;
             padding: 6px 18px;
             border-radius: 40px;
-            color: #0f172a;
         }
         .calendar-grid {
             display: grid;
@@ -102,19 +99,17 @@
             padding: 10px 5px;
             background: #f1f5f9;
             border-radius: 20px;
-            color: #334155;
             font-size: 0.85rem;
         }
         .day-cell {
             border-radius: 20px;
             min-height: 110px;
             padding: 10px 6px;
-            transition: 0.1s;
-            position: relative;
             cursor: pointer;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+            transition: 0.1s;
+            border: 1px solid #e2e8f0;
         }
         .day-cell:hover {
             transform: translateY(-2px);
@@ -124,7 +119,6 @@
             font-weight: bold;
             font-size: 1rem;
             margin-bottom: 6px;
-            display: inline-block;
             background: rgba(255,255,255,0.7);
             width: 32px;
             text-align: center;
@@ -139,19 +133,15 @@
             font-size: 0.7rem;
             font-weight: 600;
             margin: 4px 0;
-            word-break: break-word;
             cursor: pointer;
-            transition: 0.1s;
-            display: inline-block;
-            width: 100%;
             text-align: center;
+            transition: 0.1s;
         }
         .event-badge:hover {
             background: #2563eb;
         }
         .attendees-info {
             font-size: 0.65rem;
-            color: #1e293b;
             margin-top: 6px;
             background: rgba(255,255,255,0.8);
             border-radius: 20px;
@@ -209,11 +199,10 @@
             font-weight: 700;
             font-size: 1rem;
         }
-        .attendee-buttons {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-            flex-wrap: wrap;
+        .attendee-list {
+            font-size: 0.7rem;
+            color: #334155;
+            margin-top: 6px;
         }
         .btn-attend {
             background: #e2e3e8;
@@ -225,25 +214,14 @@
             cursor: pointer;
             transition: 0.1s;
         }
-        .btn-attend.active {
-            background: #22c55e;
-            color: white;
-        }
-        .btn-reset {
-            background: #fee2e2;
-            color: #b91c1c;
-        }
-        .attendee-list {
-            font-size: 0.7rem;
-            color: #334155;
-            margin-top: 6px;
+        .btn-attend:hover {
+            transform: scale(0.95);
         }
         .add-event-form {
             margin-top: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
-            align-items: center;
         }
         .add-event-form input {
             flex: 2;
@@ -258,38 +236,34 @@
             border: none;
             padding: 10px 20px;
             border-radius: 60px;
-            font-weight: 600;
             cursor: pointer;
+            font-weight: 600;
+        }
+        .add-event-form button:hover {
+            background: #2563eb;
+        }
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
         }
         small {
             color: #5b6e8c;
         }
-        button {
-            cursor: pointer;
-        }
         @media (max-width: 700px) {
-            .calendar-grid {
-                gap: 4px;
-            }
-            .day-cell {
-                min-height: 80px;
-                padding: 6px 3px;
-            }
-            .event-badge {
-                font-size: 0.6rem;
-            }
+            .calendar-grid { gap: 4px; }
+            .day-cell { min-height: 80px; padding: 6px 3px; }
+            .event-badge { font-size: 0.6rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>📅 Календарь мероприятий</h1>
-    <div class="sub">Кликайте на день ➕ добавляйте ивент ✅ отмечайтесь</div>
+    <h1>📅 Общий календарь мероприятий</h1>
+    <div class="sub">✅ Все участники видят отметки друг друга (синхронизация через Google Sheets)</div>
     
-    <div class="share-info">
-        <span>🔗 Доступ для нескольких пользователей:</span>
-        <span class="share-link" id="shareLink">Загрузка...</span>
-        <button onclick="copyShareLink()" style="background:#0284c7;color:white;border:none;padding:6px 12px;border-radius:12px;">📋 Копировать ссылку</button>
+    <div class="sync-status">
+        <span>🔄 Данные синхронизируются автоматически</span>
+        <button class="sync-btn" onclick="syncWithCloud()">⟳ Обновить вручную</button>
     </div>
 
     <div class="month-nav">
@@ -314,30 +288,87 @@
             <input type="text" id="newEventName" placeholder="Название мероприятия, например: Воркшоп по дизайну" />
             <button id="addEventBtn">➕ Добавить ивент</button>
         </div>
-        <small style="display: block; margin-top: 12px;">* Напротив мероприятия можно нажать «Пойду» — вас добавят в список участников.</small>
+        <small style="display: block; margin-top: 12px;">* Напротив мероприятия можно нажать «Пойду» — вас добавят в список участников. Все изменения видны всем!</small>
     </div>
 </div>
 
 <script>
+    // ========== КОНФИГУРАЦИЯ GOOGLE SHEETS (ВАШ URL) ==========
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3B0byEj4fgNtBXAxVxxrYiOD6rxkzt0dlVLOULKeOOx9Tjw35vjHTPbeARN_FaF-cqA/exec";
+    // ===========================================================
+    
     let eventsDB = {};
     let currentYear = 2026;
-    let currentMonth = 5;
+    let currentMonth = 5; // Июнь (0-январь)
     let selectedDateStr = "";
+    let isLoading = false;
     
     function getDateKey(year, month, day) {
         return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     }
     
-    function getEventsForDate(dateStr) {
-        if (!eventsDB[dateStr]) eventsDB[dateStr] = [];
-        return eventsDB[dateStr];
+    // Загрузка из облака
+    async function loadFromCloud() {
+        isLoading = true;
+        const statusDiv = document.querySelector('.sync-status span');
+        if (statusDiv) statusDiv.innerHTML = "🔄 Загрузка данных из облака...";
+        
+        try {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`);
+            const data = await response.json();
+            
+            if (data.success && data.events) {
+                eventsDB = data.events;
+                // Конвертируем старый формат если нужно
+                for (let date in eventsDB) {
+                    eventsDB[date] = eventsDB[date].map(ev => {
+                        if (!ev.attendees) ev.attendees = [];
+                        if (!ev.id) ev.id = Date.now() + Math.random();
+                        return ev;
+                    });
+                }
+                saveToLocal();
+                renderCalendar();
+                if (selectedDateStr) renderEventsPanel(selectedDateStr);
+                if (statusDiv) statusDiv.innerHTML = "✅ Данные синхронизированы";
+                setTimeout(() => {
+                    if (statusDiv) statusDiv.innerHTML = "🔄 Данные синхронизируются автоматически";
+                }, 2000);
+            } else {
+                console.error("Ошибка загрузки:", data);
+                loadFromLocal();
+                if (statusDiv) statusDiv.innerHTML = "⚠️ Загружены локальные данные";
+            }
+        } catch (e) {
+            console.error("Не удалось загрузить из облака:", e);
+            loadFromLocal();
+            if (statusDiv) statusDiv.innerHTML = "⚠️ Офлайн режим (локальные данные)";
+        }
+        
+        isLoading = false;
     }
     
-    function saveToLocalStorage() {
+    // Сохранение в облако
+    async function saveToCloud() {
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ events: eventsDB })
+            });
+            console.log("✅ Данные сохранены в облако");
+        } catch (e) {
+            console.error("Ошибка сохранения:", e);
+        }
+    }
+    
+    // Локальное резервное копирование
+    function saveToLocal() {
         localStorage.setItem('eventCalendarDB', JSON.stringify(eventsDB));
     }
     
-    function loadFromLocalStorage() {
+    function loadFromLocal() {
         const saved = localStorage.getItem('eventCalendarDB');
         if (saved) {
             eventsDB = JSON.parse(saved);
@@ -348,22 +379,28 @@
                 });
             }
         } else {
-            const todayKey = "2026-06-02";
-            eventsDB[todayKey] = [
-                { id: Date.now() + 1, name: "🍕 Командный обед", attendees: ["Анна", "Иван"] },
-                { id: Date.now() + 2, name: "💻 Вебинар по React", attendees: ["Мария"] }
-            ];
-            eventsDB["2026-06-03"] = [
-                { id: Date.now() + 3, name: "🏋️ Фитнес-зарядка", attendees: ["Олег"] }
-            ];
-            eventsDB["2026-06-07"] = [
-                { id: Date.now() + 4, name: "🎨 Пикник в парке", attendees: ["Лена", "Дима", "Света"] }
-            ];
-            saveToLocalStorage();
+            // Демо-данные
+            eventsDB = {
+                "2026-06-02": [
+                    { id: Date.now() + 1, name: "🍕 Командный обед", attendees: ["Анна", "Иван"] },
+                    { id: Date.now() + 2, name: "💻 Вебинар по React", attendees: ["Мария"] }
+                ],
+                "2026-06-03": [
+                    { id: Date.now() + 3, name: "🏋️ Фитнес-зарядка", attendees: ["Олег"] }
+                ],
+                "2026-06-07": [
+                    { id: Date.now() + 4, name: "🎨 Пикник в парке", attendees: ["Лена", "Дима", "Света"] }
+                ]
+            };
         }
     }
     
-    function addEventToDate(dateStr, eventName) {
+    function getEventsForDate(dateStr) {
+        if (!eventsDB[dateStr]) eventsDB[dateStr] = [];
+        return eventsDB[dateStr];
+    }
+    
+    async function addEventToDate(dateStr, eventName) {
         if (!eventName.trim()) return false;
         const events = getEventsForDate(dateStr);
         events.push({
@@ -371,24 +408,33 @@
             name: eventName.trim(),
             attendees: []
         });
-        saveToLocalStorage();
+        saveToLocal();
+        await saveToCloud();
+        renderCalendar();
+        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
         return true;
     }
     
-    function toggleAttendee(eventId, dateStr, userName) {
+    async function toggleAttendee(eventId, dateStr, userName) {
         if (!userName.trim()) userName = "Гость";
         const ev = eventsDB[dateStr]?.find(e => e.id == eventId);
         if (!ev) return;
         const idx = ev.attendees.indexOf(userName);
         idx === -1 ? ev.attendees.push(userName) : ev.attendees.splice(idx, 1);
-        saveToLocalStorage();
+        saveToLocal();
+        await saveToCloud();
+        renderCalendar();
+        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
     }
     
-    function deleteEvent(eventId, dateStr) {
+    async function deleteEvent(eventId, dateStr) {
         if (!eventsDB[dateStr]) return;
         eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id != eventId);
         if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
-        saveToLocalStorage();
+        saveToLocal();
+        await saveToCloud();
+        renderCalendar();
+        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
     }
     
     function getDayColor(dateStr, hasEvents) {
@@ -397,15 +443,10 @@
         const cellDate = new Date(dateStr);
         cellDate.setHours(0,0,0,0);
         
-        if (hasEvents) {
-            return '#dbeafe'; // синий для дней с событиями
-        } else if (cellDate < today) {
-            return '#e2e8f0'; // тускло-серый для прошедших
-        } else if (cellDate > today) {
-            return '#dcfce7'; // тускло-зеленый для будущих без событий
-        } else {
-            return '#fef9c3'; // сегодняшний - желтоватый
-        }
+        if (hasEvents) return '#dbeafe'; // синий для дней с событиями
+        if (cellDate < today) return '#e2e8f0'; // тускло-серый для прошедших
+        if (cellDate > today) return '#dcfce7'; // тускло-зеленый для будущих
+        return '#fef9c3'; // сегодняшний - желтоватый
     }
     
     function renderCalendar() {
@@ -421,9 +462,8 @@
             gridHtml += `<div class="weekday">${day}</div>`;
         });
         
-        let dayCounter = 1;
-        let emptyBefore = startWeekday;
-        for (let i = 0; i < emptyBefore; i++) {
+        // Пустые ячейки до первого дня
+        for (let i = 0; i < startWeekday; i++) {
             gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day">—</div></div>`;
         }
         
@@ -444,7 +484,8 @@
             
             if (hasEvents) {
                 events.slice(0, 2).forEach(ev => {
-                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">📌 ${ev.name.substring(0, 22)}${ev.name.length>22?'..':''}</div>`;
+                    let shortName = ev.name.length > 20 ? ev.name.substring(0, 18) + '..' : ev.name;
+                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">📌 ${shortName}</div>`;
                 });
                 if (events.length > 2) {
                     gridHtml += `<div class="attendees-info" style="background:rgba(255,255,255,0.7);">+ еще ${events.length-2}</div>`;
@@ -456,11 +497,11 @@
             } else {
                 gridHtml += `<div class="empty-day" style="font-size:0.65rem; margin-top:12px;">➕ клик</div>`;
             }
-            
             gridHtml += `</div>`;
         }
         
-        const totalCells = emptyBefore + daysInMonth;
+        // Заполнить оставшиеся ячейки
+        const totalCells = startWeekday + daysInMonth;
         const remaining = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remaining; i++) {
             gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day"></div></div>`;
@@ -479,8 +520,7 @@
         document.querySelectorAll('.event-badge').forEach(badge => {
             badge.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const dateStr = badge.getAttribute('data-date');
-                if (dateStr) selectDate(dateStr);
+                selectDate(badge.getAttribute('data-date'));
             });
         });
     }
@@ -496,7 +536,7 @@
         const events = getEventsForDate(dateStr);
         const container = document.getElementById("dayEventsContainer");
         if (!events.length) {
-            container.innerHTML = `<small>✨ Нет мероприятий на этот день. Добавьте новое событие!</small>`;
+            container.innerHTML = `<small>✨ Нет мероприятий на этот день. Добавьте первое событие!</small>`;
             return;
         }
         
@@ -509,57 +549,40 @@
                         <div class="event-name">🎉 ${ev.name}</div>
                         <div class="attendee-list">✅ Участники: ${attendeeList}</div>
                     </div>
-                    <div class="attendee-buttons">
-                        <button class="btn-attend attend-yes" data-event-id="${ev.id}" data-event-date="${dateStr}">✅ Пойду</button>
-                        <button class="btn-attend btn-reset remove-attend" data-event-id="${ev.id}" data-event-date="${dateStr}">❌ Отказаться</button>
-                        <button class="delete-event-btn" style="background:#fecaca;border:none;border-radius:40px;padding:6px 14px;cursor:pointer;">🗑 Удалить</button>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-attend" onclick="promptAndAttend(${ev.id}, '${dateStr}')">✅ Пойду</button>
+                        <button class="btn-attend" onclick="promptAndRemove(${ev.id}, '${dateStr}')" style="background:#fee2e2;">❌ Отказаться</button>
+                        <button class="btn-attend" onclick="deleteEvent(${ev.id}, '${dateStr}')" style="background:#fecaca;">🗑 Удалить</button>
                     </div>
                 </div>
             `;
         });
         html += `</div>`;
         container.innerHTML = html;
-        
-        document.querySelectorAll('.attend-yes').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-event-id'));
-                const evDate = btn.getAttribute('data-event-date');
-                let userName = prompt("Введите ваше имя", "Я");
-                if (userName && userName.trim()) {
-                    toggleAttendee(id, evDate, userName.trim());
-                    renderEventsPanel(selectedDateStr);
-                    renderCalendar();
-                }
-            });
-        });
-        
-        document.querySelectorAll('.remove-attend').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const id = parseInt(btn.getAttribute('data-event-id'));
-                const evDate = btn.getAttribute('data-event-date');
-                const userName = prompt("Введите ваше имя для отказа", "Я");
-                if (userName && userName.trim()) {
-                    toggleAttendee(id, evDate, userName.trim());
-                    renderEventsPanel(selectedDateStr);
-                    renderCalendar();
-                }
-            });
-        });
-        
-        document.querySelectorAll('.delete-event-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                const id = parseInt(btn.getAttribute('data-event-id'));
-                const evDate = btn.getAttribute('data-event-date');
-                if (confirm("Удалить мероприятие?")) {
-                    deleteEvent(id, evDate);
-                    renderEventsPanel(selectedDateStr);
-                    renderCalendar();
-                }
-            });
-        });
     }
     
-    document.getElementById("addEventBtn").addEventListener("click", () => {
+    window.promptAndAttend = async (eventId, dateStr) => {
+        let name = prompt("Введите ваше имя (коллеги увидят его в списке)", "Я");
+        if (name && name.trim()) {
+            await toggleAttendee(eventId, dateStr, name.trim());
+        } else if (name === "") {
+            await toggleAttendee(eventId, dateStr, "Гость");
+        }
+    };
+    
+    window.promptAndRemove = async (eventId, dateStr) => {
+        let name = prompt("Введите ваше имя, чтобы убрать отметку", "Я");
+        if (name && name.trim()) {
+            await toggleAttendee(eventId, dateStr, name.trim());
+        }
+    };
+    
+    window.syncWithCloud = async () => {
+        await loadFromCloud();
+        alert("Данные обновлены из облака!");
+    };
+    
+    document.getElementById("addEventBtn").addEventListener("click", async () => {
         if (!selectedDateStr) {
             alert("Сначала нажмите на любой день в календаре!");
             return;
@@ -569,10 +592,8 @@
             alert("Введите название мероприятия");
             return;
         }
-        addEventToDate(selectedDateStr, newName);
+        await addEventToDate(selectedDateStr, newName);
         document.getElementById("newEventName").value = "";
-        renderCalendar();
-        renderEventsPanel(selectedDateStr);
     });
     
     document.getElementById("prevMonthBtn").addEventListener("click", () => {
@@ -583,7 +604,8 @@
         currentMonth = newMonth;
         selectedDateStr = "";
         renderCalendar();
-        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день</small>`;
+        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день в календаре</small>`;
+        document.getElementById("selectedDateLabel").innerText = "—";
     });
     
     document.getElementById("nextMonthBtn").addEventListener("click", () => {
@@ -594,23 +616,21 @@
         currentMonth = newMonth;
         selectedDateStr = "";
         renderCalendar();
-        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день</small>`;
+        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день в календаре</small>`;
+        document.getElementById("selectedDateLabel").innerText = "—";
     });
     
-    function copyShareLink() {
-        const link = window.location.href;
-        navigator.clipboard.writeText(link);
-        alert("Ссылка скопирована! Отправьте её другим людям.");
-    }
-    
-    document.getElementById("shareLink").innerText = window.location.href;
-    
-    loadFromLocalStorage();
-    currentYear = 2026;
-    currentMonth = 5;
-    selectedDateStr = "2026-06-02";
+    // Запуск
+    loadFromLocal();
+    loadFromCloud(); // загружаем из облака при старте
     renderCalendar();
-    renderEventsPanel(selectedDateStr);
+    
+    // Автосохранение в облако каждые 30 секунд
+    setInterval(async () => {
+        if (!isLoading) {
+            await saveToCloud();
+        }
+    }, 30000);
 </script>
 </body>
 </html>
