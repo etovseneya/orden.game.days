@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Календарь мероприятий с отметками</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+            padding: 20px 24px 32px;
+        }
+        h1 {
+            font-size: 1.8rem;
+            margin: 0 0 8px 0;
+            color: #1e2a3e;
+        }
+        .sub {
+            color: #4a627a;
+            margin-bottom: 24px;
+            border-left: 4px solid #3b82f6;
+            padding-left: 16px;
+        }
+        .share-info {
+            background: #e0f2fe;
+            padding: 10px 16px;
+            border-radius: 16px;
+            margin-bottom: 20px;
+            font-size: 0.85rem;
+            color: #0369a1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .share-link {
+            background: white;
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-family: monospace;
+            font-size: 0.8rem;
+            word-break: break-all;
+        }
+        .month-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .month-buttons {
+            display: flex;
+            gap: 12px;
+        }
+        .month-buttons button {
+            background: #eef2ff;
+            border: none;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 8px 16px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: #1e40af;
+        }
+        .month-buttons button:hover {
+            background: #dbeafe;
+            transform: scale(0.96);
+        }
+        .current-month {
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: #f8fafc;
+            padding: 6px 18px;
+            border-radius: 40px;
+            color: #0f172a;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            padding: 10px 5px;
+            background: #f1f5f9;
+            border-radius: 20px;
+            color: #334155;
+            font-size: 0.85rem;
+        }
+        .day-cell {
+            border-radius: 20px;
+            min-height: 110px;
+            padding: 10px 6px;
+            transition: 0.1s;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.02);
+        }
+        .day-cell:hover {
+            transform: translateY(-2px);
+            filter: brightness(0.96);
+        }
+        .day-number {
+            font-weight: bold;
+            font-size: 1rem;
+            margin-bottom: 6px;
+            display: inline-block;
+            background: rgba(255,255,255,0.7);
+            width: 32px;
+            text-align: center;
+            border-radius: 40px;
+            padding: 2px 0;
+        }
+        .event-badge {
+            background: #3b82f6;
+            color: white;
+            border-radius: 24px;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin: 4px 0;
+            word-break: break-word;
+            cursor: pointer;
+            transition: 0.1s;
+            display: inline-block;
+            width: 100%;
+            text-align: center;
+        }
+        .event-badge:hover {
+            background: #2563eb;
+        }
+        .attendees-info {
+            font-size: 0.65rem;
+            color: #1e293b;
+            margin-top: 6px;
+            background: rgba(255,255,255,0.8);
+            border-radius: 20px;
+            padding: 4px 6px;
+            text-align: center;
+        }
+        .empty-day {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.75rem;
+            opacity: 0.6;
+        }
+        .event-panel {
+            margin-top: 28px;
+            background: #f9fafb;
+            border-radius: 28px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        .panel-title {
+            font-weight: 700;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+            display: flex;
+            gap: 12px;
+            align-items: baseline;
+            flex-wrap: wrap;
+        }
+        .selected-date {
+            background: #e6f0ff;
+            padding: 4px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+        }
+        .event-list {
+            margin: 15px 0;
+        }
+        .event-item {
+            background: white;
+            border-radius: 24px;
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            border-left: 6px solid #3b82f6;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .event-details {
+            flex: 2;
+        }
+        .event-name {
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .attendee-buttons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .btn-attend {
+            background: #e2e3e8;
+            border: none;
+            border-radius: 40px;
+            padding: 6px 14px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .btn-attend.active {
+            background: #22c55e;
+            color: white;
+        }
+        .btn-reset {
+            background: #fee2e2;
+            color: #b91c1c;
+        }
+        .attendee-list {
+            font-size: 0.7rem;
+            color: #334155;
+            margin-top: 6px;
+        }
+        .add-event-form {
+            margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .add-event-form input {
+            flex: 2;
+            padding: 10px 14px;
+            border-radius: 60px;
+            border: 1px solid #cbd5e1;
+            font-size: 0.9rem;
+        }
+        .add-event-form button {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        small {
+            color: #5b6e8c;
+        }
+        button {
+            cursor: pointer;
+        }
+        @media (max-width: 700px) {
+            .calendar-grid {
+                gap: 4px;
+            }
+            .day-cell {
+                min-height: 80px;
+                padding: 6px 3px;
+            }
+            .event-badge {
+                font-size: 0.6rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📅 Календарь мероприятий</h1>
+    <div class="sub">Кликайте на день ➕ добавляйте ивент ✅ отмечайтесь</div>
+    
+    <div class="share-info">
+        <span>🔗 Доступ для нескольких пользователей:</span>
+        <span class="share-link" id="shareLink">Загрузка...</span>
+        <button onclick="copyShareLink()" style="background:#0284c7;color:white;border:none;padding:6px 12px;border-radius:12px;">📋 Копировать ссылку</button>
+    </div>
+
+    <div class="month-nav">
+        <div class="month-buttons">
+            <button id="prevMonthBtn">◀ Назад</button>
+            <button id="nextMonthBtn">Вперед ▶</button>
+        </div>
+        <div class="current-month" id="currentMonthLabel">Июнь 2026</div>
+    </div>
+
+    <div class="calendar-grid" id="calendarGrid"></div>
+
+    <div class="event-panel" id="eventPanel">
+        <div class="panel-title">
+            <span>📌 События дня</span>
+            <span class="selected-date" id="selectedDateLabel">—</span>
+        </div>
+        <div id="dayEventsContainer">
+            <small>Нажмите на любой день в календаре</small>
+        </div>
+        <div class="add-event-form">
+            <input type="text" id="newEventName" placeholder="Название мероприятия, например: Воркшоп по дизайну" />
+            <button id="addEventBtn">➕ Добавить ивент</button>
+        </div>
+        <small style="display: block; margin-top: 12px;">* Напротив мероприятия можно нажать «Пойду» — вас добавят в список участников.</small>
+    </div>
+</div>
+
+<script>
+    let eventsDB = {};
+    let currentYear = 2026;
+    let currentMonth = 5;
+    let selectedDateStr = "";
+    
+    function getDateKey(year, month, day) {
+        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    }
+    
+    function getEventsForDate(dateStr) {
+        if (!eventsDB[dateStr]) eventsDB[dateStr] = [];
+        return eventsDB[dateStr];
+    }
+    
+    function saveToLocalStorage() {
+        localStorage.setItem('eventCalendarDB', JSON.stringify(eventsDB));
+    }
+    
+    function loadFromLocalStorage() {
+        const saved = localStorage.getItem('eventCalendarDB');
+        if (saved) {
+            eventsDB = JSON.parse(saved);
+            for (let date in eventsDB) {
+                eventsDB[date] = eventsDB[date].map(ev => {
+                    if (!ev.attendees) ev.attendees = [];
+                    return ev;
+                });
+            }
+        } else {
+            const todayKey = "2026-06-02";
+            eventsDB[todayKey] = [
+                { id: Date.now() + 1, name: "🍕 Командный обед", attendees: ["Анна", "Иван"] },
+                { id: Date.now() + 2, name: "💻 Вебинар по React", attendees: ["Мария"] }
+            ];
+            eventsDB["2026-06-03"] = [
+                { id: Date.now() + 3, name: "🏋️ Фитнес-зарядка", attendees: ["Олег"] }
+            ];
+            eventsDB["2026-06-07"] = [
+                { id: Date.now() + 4, name: "🎨 Пикник в парке", attendees: ["Лена", "Дима", "Света"] }
+            ];
+            saveToLocalStorage();
+        }
+    }
+    
+    function addEventToDate(dateStr, eventName) {
+        if (!eventName.trim()) return false;
+        const events = getEventsForDate(dateStr);
+        events.push({
+            id: Date.now(),
+            name: eventName.trim(),
+            attendees: []
+        });
+        saveToLocalStorage();
+        return true;
+    }
+    
+    function toggleAttendee(eventId, dateStr, userName) {
+        if (!userName.trim()) userName = "Гость";
+        const ev = eventsDB[dateStr]?.find(e => e.id == eventId);
+        if (!ev) return;
+        const idx = ev.attendees.indexOf(userName);
+        idx === -1 ? ev.attendees.push(userName) : ev.attendees.splice(idx, 1);
+        saveToLocalStorage();
+    }
+    
+    function deleteEvent(eventId, dateStr) {
+        if (!eventsDB[dateStr]) return;
+        eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id != eventId);
+        if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
+        saveToLocalStorage();
+    }
+    
+    function getDayColor(dateStr, hasEvents) {
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const cellDate = new Date(dateStr);
+        cellDate.setHours(0,0,0,0);
+        
+        if (hasEvents) {
+            return '#dbeafe'; // синий для дней с событиями
+        } else if (cellDate < today) {
+            return '#e2e8f0'; // тускло-серый для прошедших
+        } else if (cellDate > today) {
+            return '#dcfce7'; // тускло-зеленый для будущих без событий
+        } else {
+            return '#fef9c3'; // сегодняшний - желтоватый
+        }
+    }
+    
+    function renderCalendar() {
+        const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
+        const startWeekday = firstDayOfMonth.getDay();
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        const todayStr = new Date().toISOString().split('T')[0];
+        
+        const grid = document.getElementById("calendarGrid");
+        const weekdays = ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"];
+        let gridHtml = "";
+        weekdays.forEach(day => {
+            gridHtml += `<div class="weekday">${day}</div>`;
+        });
+        
+        let dayCounter = 1;
+        let emptyBefore = startWeekday;
+        for (let i = 0; i < emptyBefore; i++) {
+            gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day">—</div></div>`;
+        }
+        
+        for (let d = 1; d <= daysInMonth; d++) {
+            const dateKey = getDateKey(currentYear, currentMonth, d);
+            const events = eventsDB[dateKey] || [];
+            const hasEvents = events.length > 0;
+            const bgColor = getDayColor(dateKey, hasEvents);
+            const isToday = (dateKey === todayStr);
+            const isSelected = (selectedDateStr === dateKey);
+            
+            let borderStyle = '1px solid #e2e8f0';
+            if (isToday) borderStyle = '3px solid #f59e0b';
+            if (isSelected) borderStyle = '3px solid #3b82f6';
+            
+            gridHtml += `<div class="day-cell" data-date="${dateKey}" style="background:${bgColor}; border:${borderStyle};">`;
+            gridHtml += `<div class="day-number">${d}</div>`;
+            
+            if (hasEvents) {
+                events.slice(0, 2).forEach(ev => {
+                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">📌 ${ev.name.substring(0, 22)}${ev.name.length>22?'..':''}</div>`;
+                });
+                if (events.length > 2) {
+                    gridHtml += `<div class="attendees-info" style="background:rgba(255,255,255,0.7);">+ еще ${events.length-2}</div>`;
+                }
+                const totalAtt = events.reduce((acc, e) => acc + e.attendees.length, 0);
+                if (totalAtt > 0) {
+                    gridHtml += `<div class="attendees-info">👥 ${totalAtt} участ.</div>`;
+                }
+            } else {
+                gridHtml += `<div class="empty-day" style="font-size:0.65rem; margin-top:12px;">➕ клик</div>`;
+            }
+            
+            gridHtml += `</div>`;
+        }
+        
+        const totalCells = emptyBefore + daysInMonth;
+        const remaining = (7 - (totalCells % 7)) % 7;
+        for (let i = 0; i < remaining; i++) {
+            gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day"></div></div>`;
+        }
+        
+        grid.innerHTML = gridHtml;
+        document.getElementById("currentMonthLabel").innerText = new Date(currentYear, currentMonth, 1).toLocaleString('ru', { month: 'long', year: 'numeric' });
+        
+        document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                if (e.target.classList.contains('event-badge')) return;
+                selectDate(cell.getAttribute('data-date'));
+            });
+        });
+        
+        document.querySelectorAll('.event-badge').forEach(badge => {
+            badge.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const dateStr = badge.getAttribute('data-date');
+                if (dateStr) selectDate(dateStr);
+            });
+        });
+    }
+    
+    function selectDate(dateStr) {
+        selectedDateStr = dateStr;
+        renderCalendar();
+        renderEventsPanel(dateStr);
+    }
+    
+    function renderEventsPanel(dateStr) {
+        document.getElementById("selectedDateLabel").innerText = dateStr;
+        const events = getEventsForDate(dateStr);
+        const container = document.getElementById("dayEventsContainer");
+        if (!events.length) {
+            container.innerHTML = `<small>✨ Нет мероприятий на этот день. Добавьте новое событие!</small>`;
+            return;
+        }
+        
+        let html = `<div class="event-list">`;
+        events.forEach(ev => {
+            const attendeeList = ev.attendees.length ? ev.attendees.join(", ") : "никто не отметился";
+            html += `
+                <div class="event-item">
+                    <div class="event-details">
+                        <div class="event-name">🎉 ${ev.name}</div>
+                        <div class="attendee-list">✅ Участники: ${attendeeList}</div>
+                    </div>
+                    <div class="attendee-buttons">
+                        <button class="btn-attend attend-yes" data-event-id="${ev.id}" data-event-date="${dateStr}">✅ Пойду</button>
+                        <button class="btn-attend btn-reset remove-attend" data-event-id="${ev.id}" data-event-date="${dateStr}">❌ Отказаться</button>
+                        <button class="delete-event-btn" style="background:#fecaca;border:none;border-radius:40px;padding:6px 14px;cursor:pointer;">🗑 Удалить</button>
+                    </div>
+                </div>
+            `;
+        });
+        html += `</div>`;
+        container.innerHTML = html;
+        
+        document.querySelectorAll('.attend-yes').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-event-id'));
+                const evDate = btn.getAttribute('data-event-date');
+                let userName = prompt("Введите ваше имя", "Я");
+                if (userName && userName.trim()) {
+                    toggleAttendee(id, evDate, userName.trim());
+                    renderEventsPanel(selectedDateStr);
+                    renderCalendar();
+                }
+            });
+        });
+        
+        document.querySelectorAll('.remove-attend').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const id = parseInt(btn.getAttribute('data-event-id'));
+                const evDate = btn.getAttribute('data-event-date');
+                const userName = prompt("Введите ваше имя для отказа", "Я");
+                if (userName && userName.trim()) {
+                    toggleAttendee(id, evDate, userName.trim());
+                    renderEventsPanel(selectedDateStr);
+                    renderCalendar();
+                }
+            });
+        });
+        
+        document.querySelectorAll('.delete-event-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const id = parseInt(btn.getAttribute('data-event-id'));
+                const evDate = btn.getAttribute('data-event-date');
+                if (confirm("Удалить мероприятие?")) {
+                    deleteEvent(id, evDate);
+                    renderEventsPanel(selectedDateStr);
+                    renderCalendar();
+                }
+            });
+        });
+    }
+    
+    document.getElementById("addEventBtn").addEventListener("click", () => {
+        if (!selectedDateStr) {
+            alert("Сначала нажмите на любой день в календаре!");
+            return;
+        }
+        const newName = document.getElementById("newEventName").value;
+        if (!newName.trim()) {
+            alert("Введите название мероприятия");
+            return;
+        }
+        addEventToDate(selectedDateStr, newName);
+        document.getElementById("newEventName").value = "";
+        renderCalendar();
+        renderEventsPanel(selectedDateStr);
+    });
+    
+    document.getElementById("prevMonthBtn").addEventListener("click", () => {
+        let newMonth = currentMonth - 1;
+        let newYear = currentYear;
+        if (newMonth < 0) { newMonth = 11; newYear--; }
+        currentYear = newYear;
+        currentMonth = newMonth;
+        selectedDateStr = "";
+        renderCalendar();
+        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день</small>`;
+    });
+    
+    document.getElementById("nextMonthBtn").addEventListener("click", () => {
+        let newMonth = currentMonth + 1;
+        let newYear = currentYear;
+        if (newMonth > 11) { newMonth = 0; newYear++; }
+        currentYear = newYear;
+        currentMonth = newMonth;
+        selectedDateStr = "";
+        renderCalendar();
+        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день</small>`;
+    });
+    
+    function copyShareLink() {
+        const link = window.location.href;
+        navigator.clipboard.writeText(link);
+        alert("Ссылка скопирована! Отправьте её другим людям.");
+    }
+    
+    document.getElementById("shareLink").innerText = window.location.href;
+    
+    loadFromLocalStorage();
+    currentYear = 2026;
+    currentMonth = 5;
+    selectedDateStr = "2026-06-02";
+    renderCalendar();
+    renderEventsPanel(selectedDateStr);
+</script>
+</body>
+</html>
