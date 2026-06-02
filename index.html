@@ -2,354 +2,484 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Календарь мероприятий — общая база участников</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Календарь игр</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: system-ui, 'Segoe UI', sans-serif;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
         }
         body {
             background: #f0f2f5;
-            margin: 0;
-            padding: 20px;
+            padding: 12px;
+            min-height: 100vh;
         }
         .container {
-            max-width: 1200px;
+            max-width: 100%;
             margin: 0 auto;
             background: white;
-            border-radius: 28px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            padding: 20px 24px 32px;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            padding: 16px;
         }
         h1 {
-            font-size: 1.8rem;
-            margin: 0 0 8px 0;
+            font-size: 1.6rem;
+            margin: 0 0 4px 0;
             color: #1e2a3e;
         }
-        .sub {
-            color: #4a627a;
-            margin-bottom: 24px;
-            border-left: 4px solid #3b82f6;
-            padding-left: 16px;
+        .mode-badge {
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-top: 6px;
         }
         .sync-status {
             background: #e0f2fe;
-            padding: 10px 16px;
-            border-radius: 16px;
-            margin-bottom: 20px;
-            font-size: 0.85rem;
+            padding: 8px 12px;
+            border-radius: 14px;
+            margin: 12px 0;
+            font-size: 0.75rem;
             color: #0369a1;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 8px;
         }
         .sync-btn {
             background: #0284c7;
             color: white;
             border: none;
-            padding: 6px 12px;
-            border-radius: 12px;
+            padding: 5px 12px;
+            border-radius: 20px;
             cursor: pointer;
+            font-size: 0.7rem;
             font-weight: 500;
         }
-        .sync-btn:hover {
-            background: #0369a1;
+        .admin-panel {
+            background: #fef3c7;
+            padding: 10px;
+            border-radius: 14px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .admin-panel.show {
+            display: block;
+        }
+        .admin-toggle {
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            margin-bottom: 8px;
+            cursor: pointer;
         }
         .month-nav {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 20px;
+            margin: 12px 0;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 8px;
+        }
+        .month-buttons {
+            display: flex;
+            gap: 8px;
         }
         .month-buttons button {
             background: #eef2ff;
             border: none;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: bold;
-            padding: 8px 16px;
-            border-radius: 40px;
+            padding: 6px 14px;
+            border-radius: 30px;
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .month-buttons button:hover {
-            background: #dbeafe;
-            transform: scale(0.96);
         }
         .current-month {
             font-weight: 700;
-            font-size: 1.4rem;
+            font-size: 1.1rem;
             background: #f8fafc;
-            padding: 6px 18px;
-            border-radius: 40px;
+            padding: 6px 14px;
+            border-radius: 30px;
         }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-            margin: 20px 0;
+            gap: 4px;
+            margin: 12px 0;
         }
         .weekday {
             text-align: center;
             font-weight: 600;
-            padding: 10px 5px;
+            padding: 6px 2px;
             background: #f1f5f9;
-            border-radius: 20px;
-            font-size: 0.85rem;
+            border-radius: 12px;
+            font-size: 0.7rem;
         }
         .day-cell {
-            border-radius: 20px;
-            min-height: 110px;
-            padding: 10px 6px;
+            border-radius: 12px;
+            min-height: 85px;
+            padding: 5px 3px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             transition: 0.1s;
             border: 1px solid #e2e8f0;
+            background: white;
+            overflow-y: auto;
         }
-        .day-cell:hover {
-            transform: translateY(-2px);
-            filter: brightness(0.96);
+        .day-cell::-webkit-scrollbar {
+            width: 2px;
+        }
+        .day-cell:active {
+            transform: scale(0.98);
         }
         .day-number {
             font-weight: bold;
-            font-size: 1rem;
-            margin-bottom: 6px;
-            background: rgba(255,255,255,0.7);
-            width: 32px;
+            font-size: 0.8rem;
+            margin-bottom: 3px;
+            background: rgba(255,255,255,0.8);
+            width: 26px;
             text-align: center;
-            border-radius: 40px;
-            padding: 2px 0;
+            border-radius: 30px;
+            padding: 1px 0;
+            flex-shrink: 0;
         }
         .event-badge {
             background: #3b82f6;
             color: white;
-            border-radius: 24px;
-            padding: 4px 8px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            margin: 4px 0;
+            border-radius: 10px;
+            padding: 3px 4px;
+            font-size: 0.55rem;
+            font-weight: 500;
+            margin: 1px 0;
             cursor: pointer;
-            text-align: center;
-            transition: 0.1s;
-        }
-        .event-badge:hover {
-            background: #2563eb;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex-shrink: 0;
         }
         .attendees-info {
-            font-size: 0.65rem;
-            margin-top: 6px;
+            font-size: 0.55rem;
+            margin-top: 2px;
             background: rgba(255,255,255,0.8);
-            border-radius: 20px;
-            padding: 4px 6px;
+            border-radius: 10px;
+            padding: 2px 3px;
             text-align: center;
+            flex-shrink: 0;
         }
         .empty-day {
             text-align: center;
-            margin-top: 30px;
-            font-size: 0.75rem;
-            opacity: 0.6;
+            margin-top: 20px;
+            font-size: 0.65rem;
+            opacity: 0.5;
         }
-        .event-panel {
-            margin-top: 28px;
+        .details-section {
             background: #f9fafb;
-            border-radius: 28px;
-            padding: 20px;
+            border-radius: 20px;
+            padding: 16px;
+            margin-top: 16px;
             border: 1px solid #e2e8f0;
         }
-        .panel-title {
-            font-weight: 700;
+        .selected-event-title {
             font-size: 1.2rem;
-            margin-bottom: 12px;
-            display: flex;
-            gap: 12px;
-            align-items: baseline;
-            flex-wrap: wrap;
-        }
-        .selected-date {
-            background: #e6f0ff;
-            padding: 4px 16px;
-            border-radius: 40px;
-            font-size: 0.9rem;
-        }
-        .event-list {
-            margin: 15px 0;
-        }
-        .event-item {
-            background: white;
-            border-radius: 24px;
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-            border-left: 6px solid #3b82f6;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-        }
-        .event-details {
-            flex: 2;
-        }
-        .event-name {
             font-weight: 700;
-            font-size: 1rem;
+            margin-bottom: 6px;
+            color: #1e293b;
+            word-break: break-word;
         }
-        .attendee-list {
-            font-size: 0.7rem;
-            color: #334155;
-            margin-top: 6px;
+        .selected-event-desc {
+            color: #475569;
+            margin-bottom: 14px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.85rem;
+            line-height: 1.4;
         }
-        .btn-attend {
-            background: #e2e3e8;
-            border: none;
-            border-radius: 40px;
-            padding: 6px 14px;
-            font-size: 0.75rem;
+        .attendees-list-title {
+            font-weight: 700;
+            margin: 12px 0 8px 0;
+            font-size: 0.85rem;
+        }
+        .attendees-list {
+            background: white;
+            border-radius: 14px;
+            padding: 6px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .attendee-item {
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 0.8rem;
+            display: flex;
+            gap: 8px;
+        }
+        .attendee-number {
+            color: #64748b;
             font-weight: 600;
-            cursor: pointer;
-            transition: 0.1s;
+            min-width: 28px;
         }
-        .btn-attend:hover {
-            transform: scale(0.95);
+        .no-attendees {
+            color: #94a3b8;
+            text-align: center;
+            padding: 16px;
+            font-size: 0.8rem;
+        }
+        .event-selector select {
+            width: 100%;
+            padding: 10px;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.85rem;
+            margin: 10px 0;
         }
         .add-event-form {
-            margin-top: 20px;
+            margin-top: 16px;
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
+            flex-direction: column;
+            gap: 8px;
         }
-        .add-event-form input {
-            flex: 2;
-            padding: 10px 14px;
-            border-radius: 60px;
+        .add-event-form input, .add-event-form textarea {
+            padding: 10px 12px;
+            border-radius: 14px;
             border: 1px solid #cbd5e1;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            font-family: inherit;
+        }
+        .add-event-form textarea {
+            resize: vertical;
+            min-height: 50px;
         }
         .add-event-form button {
             background: #3b82f6;
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 60px;
+            padding: 10px;
+            border-radius: 14px;
             cursor: pointer;
             font-weight: 600;
+            font-size: 0.85rem;
         }
-        .add-event-form button:hover {
-            background: #2563eb;
+        .btn-attend-small {
+            background: #22c55e;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 12px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            margin-top: 10px;
+            width: 100%;
+            font-weight: 500;
         }
-        .loading {
-            opacity: 0.6;
-            pointer-events: none;
+        .btn-danger {
+            background: #ef4444;
+        }
+        .btn-outline {
+            background: #e2e8f0;
+            color: #334155;
+            margin-top: 6px;
+        }
+        .edit-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        .edit-controls button {
+            flex: 1;
+            padding: 6px;
+            font-size: 0.7rem;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
         }
         small {
             color: #5b6e8c;
+            font-size: 0.7rem;
         }
-        @media (max-width: 700px) {
-            .calendar-grid { gap: 4px; }
-            .day-cell { min-height: 80px; padding: 6px 3px; }
-            .event-badge { font-size: 0.6rem; }
+        .login-prompt {
+            background: #f1f5f9;
+            padding: 16px;
+            border-radius: 20px;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+        .login-prompt input {
+            padding: 10px;
+            border-radius: 30px;
+            border: 1px solid #cbd5e1;
+            width: 100%;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+        @media (max-width: 480px) {
+            body { padding: 8px; }
+            .container { padding: 12px; }
+            .day-cell { min-height: 70px; }
+            .event-badge { font-size: 0.5rem; white-space: normal; line-height: 1.2; }
+            .weekday { font-size: 0.6rem; }
         }
     </style>
 </head>
 <body>
 <div class="container">
-    <h1>📅 Общий календарь мероприятий</h1>
-    <div class="sub">✅ Все участники видят отметки друг друга (синхронизация через Google Sheets)</div>
+    <h1>🎮 Календарь игр</h1>
+    <div class="mode-badge" id="modeBadge">👁️ Режим просмотра</div>
     
     <div class="sync-status">
-        <span>🔄 Данные синхронизируются автоматически</span>
-        <button class="sync-btn" onclick="syncWithCloud()">⟳ Обновить вручную</button>
+        <span id="syncStatusText">🔄 Загрузка...</span>
+        <button class="sync-btn" onclick="manualSync()">⟳ Обновить</button>
+    </div>
+
+    <div id="loginPanel" class="login-prompt" style="display: none;">
+        <span>🔐</span>
+        <div>Введите код доступа для редактирования</div>
+        <input type="password" id="accessCode" placeholder="Код доступа">
+        <button onclick="checkAccess()" style="margin-top:8px; padding:8px; border-radius:30px; border:none; background:#3b82f6; color:white;">Войти</button>
+    </div>
+
+    <div class="admin-panel" id="adminPanel">
+        <button class="admin-toggle" onclick="exitEditMode()">🔒 Выйти из режима редактирования</button>
     </div>
 
     <div class="month-nav">
         <div class="month-buttons">
-            <button id="prevMonthBtn">◀ Назад</button>
-            <button id="nextMonthBtn">Вперед ▶</button>
+            <button id="prevMonthBtn">◀</button>
+            <button id="nextMonthBtn">▶</button>
         </div>
-        <div class="current-month" id="currentMonthLabel">Июнь 2026</div>
+        <div class="current-month" id="currentMonthLabel"></div>
     </div>
 
     <div class="calendar-grid" id="calendarGrid"></div>
 
-    <div class="event-panel" id="eventPanel">
-        <div class="panel-title">
-            <span>📌 События дня</span>
-            <span class="selected-date" id="selectedDateLabel">—</span>
+    <div class="details-section" id="detailsSection">
+        <div id="selectedEventInfo">
+            <small style="display: block; text-align: center; padding: 12px;">
+                👈 Нажмите на игру в календаре
+            </small>
         </div>
-        <div id="dayEventsContainer">
-            <small>Нажмите на любой день в календаре</small>
-        </div>
+    </div>
+
+    <div id="editForms" style="display: none;">
         <div class="add-event-form">
-            <input type="text" id="newEventName" placeholder="Название мероприятия, например: Воркшоп по дизайну" />
-            <button id="addEventBtn">➕ Добавить ивент</button>
+            <input type="text" id="newEventName" placeholder="Название игры" />
+            <textarea id="newEventDesc" placeholder="Краткое описание"></textarea>
+            <button id="addEventBtn">➕ Добавить игру</button>
         </div>
-        <small style="display: block; margin-top: 12px;">* Напротив мероприятия можно нажать «Пойду» — вас добавят в список участников. Все изменения видны всем!</small>
     </div>
 </div>
 
 <script>
-    // ========== КОНФИГУРАЦИЯ GOOGLE SHEETS (ВАШ URL) ==========
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/library/d/1vqHh7HjnySyQaFAfLZNyaqIPkpaDdrMJsGnEUUUplEZH7TF5TzgN0pH1/1";
-    // ===========================================================
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3B0byEj4fgNtBXAxVxxrYiOD6rxkzt0dlVLOULKeOOx9Tjw35vjHTPbeARN_FaF-cqA/exec";
+    
+    // ========== НАСТРОЙКИ ДОСТУПА ==========
+    // Замените 'YOUR_SECRET_CODE' на нужный пароль
+    const ADMIN_CODE = "admin123";
+    // Список телефонов или имен, которым разрешено редактирование (можно дополнить)
+    const ALLOWED_USERS = ["admin", "organizer", "Анна", "Иван"];
+    // =======================================
     
     let eventsDB = {};
     let currentYear = 2026;
-    let currentMonth = 5; // Июнь (0-январь)
+    let currentMonth = 5;
     let selectedDateStr = "";
-    let isLoading = false;
+    let selectedEventId = null;
+    let isAdmin = false;
+    
+    function checkStoredAccess() {
+        const stored = localStorage.getItem('gameCalendarAdmin');
+        if (stored === 'true') {
+            isAdmin = true;
+            enableEditMode();
+        }
+    }
+    
+    function checkAccess() {
+        const code = document.getElementById('accessCode').value;
+        const userName = prompt("Введите ваше имя для идентификации", localStorage.getItem('userName') || "");
+        
+        if (code === ADMIN_CODE || (userName && ALLOWED_USERS.includes(userName))) {
+            isAdmin = true;
+            localStorage.setItem('gameCalendarAdmin', 'true');
+            if (userName) localStorage.setItem('userName', userName);
+            enableEditMode();
+            document.getElementById('loginPanel').style.display = 'none';
+            alert("✅ Режим редактирования включен!");
+        } else {
+            alert("❌ Неверный код доступа или имя не в списке!");
+        }
+    }
+    
+    function enableEditMode() {
+        isAdmin = true;
+        document.getElementById('modeBadge').innerHTML = '✏️ Режим редактирования';
+        document.getElementById('modeBadge').style.background = '#fef3c7';
+        document.getElementById('adminPanel').classList.add('show');
+        document.getElementById('editForms').style.display = 'block';
+        renderCalendar();
+        if (selectedDateStr) {
+            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+            else showDayEvents(selectedDateStr);
+        }
+    }
+    
+    function exitEditMode() {
+        isAdmin = false;
+        localStorage.removeItem('gameCalendarAdmin');
+        document.getElementById('modeBadge').innerHTML = '👁️ Режим просмотра';
+        document.getElementById('modeBadge').style.background = '#e2e8f0';
+        document.getElementById('adminPanel').classList.remove('show');
+        document.getElementById('editForms').style.display = 'none';
+        renderCalendar();
+        if (selectedDateStr) {
+            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+            else showDayEvents(selectedDateStr);
+        }
+    }
     
     function getDateKey(year, month, day) {
         return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
     }
     
-    // Загрузка из облака
     async function loadFromCloud() {
-        isLoading = true;
-        const statusDiv = document.querySelector('.sync-status span');
-        if (statusDiv) statusDiv.innerHTML = "🔄 Загрузка данных из облака...";
-        
+        const statusSpan = document.getElementById('syncStatusText');
+        statusSpan.innerHTML = "🔄 Загрузка...";
         try {
-            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&t=${Date.now()}`);
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&_=${Date.now()}`);
             const data = await response.json();
-            
             if (data.success && data.events) {
                 eventsDB = data.events;
-                // Конвертируем старый формат если нужно
                 for (let date in eventsDB) {
-                    eventsDB[date] = eventsDB[date].map(ev => {
-                        if (!ev.attendees) ev.attendees = [];
-                        if (!ev.id) ev.id = Date.now() + Math.random();
-                        return ev;
-                    });
+                    eventsDB[date] = eventsDB[date].map(ev => ({
+                        ...ev,
+                        attendees: ev.attendees || [],
+                        description: ev.description || ""
+                    }));
                 }
                 saveToLocal();
-                renderCalendar();
-                if (selectedDateStr) renderEventsPanel(selectedDateStr);
-                if (statusDiv) statusDiv.innerHTML = "✅ Данные синхронизированы";
-                setTimeout(() => {
-                    if (statusDiv) statusDiv.innerHTML = "🔄 Данные синхронизируются автоматически";
-                }, 2000);
-            } else {
-                console.error("Ошибка загрузки:", data);
-                loadFromLocal();
-                if (statusDiv) statusDiv.innerHTML = "⚠️ Загружены локальные данные";
+                statusSpan.innerHTML = "✅ Синхронизировано";
+                return true;
             }
+            throw new Error("Нет данных");
         } catch (e) {
-            console.error("Не удалось загрузить из облака:", e);
             loadFromLocal();
-            if (statusDiv) statusDiv.innerHTML = "⚠️ Офлайн режим (локальные данные)";
+            statusSpan.innerHTML = "📱 Офлайн режим";
+            return false;
         }
-        
-        isLoading = false;
     }
     
-    // Сохранение в облако
     async function saveToCloud() {
+        if (!isAdmin) return;
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
@@ -357,39 +487,33 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ events: eventsDB })
             });
-            console.log("✅ Данные сохранены в облако");
-        } catch (e) {
-            console.error("Ошибка сохранения:", e);
-        }
+            document.getElementById('syncStatusText').innerHTML = "✅ Сохранено";
+            setTimeout(() => {
+                if (document.getElementById('syncStatusText').innerHTML === "✅ Сохранено")
+                    document.getElementById('syncStatusText').innerHTML = "✅ Синхронизировано";
+            }, 1500);
+        } catch (e) {}
     }
     
-    // Локальное резервное копирование
     function saveToLocal() {
-        localStorage.setItem('eventCalendarDB', JSON.stringify(eventsDB));
+        localStorage.setItem('gameCalendarDB', JSON.stringify(eventsDB));
     }
     
     function loadFromLocal() {
-        const saved = localStorage.getItem('eventCalendarDB');
+        const saved = localStorage.getItem('gameCalendarDB');
         if (saved) {
             eventsDB = JSON.parse(saved);
-            for (let date in eventsDB) {
-                eventsDB[date] = eventsDB[date].map(ev => {
-                    if (!ev.attendees) ev.attendees = [];
-                    return ev;
-                });
-            }
         } else {
-            // Демо-данные
             eventsDB = {
                 "2026-06-02": [
-                    { id: Date.now() + 1, name: "🍕 Командный обед", attendees: ["Анна", "Иван"] },
-                    { id: Date.now() + 2, name: "💻 Вебинар по React", attendees: ["Мария"] }
+                    { id: Date.now() + 1, name: "🏆 Турнир по CS2", description: "Сбор в 19:00, Discord", attendees: ["Анна", "Иван"] },
+                    { id: Date.now() + 2, name: "🎮 Dota 2 катки", description: "Ищем 5-го", attendees: ["Мария"] }
                 ],
                 "2026-06-03": [
-                    { id: Date.now() + 3, name: "🏋️ Фитнес-зарядка", attendees: ["Олег"] }
+                    { id: Date.now() + 3, name: "⚽ FIFA турнир", description: "PS5, приходите", attendees: ["Олег"] }
                 ],
                 "2026-06-07": [
-                    { id: Date.now() + 4, name: "🎨 Пикник в парке", attendees: ["Лена", "Дима", "Света"] }
+                    { id: Date.now() + 4, name: "🎲 Настолки", description: "Мафия и UNO", attendees: ["Лена", "Дима"] }
                 ]
             };
         }
@@ -400,18 +524,19 @@
         return eventsDB[dateStr];
     }
     
-    async function addEventToDate(dateStr, eventName) {
+    async function addEventToDate(dateStr, eventName, eventDesc) {
+        if (!isAdmin) { alert("Только организаторы могут добавлять игры!"); return false; }
         if (!eventName.trim()) return false;
         const events = getEventsForDate(dateStr);
         events.push({
             id: Date.now(),
             name: eventName.trim(),
+            description: eventDesc.trim() || "",
             attendees: []
         });
         saveToLocal();
         await saveToCloud();
         renderCalendar();
-        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
         return true;
     }
     
@@ -421,32 +546,37 @@
         if (!ev) return;
         const idx = ev.attendees.indexOf(userName);
         idx === -1 ? ev.attendees.push(userName) : ev.attendees.splice(idx, 1);
+        ev.attendees.sort((a,b) => a.localeCompare(b));
         saveToLocal();
         await saveToCloud();
         renderCalendar();
-        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
+        if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
     }
     
     async function deleteEvent(eventId, dateStr) {
+        if (!isAdmin) { alert("Только организаторы могут удалять игры!"); return; }
         if (!eventsDB[dateStr]) return;
         eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id != eventId);
         if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
+        if (selectedEventId === eventId) {
+            selectedEventId = null;
+            selectedDateStr = "";
+        }
         saveToLocal();
         await saveToCloud();
         renderCalendar();
-        if (selectedDateStr === dateStr) renderEventsPanel(dateStr);
+        if (selectedDateStr) showDayEvents(selectedDateStr);
+        else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 Нажмите на игру в календаре</small></div>`;
     }
     
     function getDayColor(dateStr, hasEvents) {
         const today = new Date();
         today.setHours(0,0,0,0);
         const cellDate = new Date(dateStr);
-        cellDate.setHours(0,0,0,0);
-        
-        if (hasEvents) return '#dbeafe'; // синий для дней с событиями
-        if (cellDate < today) return '#e2e8f0'; // тускло-серый для прошедших
-        if (cellDate > today) return '#dcfce7'; // тускло-зеленый для будущих
-        return '#fef9c3'; // сегодняшний - желтоватый
+        if (hasEvents) return '#dbeafe';
+        if (cellDate < today) return '#e2e8f0';
+        if (cellDate > today) return '#dcfce7';
+        return '#fef9c3';
     }
     
     function renderCalendar() {
@@ -462,9 +592,8 @@
             gridHtml += `<div class="weekday">${day}</div>`;
         });
         
-        // Пустые ячейки до первого дня
         for (let i = 0; i < startWeekday; i++) {
-            gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day">—</div></div>`;
+            gridHtml += `<div class="day-cell" style="background:#f1f5f9;"><div class="empty-day">—</div></div>`;
         }
         
         for (let d = 1; d <= daysInMonth; d++) {
@@ -475,162 +604,210 @@
             const isToday = (dateKey === todayStr);
             const isSelected = (selectedDateStr === dateKey);
             
-            let borderStyle = '1px solid #e2e8f0';
-            if (isToday) borderStyle = '3px solid #f59e0b';
-            if (isSelected) borderStyle = '3px solid #3b82f6';
+            let border = '1px solid #e2e8f0';
+            if (isToday) border = '3px solid #f59e0b';
+            if (isSelected) border = '3px solid #3b82f6';
             
-            gridHtml += `<div class="day-cell" data-date="${dateKey}" style="background:${bgColor}; border:${borderStyle};">`;
+            gridHtml += `<div class="day-cell" data-date="${dateKey}" style="background:${bgColor}; border:${border};">`;
             gridHtml += `<div class="day-number">${d}</div>`;
             
             if (hasEvents) {
-                events.slice(0, 2).forEach(ev => {
-                    let shortName = ev.name.length > 20 ? ev.name.substring(0, 18) + '..' : ev.name;
-                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">📌 ${shortName}</div>`;
+                events.forEach(ev => {
+                    let shortName = ev.name.length > 22 ? ev.name.substring(0, 20) + '..' : ev.name;
+                    gridHtml += `<div class="event-badge" data-event-id="${ev.id}" data-date="${dateKey}">🎮 ${shortName}</div>`;
                 });
-                if (events.length > 2) {
-                    gridHtml += `<div class="attendees-info" style="background:rgba(255,255,255,0.7);">+ еще ${events.length-2}</div>`;
-                }
                 const totalAtt = events.reduce((acc, e) => acc + e.attendees.length, 0);
                 if (totalAtt > 0) {
-                    gridHtml += `<div class="attendees-info">👥 ${totalAtt} участ.</div>`;
+                    gridHtml += `<div class="attendees-info">👥 ${totalAtt} чел</div>`;
                 }
             } else {
-                gridHtml += `<div class="empty-day" style="font-size:0.65rem; margin-top:12px;">➕ клик</div>`;
+                gridHtml += `<div class="empty-day" style="font-size:0.6rem; margin-top:12px;">➕</div>`;
             }
             gridHtml += `</div>`;
         }
         
-        // Заполнить оставшиеся ячейки
         const totalCells = startWeekday + daysInMonth;
         const remaining = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remaining; i++) {
-            gridHtml += `<div class="day-cell" style="background:#f1f5f9; border:1px solid #e2e8f0;"><div class="empty-day"></div></div>`;
+            gridHtml += `<div class="day-cell" style="background:#f1f5f9;"><div class="empty-day"></div></div>`;
         }
         
         grid.innerHTML = gridHtml;
-        document.getElementById("currentMonthLabel").innerText = new Date(currentYear, currentMonth, 1).toLocaleString('ru', { month: 'long', year: 'numeric' });
-        
-        document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
-            cell.addEventListener('click', (e) => {
-                if (e.target.classList.contains('event-badge')) return;
-                selectDate(cell.getAttribute('data-date'));
-            });
-        });
+        const monthNames = ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'];
+        document.getElementById("currentMonthLabel").innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
         
         document.querySelectorAll('.event-badge').forEach(badge => {
             badge.addEventListener('click', (e) => {
                 e.stopPropagation();
-                selectDate(badge.getAttribute('data-date'));
+                const dateStr = badge.getAttribute('data-date');
+                const eventId = parseInt(badge.getAttribute('data-event-id'));
+                selectedDateStr = dateStr;
+                selectedEventId = eventId;
+                renderCalendar();
+                showEventDetails(dateStr, eventId);
+            });
+        });
+        
+        document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
+            cell.addEventListener('click', (e) => {
+                if (e.target.classList.contains('event-badge')) return;
+                const dateStr = cell.getAttribute('data-date');
+                selectedDateStr = dateStr;
+                selectedEventId = null;
+                renderCalendar();
+                showDayEvents(dateStr);
             });
         });
     }
     
-    function selectDate(dateStr) {
-        selectedDateStr = dateStr;
-        renderCalendar();
-        renderEventsPanel(dateStr);
-    }
-    
-    function renderEventsPanel(dateStr) {
-        document.getElementById("selectedDateLabel").innerText = dateStr;
+    function showDayEvents(dateStr) {
         const events = getEventsForDate(dateStr);
-        const container = document.getElementById("dayEventsContainer");
         if (!events.length) {
-            container.innerHTML = `<small>✨ Нет мероприятий на этот день. Добавьте первое событие!</small>`;
+            document.getElementById('detailsSection').innerHTML = `
+                <div id="selectedEventInfo">
+                    <div class="selected-event-title">📅 ${dateStr}</div>
+                    <div style="color:#64748b; font-size:0.85rem;">Нет игр</div>
+                    ${isAdmin ? `<button class="btn-attend-small btn-outline" onclick="document.getElementById('newEventName').focus()">➕ Добавить игру</button>` : ''}
+                </div>`;
             return;
         }
         
-        let html = `<div class="event-list">`;
-        events.forEach(ev => {
-            const attendeeList = ev.attendees.length ? ev.attendees.join(", ") : "никто не отметился";
-            html += `
-                <div class="event-item">
-                    <div class="event-details">
-                        <div class="event-name">🎉 ${ev.name}</div>
-                        <div class="attendee-list">✅ Участники: ${attendeeList}</div>
-                    </div>
-                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-                        <button class="btn-attend" onclick="promptAndAttend(${ev.id}, '${dateStr}')">✅ Пойду</button>
-                        <button class="btn-attend" onclick="promptAndRemove(${ev.id}, '${dateStr}')" style="background:#fee2e2;">❌ Отказаться</button>
-                        <button class="btn-attend" onclick="deleteEvent(${ev.id}, '${dateStr}')" style="background:#fecaca;">🗑 Удалить</button>
-                    </div>
+        let html = `
+            <div id="selectedEventInfo">
+                <div class="selected-event-title">📅 ${dateStr}</div>
+                <div class="event-selector">
+                    <select id="eventSelect" onchange="switchEvent(this.value)">
+                        <option value="">Выберите игру</option>
+                        ${events.map(ev => `<option value="${ev.id}">${ev.name}</option>`).join('')}
+                    </select>
                 </div>
+                <div id="eventDetailView">
+                    <small style="color:#64748b;">Выберите игру из списка</small>
+                </div>
+            </div>
+        `;
+        document.getElementById('detailsSection').innerHTML = html;
+        if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+            document.getElementById('eventSelect').value = selectedEventId;
+            showEventDetails(dateStr, selectedEventId);
+        }
+    }
+    
+    window.switchEvent = (eventId) => {
+        if (!eventId) return;
+        selectedEventId = parseInt(eventId);
+        showEventDetails(selectedDateStr, selectedEventId);
+    };
+    
+    function showEventDetails(dateStr, eventId) {
+        const event = eventsDB[dateStr]?.find(e => e.id === eventId);
+        if (!event) return;
+        
+        const sortedAttendees = [...event.attendees].sort((a,b) => a.localeCompare(b));
+        const attendeesList = sortedAttendees.length ? 
+            sortedAttendees.map((name, idx) => `<div class="attendee-item"><span class="attendee-number">${idx+1}.</span><span class="attendee-name">${name}</span></div>`).join('') :
+            '<div class="no-attendees">😴 Пока никто не записался</div>';
+        
+        let editButtons = '';
+        if (isAdmin) {
+            editButtons = `
+                <button class="btn-attend-small btn-danger" onclick="if(confirm('Удалить игру?')) deleteEvent(${event.id}, '${dateStr}')" style="background:#dc2626; margin-top:8px;">🗑 Удалить игру</button>
             `;
-        });
-        html += `</div>`;
-        container.innerHTML = html;
+        }
+        
+        const html = `
+            <div id="selectedEventInfo">
+                <div class="selected-event-title">🎮 ${event.name}</div>
+                ${event.description ? `<div class="selected-event-desc">📝 ${event.description}</div>` : ''}
+                <div class="attendees-list-title">👥 Записались (${event.attendees.length} чел.)</div>
+                <div class="attendees-list">
+                    ${attendeesList}
+                </div>
+                <button class="btn-attend-small" onclick="promptAndAttend(${event.id}, '${dateStr}')">✅ Я иду!</button>
+                <button class="btn-attend-small btn-danger" onclick="promptAndRemove(${event.id}, '${dateStr}')" style="background:#ef4444; margin-top:8px;">❌ Отказаться</button>
+                ${editButtons}
+            </div>
+        `;
+        
+        const detailView = document.getElementById('eventDetailView');
+        if (detailView) detailView.innerHTML = html;
+        else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo">${html}</div>`;
     }
     
     window.promptAndAttend = async (eventId, dateStr) => {
-        let name = prompt("Введите ваше имя (коллеги увидят его в списке)", "Я");
+        let name = prompt("Введите ваше имя", localStorage.getItem('userName') || "");
         if (name && name.trim()) {
+            localStorage.setItem('userName', name.trim());
             await toggleAttendee(eventId, dateStr, name.trim());
-        } else if (name === "") {
-            await toggleAttendee(eventId, dateStr, "Гость");
         }
     };
     
     window.promptAndRemove = async (eventId, dateStr) => {
-        let name = prompt("Введите ваше имя, чтобы убрать отметку", "Я");
-        if (name && name.trim()) {
-            await toggleAttendee(eventId, dateStr, name.trim());
-        }
+        let name = prompt("Введите ваше имя для отказа", localStorage.getItem('userName') || "");
+        if (name && name.trim()) await toggleAttendee(eventId, dateStr, name.trim());
     };
     
-    window.syncWithCloud = async () => {
+    window.manualSync = async () => {
         await loadFromCloud();
-        alert("Данные обновлены из облака!");
+        renderCalendar();
+        if (selectedDateStr) {
+            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+            else showDayEvents(selectedDateStr);
+        }
+        alert("Данные обновлены!");
     };
     
-    document.getElementById("addEventBtn").addEventListener("click", async () => {
+    document.getElementById("addEventBtn")?.addEventListener("click", async () => {
+        if (!isAdmin) { alert("Только организаторы могут добавлять игры!"); return; }
         if (!selectedDateStr) {
-            alert("Сначала нажмите на любой день в календаре!");
+            alert("Сначала нажмите на день в календаре");
             return;
         }
         const newName = document.getElementById("newEventName").value;
         if (!newName.trim()) {
-            alert("Введите название мероприятия");
+            alert("Введите название игры");
             return;
         }
-        await addEventToDate(selectedDateStr, newName);
+        const newDesc = document.getElementById("newEventDesc").value;
+        await addEventToDate(selectedDateStr, newName, newDesc);
         document.getElementById("newEventName").value = "";
+        document.getElementById("newEventDesc").value = "";
+        renderCalendar();
+        showDayEvents(selectedDateStr);
     });
     
     document.getElementById("prevMonthBtn").addEventListener("click", () => {
-        let newMonth = currentMonth - 1;
-        let newYear = currentYear;
-        if (newMonth < 0) { newMonth = 11; newYear--; }
-        currentYear = newYear;
-        currentMonth = newMonth;
+        currentMonth--;
+        if (currentMonth < 0) { currentMonth = 11; currentYear--; }
         selectedDateStr = "";
+        selectedEventId = null;
         renderCalendar();
-        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день в календаре</small>`;
-        document.getElementById("selectedDateLabel").innerText = "—";
+        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 Нажмите на игру в календаре</small></div>`;
     });
     
     document.getElementById("nextMonthBtn").addEventListener("click", () => {
-        let newMonth = currentMonth + 1;
-        let newYear = currentYear;
-        if (newMonth > 11) { newMonth = 0; newYear++; }
-        currentYear = newYear;
-        currentMonth = newMonth;
+        currentMonth++;
+        if (currentMonth > 11) { currentMonth = 0; currentYear++; }
         selectedDateStr = "";
+        selectedEventId = null;
         renderCalendar();
-        document.getElementById("dayEventsContainer").innerHTML = `<small>Нажмите на любой день в календаре</small>`;
-        document.getElementById("selectedDateLabel").innerText = "—";
+        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 Нажмите на игру в календаре</small></div>`;
     });
     
-    // Запуск
-    loadFromLocal();
-    loadFromCloud(); // загружаем из облака при старте
-    renderCalendar();
-    
-    // Автосохранение в облако каждые 30 секунд
-    setInterval(async () => {
-        if (!isLoading) {
-            await saveToCloud();
+    function checkAdminOnLoad() {
+        const stored = localStorage.getItem('gameCalendarAdmin');
+        if (stored === 'true') {
+            isAdmin = true;
+            enableEditMode();
+        } else {
+            document.getElementById('loginPanel').style.display = 'block';
         }
-    }, 30000);
+    }
+    
+    loadFromLocal();
+    renderCalendar();
+    loadFromCloud().then(() => renderCalendar());
+    checkAdminOnLoad();
 </script>
 </body>
 </html>
