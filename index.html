@@ -66,6 +66,7 @@
             padding: 8px 16px;
             border-radius: 30px;
             cursor: pointer;
+            font-size: 1rem;
         }
         .current-month {
             font-weight: bold;
@@ -123,6 +124,9 @@
             font-size: 0.55rem;
             margin: 2px 0;
             pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         .vote-info {
             font-size: 0.55rem;
@@ -362,9 +366,8 @@
 </div>
 
 <script>
-    // ⚠️ ВСТАВЬТЕ ВАШ URL СЮДА ⚠️
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbxXMpGWr0ddaNQB8LEuci4Tf-i19JdGflaVX0QbyHvfw5OzovHsA1oWV_ruATA1OhAP_w/exec";
-    
+    // ========== НАСТРОЙКИ ==========
+    const GOOGLE_URL = "hhttps://script.google.com/macros/s/AKfycbxLI3_lvTFvwKePONK4KYD0S6FLD8YsxmjnisPzEfAnmBzFPxgvKWtTiKLdGfgDgV1lHw/exec";
     const ADMIN_PASSWORD = "orden.sparta";
     
     let eventsDB = {};
@@ -377,11 +380,13 @@
         return `${p[2]}.${p[1]}.${p[0].slice(2)}`;
     }
     
-    // ========== РАБОТА С GOOGLE SHEETS ==========
+    // ========== ЗАГРУЗКА ИЗ GOOGLE ==========
     async function loadFromGoogle() {
         try {
-            const response = await fetch(`${GOOGLE_URL}?action=get&_=${Date.now()}`);
+            const response = await fetch(`${GOOGLE_URL}?t=${Date.now()}`);
             const data = await response.json();
+            console.log("Загружено из Google:", data);
+            
             if (data.success && data.events) {
                 eventsDB = {};
                 for (let date in data.events) {
@@ -406,6 +411,7 @@
         }
     }
     
+    // ========== СОХРАНЕНИЕ В GOOGLE ==========
     async function saveToGoogle() {
         try {
             await fetch(GOOGLE_URL, {
@@ -414,6 +420,7 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ events: eventsDB })
             });
+            console.log("Сохранено в Google");
             return true;
         } catch(e) {
             console.error("Ошибка сохранения:", e);
@@ -430,6 +437,7 @@
     async function addEvent(date, name, desc, link) {
         if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return false; }
         if (!name.trim()) return false;
+        
         getEventsForDate(date).push({
             id: Date.now(),
             name: name.trim().toUpperCase(),
@@ -438,6 +446,7 @@
             yesVotes: [],
             noVotes: []
         });
+        
         await saveToGoogle();
         await loadFromGoogle();
         renderCalendar();
@@ -486,7 +495,7 @@
         if (selectedDate) showDayEvents(selectedDate);
     }
     
-    // ========== ОТРИСОВКА ==========
+    // ========== ОТРИСОВКА КАЛЕНДАРЯ ==========
     function renderCalendar() {
         const firstDay = new Date(currentYear, currentMonth, 1);
         let offset = firstDay.getDay() - 1;
@@ -512,15 +521,19 @@
             
             html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border};'>`;
             html += `<div class='day-number'>${d}</div>`;
+            
             if (hasEvents) {
                 html += `<div class='viking-icon'>⚔️</div>`;
+                // ПОКАЗЫВАЕМ ВСЕ СОБЫТИЯ
                 events.forEach(ev => {
                     let short = ev.name.length > 22 ? ev.name.substring(0, 20) + '..' : ev.name;
                     html += `<div class='event-badge'>🏷️ ${short}</div>`;
                 });
                 const yesTotal = events.reduce((a,e) => a + (e.yesVotes?.length || 0), 0);
                 const noTotal = events.reduce((a,e) => a + (e.noVotes?.length || 0), 0);
-                if (yesTotal + noTotal > 0) html += `<div class='vote-info'>✅ ${yesTotal} | ❌ ${noTotal}</div>`;
+                if (yesTotal + noTotal > 0) {
+                    html += `<div class='vote-info'>✅ ${yesTotal} | ❌ ${noTotal}</div>`;
+                }
             } else {
                 html += `<div class='empty-day'>➕</div>`;
             }
@@ -529,7 +542,9 @@
         
         const total = offset + daysInMonth;
         const rem = (7 - (total % 7)) % 7;
-        for (let i = 0; i < rem; i++) html += `<div class='day-cell' style='background:#e8e4d8;'><div class='empty-day'></div></div>`;
+        for (let i = 0; i < rem; i++) {
+            html += `<div class='day-cell' style='background:#e8e4d8;'><div class='empty-day'></div></div>`;
+        }
         
         grid.innerHTML = html;
         const months = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
@@ -612,7 +627,7 @@
             <div>
                 <div class='event-title'>⚔️ ${ev.name}</div>
                 ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
-                ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА НА СОБЫТИЕ</a></div>` : ''}
+                ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
                 
                 <div class='vote-buttons'>
                     <button class='vote-btn yes ${hasYes ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","yes")'>✅ ИДУ</button>
@@ -631,7 +646,7 @@
                 </div>
                 
                 ${hasYes || hasNo ? `<div class='current-vote ${hasYes ? "yes" : "no"}'>🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${hasYes ? "✅ ИДУ" : "❌ НЕ ИДУ"}</div>` : ''}
-                <button class='change-btn' onclick='changeVote(${ev.id},"${date}")'>🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ ГОЛОС</button>
+                <button class='change-btn' onclick='changeVote(${ev.id},"${date}")'>🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ</button>
                 ${adminBtns}
             </div>
         `;
@@ -690,7 +705,6 @@
         
         isAdmin = true;
         localStorage.setItem('gameCalendarAdmin', 'true');
-        localStorage.setItem('adminNick', nickname);
         
         document.getElementById('modeBadge').innerHTML = '✏️ РЕЖИМ РЕДАКТИРОВАНИЯ';
         document.getElementById('modeBadge').style.background = '#d0c8b0';
@@ -705,7 +719,6 @@
     function exitAdminMode() {
         isAdmin = false;
         localStorage.removeItem('gameCalendarAdmin');
-        localStorage.removeItem('adminNick');
         
         document.getElementById('modeBadge').innerHTML = '🗳️ РЕЖИМ ГОЛОСОВАНИЯ';
         document.getElementById('modeBadge').style.background = '#e0d8c8';
