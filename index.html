@@ -38,6 +38,15 @@
             font-size: 0.7rem;
             color: #4a5b3a;
         }
+        .status-bar {
+            background: #e8e0d0;
+            padding: 5px 10px;
+            border-radius: 12px;
+            margin: 8px 0;
+            font-size: 0.7rem;
+            text-align: center;
+            color: #5a6b4a;
+        }
         .admin-panel {
             background: #e0d8c0;
             padding: 10px;
@@ -330,6 +339,8 @@
     <h1>⚔️ КАЛЕНДАРЬ ИГР</h1>
     <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
     
+    <div class="status-bar" id="statusBar">🔄 ЗАГРУЗКА ДАННЫХ...</div>
+    
     <div class="admin-panel" id="adminPanel">
         <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ АДМИНКИ</button>
     </div>
@@ -367,7 +378,7 @@
 
 <script>
     // ========== НАСТРОЙКИ ==========
-    const GOOGLE_URL = "hhttps://script.google.com/macros/s/AKfycbxLI3_lvTFvwKePONK4KYD0S6FLD8YsxmjnisPzEfAnmBzFPxgvKWtTiKLdGfgDgV1lHw/exec";
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwZP6La7eDWraw3owInk8i8f5FBwyLkFh5HBe69rn7BWyw0J5ZKrneCBEx2p_ZeGbi4QQ/exec";
     const ADMIN_PASSWORD = "orden.sparta";
     
     let eventsDB = {};
@@ -380,8 +391,20 @@
         return `${p[2]}.${p[1]}.${p[0].slice(2)}`;
     }
     
-    // ========== ЗАГРУЗКА ИЗ GOOGLE ==========
+    function updateStatus(text, isError = false) {
+        const statusBar = document.getElementById('statusBar');
+        statusBar.innerHTML = text;
+        statusBar.style.color = isError ? '#a04040' : '#5a6b4a';
+        setTimeout(() => {
+            if (statusBar.innerHTML === text && !isError) {
+                statusBar.innerHTML = '✅ ГОТОВО';
+            }
+        }, 3000);
+    }
+    
+    // ========== ЗАГРУЗКА ИЗ GOOGLE SHEETS ==========
     async function loadFromGoogle() {
+        updateStatus("🔄 ЗАГРУЗКА ИЗ ОБЛАКА...");
         try {
             const response = await fetch(`${GOOGLE_URL}?t=${Date.now()}`);
             const data = await response.json();
@@ -401,17 +424,21 @@
                         }));
                     }
                 }
+                updateStatus(`✅ ЗАГРУЖЕНО ${Object.keys(eventsDB).length} ДНЕЙ С СОБЫТИЯМИ`);
                 renderCalendar();
+                if (selectedDate) showDayEvents(selectedDate);
                 return true;
             }
+            updateStatus("⚠️ ОБЛАКО ПУСТО", true);
             return false;
         } catch(e) {
             console.error("Ошибка загрузки:", e);
+            updateStatus("❌ ОШИБКА ЗАГРУЗКИ", true);
             return false;
         }
     }
     
-    // ========== СОХРАНЕНИЕ В GOOGLE ==========
+    // ========== СОХРАНЕНИЕ В GOOGLE SHEETS ==========
     async function saveToGoogle() {
         try {
             await fetch(GOOGLE_URL, {
@@ -420,10 +447,12 @@
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ events: eventsDB })
             });
-            console.log("Сохранено в Google");
+            console.log("✅ Сохранено в Google");
+            updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
             return true;
         } catch(e) {
             console.error("Ошибка сохранения:", e);
+            updateStatus("❌ ОШИБКА СОХРАНЕНИЯ", true);
             return false;
         }
     }
@@ -448,7 +477,7 @@
         });
         
         await saveToGoogle();
-        await loadFromGoogle();
+        await loadFromGoogle(); // Перезагружаем свежие данные
         renderCalendar();
         showDayEvents(date);
         return true;
@@ -524,7 +553,6 @@
             
             if (hasEvents) {
                 html += `<div class='viking-icon'>⚔️</div>`;
-                // ПОКАЗЫВАЕМ ВСЕ СОБЫТИЯ
                 events.forEach(ev => {
                     let short = ev.name.length > 22 ? ev.name.substring(0, 20) + '..' : ev.name;
                     html += `<div class='event-badge'>🏷️ ${short}</div>`;
@@ -547,7 +575,7 @@
         }
         
         grid.innerHTML = html;
-        const months = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮН','ИЮЛ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
+        const months = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮНЬ','ИЮЛЬ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
         document.getElementById("currentMonthLabel").innerHTML = `${months[currentMonth]} ${currentYear}`;
         
         document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
@@ -772,9 +800,12 @@
     });
     
     // ========== ЗАПУСК ==========
-    loadFromGoogle().then(() => {
+    async function init() {
+        await loadFromGoogle();
         checkStoredAdmin();
-    });
+    }
+    
+    init();
 </script>
 </body>
 </html>
