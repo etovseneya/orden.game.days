@@ -378,7 +378,7 @@
 
 <script>
     // ========== НАСТРОЙКИ ==========
-    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwZP6La7eDWraw3owInk8i8f5FBwyLkFh5HBe69rn7BWyw0J5ZKrneCBEx2p_ZeGbi4QQ/exec";
+    const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbyIUb1lncrQUAVW1B9tFkjIQtGWjMFtd4rlRq36pqt_fk1lZJLkCD1SrkspIbzNrrFssQ/exec";
     const ADMIN_PASSWORD = "orden.sparta";
     
     let eventsDB = {};
@@ -441,15 +441,19 @@
     // ========== СОХРАНЕНИЕ В GOOGLE SHEETS ==========
     async function saveToGoogle() {
         try {
-            await fetch(GOOGLE_URL, {
+            const response = await fetch(GOOGLE_URL, {
                 method: "POST",
-                mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ events: eventsDB })
             });
-            console.log("✅ Сохранено в Google");
-            updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
-            return true;
+            // Просто проверяем, что запрос ушёл
+            if (response.ok) {
+                console.log("✅ Сохранено в Google");
+                updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
+                return true;
+            } else {
+                throw new Error("Статус ответа: " + response.status);
+            }
         } catch(e) {
             console.error("Ошибка сохранения:", e);
             updateStatus("❌ ОШИБКА СОХРАНЕНИЯ", true);
@@ -477,7 +481,7 @@
         });
         
         await saveToGoogle();
-        await loadFromGoogle(); // Перезагружаем свежие данные
+        // Больше не вызываем loadFromGoogle, чтобы не стирать только что добавленное
         renderCalendar();
         showDayEvents(date);
         return true;
@@ -492,8 +496,7 @@
             ev.link = newLink;
         }
         await saveToGoogle();
-        await loadFromGoogle();
-        showEventDetails(date, eventId);
+        showEventDetails(date, eventId);  // обновим детали без перезагрузки календаря
     }
     
     async function vote(eventId, date, userName, type) {
@@ -507,8 +510,8 @@
         ev.yesVotes.sort();
         ev.noVotes.sort();
         await saveToGoogle();
-        await loadFromGoogle();
         if (selectedEventId === eventId) showEventDetails(date, eventId);
+        renderCalendar(); // обновим иконки голосов в ячейке
     }
     
     async function deleteEvent(eventId, date) {
@@ -520,8 +523,9 @@
             selectedDate = "";
         }
         await saveToGoogle();
-        await loadFromGoogle();
+        renderCalendar();
         if (selectedDate) showDayEvents(selectedDate);
+        else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
     }
     
     // ========== ОТРИСОВКА КАЛЕНДАРЯ ==========
@@ -716,7 +720,8 @@
                 ev.yesVotes = ev.yesVotes.filter(v => v !== uname);
                 ev.noVotes = ev.noVotes.filter(v => v !== uname);
                 await saveToGoogle();
-                await loadFromGoogle();
+                // Просто обновляем детали, календарь тоже нужно освежить
+                renderCalendar();
                 showEventDetails(date, id);
                 alert("ГОЛОС УДАЛЕН!");
             }
@@ -755,7 +760,7 @@
         document.getElementById('loginBox').style.display = 'block';
         
         if (selectedDate) showDayEvents(selectedDate);
-        loadFromGoogle();
+        loadFromGoogle(); // при выходе подтягиваем актуальные данные с сервера
     }
     
     function checkStoredAdmin() {
