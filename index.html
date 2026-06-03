@@ -12,53 +12,60 @@
             padding: 0;
         }
         body {
-            background: #e8e0d0;
+            background: #1a2a1a;
             padding: 12px;
             min-height: 100vh;
         }
         .container {
             max-width: 100%;
             margin: 0 auto;
-            background: #f5f0e8;
+            background: #2a3a2a;
             border-radius: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
             padding: 16px;
-            border: 1px solid #d4c9b0;
+            border: 1px solid #4a6a4a;
         }
         h1 {
             font-size: 1.6rem;
             margin: 0 0 4px 0;
-            color: #4a5b3a;
-            text-shadow: 1px 1px 0 #e0d8c8;
+            color: #d4c9a8;
+            text-shadow: 1px 1px 0 #1a2a1a;
             font-family: 'Courier New', monospace;
-            letter-spacing: 1px;
+            letter-spacing: 2px;
         }
         .mode-badge {
             display: inline-block;
-            background: #e0d8c8;
+            background: #3a4a3a;
             padding: 4px 12px;
             border-radius: 20px;
             font-size: 0.7rem;
             margin-top: 6px;
-            color: #4a5b3a;
-            border: 1px solid #c0b8a0;
+            color: #d4c9a8;
+            border: 1px solid #5a7a5a;
         }
         .sync-status {
-            background: #e8e0d0;
+            background: #2a3a2a;
             padding: 8px 12px;
             border-radius: 14px;
             margin: 12px 0;
             font-size: 0.75rem;
-            color: #5a6b4a;
+            color: #a0c4a8;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
             gap: 8px;
-            border: 1px solid #d0c8b0;
+            border: 1px solid #4a6a4a;
         }
-        .sync-status span {
-            flex: 1;
+        .sync-btn {
+            background: #5a7a5a;
+            color: #d4c9a8;
+            border: none;
+            padding: 5px 12px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.7rem;
+            font-weight: 500;
         }
         .admin-buttons {
             display: none;
@@ -67,35 +74,24 @@
         .admin-buttons.show {
             display: flex;
         }
-        .sync-btn {
-            background: #8a9e6a;
-            color: #f5f0e8;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
         .admin-panel {
-            background: #e0d8c0;
+            background: #3a4a2a;
             padding: 10px;
             border-radius: 14px;
             margin-bottom: 12px;
             display: none;
-            border: 1px solid #c0b8a0;
+            border: 1px solid #5a7a4a;
         }
         .admin-panel.show {
             display: block;
         }
         .admin-toggle {
-            background: #8a7a5a;
-            color: #f5f0e8;
+            background: #6a5a3a;
+            color: #d4c9a8;
             border: none;
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 0.7rem;
-            margin-bottom: 8px;
             cursor: pointer;
         }
         .month-nav {
@@ -107,23 +103,23 @@
             gap: 8px;
         }
         .month-buttons button {
-            background: #d0c8b0;
-            border: 1px solid #b0a890;
+            background: #4a6a4a;
+            border: 1px solid #6a8a6a;
             font-size: 1rem;
             font-weight: bold;
             padding: 6px 14px;
             border-radius: 30px;
             cursor: pointer;
-            color: #4a5b3a;
+            color: #d4c9a8;
         }
         .current-month {
             font-weight: 700;
             font-size: 1.1rem;
-            background: #e8e0d0;
+            background: #2a3a2a;
             padding: 6px 14px;
             border-radius: 30px;
-            color: #4a5b3a;
-            border: 1px solid #d0c8b0;
+            color: #d4c9a8;
+            border: 1px solid #4a6a4a;
         }
         .calendar-grid {
             display: grid;
@@ -135,10 +131,10 @@
             text-align: center;
             font-weight: 600;
             padding: 6px 2px;
-            background: #d8d0c0;
+            background: #4a6a4a;
             border-radius: 12px;
             font-size: 0.7rem;
-            color: #4a5b3a;
+            color: #d4c9a8;
         }
         .day-cell {
             border-radius: 12px;
@@ -148,17 +144,14 @@
             display: flex;
             flex-direction: column;
             transition: 0.1s;
-            border: 1px solid #d0c8b0;
-            background: #faf8f0;
+            border: 1px solid #4a6a4a;
+            background: #3a4a3a;
             overflow-y: auto;
             position: relative;
         }
         .day-cell.has-event {
-            background: #e8a0a0 !important;
+            background: #8a4a4a !important;
             border: 2px solid #c04040 !important;
-        }
-        .day-cell.has-event .day-number {
-            background: rgba(200,50,50,0.3);
         }
         .viking-icon {
             position: absolute;
@@ -170,24 +163,21 @@
         .day-cell:active {
             transform: scale(0.98);
         }
-        .day-cell.weekend {
-            background: #d8e8d0;
-        }
         .day-number {
             font-weight: bold;
             font-size: 0.8rem;
             margin-bottom: 3px;
-            background: rgba(100,80,50,0.1);
+            background: rgba(0,0,0,0.2);
             width: 26px;
             text-align: center;
             border-radius: 30px;
             padding: 1px 0;
             flex-shrink: 0;
-            color: #5a6b4a;
+            color: #d4c9a8;
         }
         .event-badge {
-            background: #8a9e6a;
-            color: #f5f0e8;
+            background: #5a7a5a;
+            color: #d4c9a8;
             border-radius: 10px;
             padding: 3px 4px;
             font-size: 0.55rem;
@@ -198,86 +188,104 @@
             overflow: hidden;
             text-overflow: ellipsis;
             flex-shrink: 0;
-            border-left: 2px solid #c0d0a0;
+            border-left: 2px solid #8aae6a;
             pointer-events: none;
         }
         .attendees-info {
             font-size: 0.55rem;
             margin-top: 2px;
-            background: rgba(100,80,50,0.1);
+            background: rgba(0,0,0,0.2);
             border-radius: 10px;
             padding: 2px 3px;
             text-align: center;
             flex-shrink: 0;
-            color: #7a8a6a;
+            color: #a0c4a8;
         }
         .empty-day {
             text-align: center;
             margin-top: 20px;
             font-size: 0.65rem;
             opacity: 0.5;
-            color: #b0a890;
+            color: #6a8a6a;
         }
         .details-section {
-            background: #f0ece0;
+            background: #2a3a2a;
             border-radius: 20px;
             padding: 16px;
             margin-top: 16px;
-            border: 1px solid #d0c8b0;
+            border: 1px solid #4a6a4a;
         }
         .selected-event-title {
             font-size: 1.2rem;
             font-weight: 700;
             margin-bottom: 6px;
-            color: #4a5b3a;
+            color: #d4c9a8;
             word-break: break-word;
         }
         .selected-event-desc {
-            color: #6a7b5a;
+            color: #a0c4a8;
             margin-bottom: 10px;
             padding-bottom: 8px;
-            border-bottom: 1px solid #d0c8b0;
+            border-bottom: 1px solid #4a6a4a;
             font-size: 0.85rem;
             line-height: 1.4;
         }
         .event-link {
-            color: #6a7b5a;
+            color: #a0c4a8;
             margin-bottom: 10px;
             font-size: 0.8rem;
         }
         .event-link a {
-            color: #4a7a3a;
+            color: #8aae6a;
             text-decoration: none;
-            word-break: break-all;
         }
-        .vote-section {
+        .vote-row {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
             margin: 10px 0;
         }
-        .vote-title {
-            font-weight: 700;
-            margin: 10px 0 6px 0;
-            font-size: 0.85rem;
-            color: #5a6b4a;
-            text-align: center;
+        .vote-btn {
+            background: #3a4a3a;
+            border: 1px solid #5a7a5a;
+            border-radius: 30px;
+            padding: 6px 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            font-weight: 500;
+            color: #d4c9a8;
+        }
+        .vote-btn.yes {
+            background: #4a6a3a;
+            border-color: #6aae4a;
+        }
+        .vote-btn.no {
+            background: #6a4a3a;
+            border-color: #c06060;
+        }
+        .vote-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
         .vote-columns {
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            margin-top: 10px;
         }
         .vote-column {
             flex: 1;
             min-width: 140px;
-            background: #faf8f0;
+            background: #3a4a3a;
             border-radius: 14px;
             padding: 8px;
         }
         .vote-column.green {
-            background: #d0e8c0;
-            border: 1px solid #8aae6a;
+            background: #3a5a3a;
+            border: 1px solid #6aae6a;
         }
         .vote-column.red {
-            background: #e8c0c0;
+            background: #5a3a3a;
             border: 1px solid #c08080;
         }
         .vote-column-title {
@@ -287,32 +295,29 @@
             border-radius: 10px;
             margin-bottom: 6px;
             font-size: 0.75rem;
+            color: #d4c9a8;
         }
         .vote-column.green .vote-column-title {
-            background: #6aae4a;
-            color: white;
+            background: #4a7a4a;
         }
         .vote-column.red .vote-column-title {
-            background: #c06060;
-            color: white;
+            background: #7a4a4a;
         }
         .attendee-vote-item {
             padding: 4px 6px;
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
             font-size: 0.7rem;
             display: flex;
             gap: 5px;
+            color: #c0c0a0;
         }
         .vote-number {
-            color: #8a9e6a;
+            color: #8aae6a;
             font-weight: 600;
             min-width: 22px;
         }
-        .vote-name {
-            color: #4a5b3a;
-        }
         .no-votes {
-            color: #b0a890;
+            color: #8a8a6a;
             text-align: center;
             padding: 10px;
             font-size: 0.65rem;
@@ -321,11 +326,11 @@
             width: 100%;
             padding: 10px;
             border-radius: 14px;
-            border: 1px solid #d0c8b0;
-            background: #faf8f0;
+            border: 1px solid #4a6a4a;
+            background: #3a4a3a;
             font-size: 0.85rem;
             margin: 10px 0;
-            color: #4a5b3a;
+            color: #d4c9a8;
         }
         .add-event-form {
             margin-top: 16px;
@@ -336,56 +341,25 @@
         .add-event-form input, .add-event-form textarea {
             padding: 10px 12px;
             border-radius: 14px;
-            border: 1px solid #d0c8b0;
+            border: 1px solid #4a6a4a;
             font-size: 0.85rem;
             font-family: inherit;
-            background: #faf8f0;
-            color: #4a5b3a;
+            background: #3a4a3a;
+            color: #d4c9a8;
         }
         .add-event-form textarea {
             resize: vertical;
             min-height: 50px;
         }
         .add-event-form button {
-            background: #8a9e6a;
-            color: #f5f0e8;
+            background: #5a7a5a;
+            color: #d4c9a8;
             border: none;
             padding: 10px;
             border-radius: 14px;
             cursor: pointer;
             font-weight: 600;
             font-size: 0.85rem;
-        }
-        .vote-row {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            margin: 10px 0;
-        }
-        .vote-btn {
-            background: #e8e4d8;
-            border: 1px solid #c0b8a0;
-            border-radius: 30px;
-            padding: 6px 20px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            transition: 0.1s;
-            font-weight: 500;
-        }
-        .vote-btn:active {
-            transform: scale(0.95);
-        }
-        .vote-btn.yes {
-            background: #d0e8c0;
-            border-color: #6aae4a;
-        }
-        .vote-btn.no {
-            background: #e8c0c0;
-            border-color: #c06060;
-        }
-        .vote-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
         }
         .current-vote {
             text-align: center;
@@ -396,12 +370,12 @@
             border-radius: 20px;
         }
         .current-vote.yes {
-            background: #d0e8c0;
-            color: #4a6a2a;
+            background: #4a6a3a;
+            color: #a0e0a0;
         }
         .current-vote.no {
-            background: #e8c0c0;
-            color: #a04040;
+            background: #6a4a3a;
+            color: #e0a0a0;
         }
         .action-buttons {
             display: flex;
@@ -409,8 +383,8 @@
             margin-top: 8px;
         }
         .action-btn {
-            background: #8a7a5a;
-            color: white;
+            background: #5a6a4a;
+            color: #d4c9a8;
             border: none;
             border-radius: 30px;
             padding: 5px 12px;
@@ -423,10 +397,10 @@
             background: #4a7a6a;
         }
         .action-btn.delete {
-            background: #c0a080;
+            background: #7a5a4a;
         }
         .edit-form {
-            background: #e8e4d8;
+            background: #3a4a3a;
             border-radius: 14px;
             padding: 12px;
             margin-top: 12px;
@@ -440,13 +414,13 @@
             padding: 8px;
             margin-bottom: 8px;
             border-radius: 12px;
-            border: 1px solid #c0b8a0;
-            background: #faf8f0;
-            font-size: 0.8rem;
+            border: 1px solid #4a6a4a;
+            background: #2a3a2a;
+            color: #d4c9a8;
         }
         .edit-form button {
-            background: #6aae4a;
-            color: white;
+            background: #5a7a5a;
+            color: #d4c9a8;
             border: none;
             padding: 6px 12px;
             border-radius: 20px;
@@ -455,11 +429,11 @@
             margin-right: 5px;
         }
         .edit-form button.cancel {
-            background: #c0a080;
+            background: #7a5a4a;
         }
         .change-btn {
-            background: #8a7a5a;
-            color: white;
+            background: #5a6a4a;
+            color: #d4c9a8;
             border: none;
             border-radius: 30px;
             padding: 5px 12px;
@@ -468,47 +442,46 @@
             margin-top: 8px;
             width: 100%;
         }
-        small {
-            color: #b0a890;
-            font-size: 0.7rem;
-        }
         .login-prompt {
-            background: #e0d8c0;
+            background: #3a4a3a;
             padding: 12px;
             border-radius: 20px;
             text-align: center;
             margin-top: 16px;
-            border: 1px solid #c0b8a0;
+            border: 1px solid #5a7a5a;
         }
         .login-prompt input {
             padding: 8px;
             border-radius: 30px;
-            border: 1px solid #c0b8a0;
+            border: 1px solid #5a7a5a;
             width: 100%;
             margin-top: 8px;
             font-size: 0.85rem;
-            background: #faf8f0;
-            color: #4a5b3a;
+            background: #2a3a2a;
+            color: #d4c9a8;
             text-align: center;
         }
         .login-prompt button {
-            background: #8a7a5a;
-            color: #f5f0e8;
+            background: #6a5a3a;
+            color: #d4c9a8;
             border: none;
             padding: 8px 16px;
             border-radius: 30px;
             margin-top: 8px;
             cursor: pointer;
         }
+        small {
+            color: #8a8a6a;
+            font-size: 0.7rem;
+        }
         @media (max-width: 480px) {
             body { padding: 8px; }
             .container { padding: 12px; }
             .day-cell { min-height: 70px; }
-            .event-badge { font-size: 0.5rem; white-space: normal; line-height: 1.2; pointer-events: none; }
+            .event-badge { font-size: 0.5rem; white-space: normal; line-height: 1.2; }
             .weekday { font-size: 0.6rem; }
             .vote-columns { flex-direction: column; }
             .vote-btn { padding: 4px 12px; font-size: 0.7rem; }
-            .action-buttons { flex-direction: column; }
         }
     </style>
 </head>
@@ -520,8 +493,8 @@
     <div class="sync-status">
         <span id="syncStatusText">🔄 ЗАГРУЗКА...</span>
         <div class="admin-buttons" id="adminButtons">
-            <button class="sync-btn" onclick="manualSync()">⟳ ОБНОВИТЬ</button>
-            <button class="sync-btn" onclick="forceSaveToCloud()" style="background:#6aae4a;">💾 СОХРАНИТЬ</button>
+            <button class="sync-btn" onclick="syncFromCloud()">⟳ ЗАГРУЗИТЬ ИЗ ОБЛАКА</button>
+            <button class="sync-btn" onclick="saveToCloudNow()" style="background:#6aae4a;">💾 СОХРАНИТЬ В ОБЛАКО</button>
         </div>
     </div>
 
@@ -551,7 +524,7 @@
         <div class="add-event-form">
             <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ" />
             <textarea id="newEventDesc" placeholder="КРАТКОЕ ОПИСАНИЕ"></textarea>
-            <input type="text" id="newEventLink" placeholder="ССЫЛКА НА СОБЫТИЕ (НЕОБЯЗАТЕЛЬНО)" />
+            <input type="text" id="newEventLink" placeholder="ССЫЛКА НА СОБЫТИЕ" />
             <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
         </div>
     </div>
@@ -565,8 +538,8 @@
 </div>
 
 <script>
-    // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТОТ URL НА ВАШ НОВЫЙ ИЗ GOOGLE APPS SCRIPT!
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxkZzl2IlM5jldbrGPP5c0nOJM8L-ejfPflX6r27EzHqh5gOM4Z6qapKBdI7s1LbIOUrQ/exec";
+    // ⚠️ ⚠️ ⚠️ ВАЖНО: ВСТАВЬТЕ ВАШ URL ИЗ GOOGLE APPS SCRIPT СЮДА ⚠️ ⚠️ ⚠️
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxq_aerkEYJK4OBaX66tpIY0JE_NXTlYw3K-VwkWyaph_VPOYEY_9cSg9lrNxY9Yg7aVw/exec";
     
     const ADMIN_CODE = "orden.sparta";
     
@@ -585,135 +558,14 @@
         return dateStr;
     }
     
-    function checkStoredAccess() {
-        const stored = localStorage.getItem('gameCalendarAdmin');
-        if (stored === 'true') {
-            isAdmin = true;
-            enableEditMode();
-        } else {
-            document.getElementById('loginPanel').style.display = 'block';
-        }
-    }
-    
-    function checkAccess() {
-        const code = document.getElementById('accessCode').value;
-        if (code === ADMIN_CODE) {
-            isAdmin = true;
-            localStorage.setItem('gameCalendarAdmin', 'true');
-            enableEditMode();
-            document.getElementById('loginPanel').style.display = 'none';
-            alert("✅ РЕЖИМ РЕДАКТИРОВАНИЯ ВКЛЮЧЕН!");
-        } else {
-            alert("❌ НЕВЕРНЫЙ КОД ДОСТУПА!");
-        }
-    }
-    
-    function enableEditMode() {
-        isAdmin = true;
-        document.getElementById('modeBadge').innerHTML = '✏️ РЕЖИМ РЕДАКТИРОВАНИЯ';
-        document.getElementById('modeBadge').style.background = '#d0c8b0';
-        document.getElementById('adminPanel').classList.add('show');
-        document.getElementById('editForms').style.display = 'block';
-        document.getElementById('adminButtons').classList.add('show');
-        if (selectedDateStr && selectedEventId) {
-            showEventDetails(selectedDateStr, selectedEventId);
-        }
-    }
-    
-    function exitEditMode() {
-        isAdmin = false;
-        localStorage.removeItem('gameCalendarAdmin');
-        document.getElementById('modeBadge').innerHTML = '🗳️ РЕЖИМ ГОЛОСОВАНИЯ';
-        document.getElementById('modeBadge').style.background = '#e0d8c8';
-        document.getElementById('adminPanel').classList.remove('show');
-        document.getElementById('editForms').style.display = 'none';
-        document.getElementById('adminButtons').classList.remove('show');
-        if (selectedDateStr && selectedEventId) {
-            showEventDetails(selectedDateStr, selectedEventId);
-        }
-    }
-    
-    function getDateKey(year, month, day) {
-        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    }
-    
-    async function loadFromCloud() {
-        const statusSpan = document.getElementById('syncStatusText');
-        statusSpan.innerHTML = "🔄 ЗАГРУЗКА ИЗ ОБЛАКА...";
-        
-        try {
-            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&_=${Date.now()}`);
-            const data = await response.json();
-            
-            if (data.success && data.events) {
-                // Очищаем текущие данные
-                eventsDB = {};
-                
-                // Загружаем новые
-                for (let date in data.events) {
-                    if (data.events[date] && data.events[date].length > 0) {
-                        eventsDB[date] = data.events[date].map(ev => ({
-                            id: ev.id,
-                            name: ev.name,
-                            description: ev.description || "",
-                            link: ev.link || "",
-                            yesVotes: ev.yesVotes || ev.attendees || [],
-                            noVotes: ev.noVotes || []
-                        }));
-                    }
-                }
-                
-                saveToLocal();
-                statusSpan.innerHTML = "✅ ЗАГРУЖЕНО";
-                return true;
-            }
-            throw new Error("Нет данных");
-        } catch (e) {
-            console.log("Ошибка загрузки", e);
-            statusSpan.innerHTML = "📱 ОФЛАЙН";
-            return false;
-        }
-    }
-    
-    async function forceSaveToCloud() {
-        if (!isAdmin) return;
-        const statusSpan = document.getElementById('syncStatusText');
-        statusSpan.innerHTML = "💾 СОХРАНЕНИЕ...";
-        
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ events: eventsDB })
-            });
-            statusSpan.innerHTML = "✅ СОХРАНЕНО";
-            setTimeout(() => {
-                if (statusSpan.innerHTML === "✅ СОХРАНЕНО") {
-                    statusSpan.innerHTML = "✅ ГОТОВО";
-                }
-            }, 2000);
-        } catch (e) {
-            console.log("Ошибка сохранения", e);
-            statusSpan.innerHTML = "⚠️ ОШИБКА";
-        }
-    }
-    
-    async function saveToCloud() {
-        if (!isAdmin) return;
-        try {
-            await fetch(GOOGLE_SCRIPT_URL, {
-                method: "POST",
-                mode: "no-cors",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ events: eventsDB })
-            });
-        } catch (e) {}
-    }
-    
     function saveToLocal() {
         localStorage.setItem('gameCalendarDB', JSON.stringify(eventsDB));
-        localStorage.setItem('gameCalendarBackup', JSON.stringify(eventsDB));
+        document.getElementById('syncStatusText').innerHTML = "✅ СОХРАНЕНО";
+        setTimeout(() => {
+            if (document.getElementById('syncStatusText').innerHTML === "✅ СОХРАНЕНО") {
+                document.getElementById('syncStatusText').innerHTML = "✅ ГОТОВО";
+            }
+        }, 1500);
     }
     
     function loadFromLocal() {
@@ -721,20 +573,11 @@
         if (saved && saved !== '{}') {
             eventsDB = JSON.parse(saved);
             console.log("Загружено из localStorage");
-            return;
+            return true;
         }
-        
-        const backup = localStorage.getItem('gameCalendarBackup');
-        if (backup && backup !== '{}') {
-            eventsDB = JSON.parse(backup);
-            console.log("Восстановлено из резервной копии");
-            return;
-        }
-        
-        // Демо-данные
         eventsDB = {
             "2026-06-02": [
-                { id: Date.now() + 1, name: "ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00", link: "", yesVotes: ["АННА", "ИВАН"], noVotes: [] },
+                { id: Date.now() + 1, name: "ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00, DISCORD", link: "", yesVotes: ["АННА", "ИВАН"], noVotes: [] },
                 { id: Date.now() + 2, name: "СНАЙПЕРСКАЯ ЗАСАДА", description: "НУЖНЫ 2 СНАЙПЕРА", link: "", yesVotes: ["МАРИЯ"], noVotes: [] }
             ],
             "2026-06-03": [
@@ -745,6 +588,62 @@
             ]
         };
         saveToLocal();
+        return false;
+    }
+    
+    async function saveToCloudNow() {
+        if (!isAdmin) { alert("Только администратор может сохранять в облако!"); return; }
+        document.getElementById('syncStatusText').innerHTML = "💾 ОТПРАВКА В ОБЛАКО...";
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ events: eventsDB })
+            });
+            document.getElementById('syncStatusText').innerHTML = "✅ СОХРАНЕНО В ОБЛАКО";
+            setTimeout(() => {
+                if (document.getElementById('syncStatusText').innerHTML === "✅ СОХРАНЕНО В ОБЛАКО") {
+                    document.getElementById('syncStatusText').innerHTML = "✅ ГОТОВО";
+                }
+            }, 2000);
+            alert("✅ Данные сохранены в облако!");
+        } catch(e) {
+            alert("❌ Ошибка сохранения: " + e.message);
+        }
+    }
+    
+    async function syncFromCloud() {
+        if (!isAdmin) return;
+        document.getElementById('syncStatusText').innerHTML = "🔄 ЗАГРУЗКА ИЗ ОБЛАКА...";
+        try {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&_=${Date.now()}`);
+            const data = await response.json();
+            if (data.success && data.events && Object.keys(data.events).length > 0) {
+                eventsDB = {};
+                for (let date in data.events) {
+                    if (data.events[date] && data.events[date].length > 0) {
+                        eventsDB[date] = data.events[date].map(ev => ({
+                            id: ev.id,
+                            name: ev.name,
+                            description: ev.description || "",
+                            link: ev.link || "",
+                            yesVotes: ev.yesVotes || [],
+                            noVotes: ev.noVotes || []
+                        }));
+                    }
+                }
+                saveToLocal();
+                renderCalendar();
+                if (selectedDateStr) showDayEvents(selectedDateStr);
+                document.getElementById('syncStatusText').innerHTML = "✅ ЗАГРУЖЕНО";
+                alert("✅ Данные загружены из облака!");
+            } else {
+                alert("⚠️ В облаке нет данных. Нажмите 'СОХРАНИТЬ В ОБЛАКО'");
+            }
+        } catch(e) {
+            alert("❌ Ошибка загрузки: " + e.message);
+        }
     }
     
     function getEventsForDate(dateStr) {
@@ -753,7 +652,7 @@
     }
     
     async function addEventToDate(dateStr, eventName, eventDesc, eventLink) {
-        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ СОБЫТИЯ!"); return false; }
+        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ!"); return false; }
         if (!eventName.trim()) return false;
         const events = getEventsForDate(dateStr);
         events.push({
@@ -765,60 +664,52 @@
             noVotes: []
         });
         saveToLocal();
-        await saveToCloud();
         renderCalendar();
+        showDayEvents(dateStr);
         return true;
     }
     
     async function editEvent(eventId, dateStr, newName, newDesc, newLink) {
-        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ РЕДАКТИРОВАТЬ!"); return false; }
+        if (!isAdmin) return;
         const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
-        if (!ev) return false;
-        if (newName.trim()) ev.name = newName.trim().toUpperCase();
-        ev.description = newDesc.trim() || "";
-        ev.link = newLink.trim() || "";
+        if (ev) {
+            ev.name = newName.toUpperCase();
+            ev.description = newDesc;
+            ev.link = newLink;
+        }
         saveToLocal();
-        await saveToCloud();
         renderCalendar();
-        if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
-        return true;
+        showEventDetails(dateStr, eventId);
     }
     
     async function vote(eventId, dateStr, userName, voteType) {
-        if (!userName.trim()) userName = "Гость";
-        const ev = eventsDB[dateStr]?.find(e => e.id == eventId);
+        const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
         if (!ev) return;
-        
         const userNameUpper = userName.trim().toUpperCase();
         ev.yesVotes = ev.yesVotes.filter(v => v !== userNameUpper);
         ev.noVotes = ev.noVotes.filter(v => v !== userNameUpper);
-        
         if (voteType === 'yes') {
             ev.yesVotes.push(userNameUpper);
         } else if (voteType === 'no') {
             ev.noVotes.push(userNameUpper);
         }
-        
-        ev.yesVotes.sort((a,b) => a.localeCompare(b));
-        ev.noVotes.sort((a,b) => a.localeCompare(b));
-        
+        ev.yesVotes.sort();
+        ev.noVotes.sort();
         saveToLocal();
-        await saveToCloud();
         renderCalendar();
         if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
     }
     
     async function deleteEvent(eventId, dateStr) {
-        if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ УДАЛЯТЬ!"); return; }
+        if (!isAdmin) return;
         if (!eventsDB[dateStr]) return;
-        eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id != eventId);
+        eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id !== eventId);
         if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
         if (selectedEventId === eventId) {
             selectedEventId = null;
             selectedDateStr = "";
         }
         saveToLocal();
-        await saveToCloud();
         renderCalendar();
         if (selectedDateStr) showDayEvents(selectedDateStr);
         else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
@@ -828,21 +719,15 @@
         const firstDayOfMonth = new Date(currentYear, currentMonth, 1);
         let startOffset = firstDayOfMonth.getDay() - 1;
         if (startOffset === -1) startOffset = 6;
-        
         const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
         const todayStr = new Date().toISOString().split('T')[0];
-        
         const grid = document.getElementById("calendarGrid");
         const weekdays = ["ПН", "ВТ", "СР", "ЧТ", "ПТ", "СБ", "ВС"];
         let gridHtml = "";
-        weekdays.forEach(day => {
-            gridHtml += `<div class="weekday">${day}</div>`;
-        });
-        
+        weekdays.forEach(day => { gridHtml += `<div class="weekday">${day}</div>`; });
         for (let i = 0; i < startOffset; i++) {
-            gridHtml += `<div class="day-cell" style="background:#e8e4d8;"><div class="empty-day">—</div></div>`;
+            gridHtml += `<div class="day-cell" style="background:#2a3a2a;"><div class="empty-day">—</div></div>`;
         }
-        
         for (let d = 1; d <= daysInMonth; d++) {
             const dateKey = getDateKey(currentYear, currentMonth, d);
             const events = eventsDB[dateKey] || [];
@@ -852,23 +737,20 @@
             let isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
             const isToday = (dateKey === todayStr);
             const isSelected = (selectedDateStr === dateKey);
-            
-            let border = '1px solid #d0c8b0';
+            let border = '1px solid #4a6a4a';
             if (isToday) border = '3px solid #c0a040';
-            if (isSelected) border = '3px solid #8a9e6a';
-            
+            if (isSelected) border = '3px solid #8aae6a';
             let bgColor = '';
             if (hasEvents) {
-                bgColor = '#e8a0a0';
+                bgColor = '#8a4a4a';
             } else if (isWeekend) {
-                bgColor = '#d8e8d0';
+                bgColor = '#3a5a3a';
             } else if (dateKey < todayStr) {
-                bgColor = '#f0ece0';
+                bgColor = '#3a4a3a';
             } else {
-                bgColor = '#f8f4e8';
+                bgColor = '#4a5a3a';
             }
-            
-            gridHtml += `<div class="day-cell ${hasEvents ? 'has-event' : ''} ${isWeekend ? 'weekend' : ''}" data-date="${dateKey}" style="background:${bgColor}; border:${border};">`;
+            gridHtml += `<div class="day-cell ${hasEvents ? 'has-event' : ''}" data-date="${dateKey}" style="background:${bgColor}; border:${border};">`;
             gridHtml += `<div class="day-number">${d}</div>`;
             if (hasEvents) {
                 gridHtml += `<div class="viking-icon">⚔️</div>`;
@@ -886,17 +768,14 @@
             }
             gridHtml += `</div>`;
         }
-        
         const totalCells = startOffset + daysInMonth;
         const remaining = (7 - (totalCells % 7)) % 7;
         for (let i = 0; i < remaining; i++) {
-            gridHtml += `<div class="day-cell" style="background:#e8e4d8;"><div class="empty-day"></div></div>`;
+            gridHtml += `<div class="day-cell" style="background:#2a3a2a;"><div class="empty-day"></div></div>`;
         }
-        
         grid.innerHTML = gridHtml;
         const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
         document.getElementById("currentMonthLabel").innerHTML = `${monthNames[currentMonth]} ${currentYear}`;
-        
         document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
             cell.addEventListener('click', (e) => {
                 const dateStr = cell.getAttribute('data-date');
@@ -908,18 +787,21 @@
         });
     }
     
+    function getDateKey(year, month, day) {
+        return `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+    }
+    
     function showDayEvents(dateStr) {
         const events = getEventsForDate(dateStr);
         if (!events.length) {
             document.getElementById('detailsSection').innerHTML = `
                 <div id="selectedEventInfo">
                     <div class="selected-event-title">📅 ${formatDate(dateStr)}</div>
-                    <div style="color:#8a9e6a; font-size:0.85rem;">НЕТ СОБЫТИЙ</div>
+                    <div style="color:#a0c4a8; font-size:0.85rem;">НЕТ СОБЫТИЙ</div>
                     ${isAdmin ? `<button class="vote-btn" style="width:100%; margin-top:10px;" onclick="document.getElementById('newEventName').focus()">➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
                 </div>`;
             return;
         }
-        
         let html = `
             <div id="selectedEventInfo">
                 <div class="selected-event-title">📅 ${formatDate(dateStr)}</div>
@@ -930,7 +812,7 @@
                     </select>
                 </div>
                 <div id="eventDetailView">
-                    <small style="color:#8a9e6a;">ВЫБЕРИТЕ СОБЫТИЕ ИЗ СПИСКА</small>
+                    <small style="color:#a0c4a8;">ВЫБЕРИТЕ СОБЫТИЕ ИЗ СПИСКА</small>
                 </div>
             </div>
         `;
@@ -950,23 +832,14 @@
     function showEventDetails(dateStr, eventId) {
         const event = eventsDB[dateStr]?.find(e => e.id === eventId);
         if (!event) return;
-        
-        const sortedYesVotes = [...(event.yesVotes || [])].sort((a,b) => a.localeCompare(b));
-        const sortedNoVotes = [...(event.noVotes || [])].sort((a,b) => a.localeCompare(b));
-        
-        const yesList = sortedYesVotes.length ? 
-            sortedYesVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') :
-            '<div class="no-votes">😴 ПОКА НИКТО</div>';
-        
-        const noList = sortedNoVotes.length ? 
-            sortedNoVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') :
-            '<div class="no-votes">😴 ПОКА НИКТО</div>';
-        
+        const sortedYesVotes = [...(event.yesVotes || [])].sort();
+        const sortedNoVotes = [...(event.noVotes || [])].sort();
+        const yesList = sortedYesVotes.length ? sortedYesVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>';
+        const noList = sortedNoVotes.length ? sortedNoVotes.map((name, idx) => `<div class="attendee-vote-item"><span class="vote-number">${idx+1}.</span><span class="vote-name">${name}</span></div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>';
         const userName = localStorage.getItem('userName') || "";
         const hasVotedYes = sortedYesVotes.includes(userName);
         const hasVotedNo = sortedNoVotes.includes(userName);
         const currentVote = hasVotedYes ? "yes" : (hasVotedNo ? "no" : null);
-        
         let actionButtons = '';
         if (isAdmin) {
             actionButtons = `
@@ -983,38 +856,30 @@
                 </div>
             `;
         }
-        
         const html = `
             <div id="selectedEventInfo">
                 <div class="selected-event-title">⚔️ ${event.name}</div>
                 ${event.description ? `<div class="selected-event-desc">📝 ${event.description}</div>` : ''}
                 ${event.link ? `<div class="event-link">🔗 <a href="${event.link}" target="_blank">ССЫЛКА НА СОБЫТИЕ</a></div>` : ''}
-                
                 <div class="vote-row">
                     <button class="vote-btn yes ${hasVotedYes ? 'disabled' : ''}" onclick="voteClick(${event.id}, '${dateStr}', 'yes')">✅ ИДУ</button>
                     <button class="vote-btn no ${hasVotedNo ? 'disabled' : ''}" onclick="voteClick(${event.id}, '${dateStr}', 'no')">❌ НЕ ИДУ</button>
                 </div>
-                
-                <div class="vote-section">
-                    <div class="vote-title">РЕЗУЛЬТАТЫ</div>
-                    <div class="vote-columns">
-                        <div class="vote-column green">
-                            <div class="vote-column-title">✅ ИДУ (${sortedYesVotes.length})</div>
-                            <div class="attendees-list">${yesList}</div>
-                        </div>
-                        <div class="vote-column red">
-                            <div class="vote-column-title">❌ НЕ ИДУ (${sortedNoVotes.length})</div>
-                            <div class="attendees-list">${noList}</div>
-                        </div>
+                <div class="vote-columns">
+                    <div class="vote-column green">
+                        <div class="vote-column-title">✅ ИДУ (${sortedYesVotes.length})</div>
+                        <div class="attendees-list">${yesList}</div>
+                    </div>
+                    <div class="vote-column red">
+                        <div class="vote-column-title">❌ НЕ ИДУ (${sortedNoVotes.length})</div>
+                        <div class="attendees-list">${noList}</div>
                     </div>
                 </div>
-                
                 ${currentVote ? `<div class="current-vote ${currentVote}">🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${currentVote === 'yes' ? '✅ ИДУ' : '❌ НЕ ИДУ'}</div>` : ''}
                 <button class="change-btn" onclick="changeVote(${event.id}, '${dateStr}')">🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ ГОЛОС</button>
                 ${actionButtons}
             </div>
         `;
-        
         const detailView = document.getElementById('eventDetailView');
         if (detailView) detailView.innerHTML = html;
         else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo">${html}</div>`;
@@ -1022,19 +887,14 @@
     
     window.toggleEditForm = (eventId, dateStr) => {
         const form = document.getElementById(`editForm-${eventId}`);
-        if (form) {
-            form.classList.toggle('show');
-        }
+        if (form) form.classList.toggle('show');
     };
     
     window.saveEdit = async (eventId, dateStr) => {
         const newName = document.getElementById(`editName-${eventId}`).value;
         const newDesc = document.getElementById(`editDesc-${eventId}`).value;
         const newLink = document.getElementById(`editLink-${eventId}`).value;
-        if (!newName.trim()) {
-            alert("ВВЕДИТЕ НАЗВАНИЕ!");
-            return;
-        }
+        if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
         await editEvent(eventId, dateStr, newName, newDesc, newLink);
         toggleEditForm(eventId, dateStr);
     };
@@ -1045,9 +905,7 @@
             name = prompt("ВВЕДИ ПОЗЫВНОЙ");
             if (name && name.trim()) {
                 localStorage.setItem('userName', name.trim().toUpperCase());
-            } else {
-                return;
-            }
+            } else { return; }
         }
         await vote(eventId, dateStr, name.trim().toUpperCase(), voteType);
     };
@@ -1061,7 +919,6 @@
                 ev.yesVotes = ev.yesVotes.filter(v => v !== userNameUpper);
                 ev.noVotes = ev.noVotes.filter(v => v !== userNameUpper);
                 saveToLocal();
-                await saveToCloud();
                 renderCalendar();
                 showEventDetails(dateStr, eventId);
                 alert("ГОЛОС УДАЛЕН!");
@@ -1069,34 +926,45 @@
         }
     };
     
-    window.manualSync = async () => {
-        if (!isAdmin) return;
-        await loadFromCloud();
-        renderCalendar();
-        if (selectedDateStr) {
-            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
-            else showDayEvents(selectedDateStr);
+    function checkAccess() {
+        const code = document.getElementById('accessCode').value;
+        if (code === ADMIN_CODE) {
+            isAdmin = true;
+            localStorage.setItem('gameCalendarAdmin', 'true');
+            enableEditMode();
+            document.getElementById('loginPanel').style.display = 'none';
+            alert("✅ РЕЖИМ РЕДАКТИРОВАНИЯ ВКЛЮЧЕН!");
+        } else {
+            alert("❌ НЕВЕРНЫЙ КОД ДОСТУПА!");
         }
-        alert("ДАННЫЕ ОБНОВЛЕНЫ!");
-    };
+    }
     
-    window.forceSaveToCloud = async () => {
-        if (!isAdmin) return;
-        await forceSaveToCloud();
-        alert("ДАННЫЕ СОХРАНЕНЫ В ОБЛАКО!");
-    };
+    function enableEditMode() {
+        isAdmin = true;
+        document.getElementById('modeBadge').innerHTML = '✏️ РЕЖИМ РЕДАКТИРОВАНИЯ';
+        document.getElementById('modeBadge').style.background = '#4a5a3a';
+        document.getElementById('adminPanel').classList.add('show');
+        document.getElementById('editForms').style.display = 'block';
+        document.getElementById('adminButtons').classList.add('show');
+        if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+    }
+    
+    function exitEditMode() {
+        isAdmin = false;
+        localStorage.removeItem('gameCalendarAdmin');
+        document.getElementById('modeBadge').innerHTML = '🗳️ РЕЖИМ ГОЛОСОВАНИЯ';
+        document.getElementById('modeBadge').style.background = '#3a4a3a';
+        document.getElementById('adminPanel').classList.remove('show');
+        document.getElementById('editForms').style.display = 'none';
+        document.getElementById('adminButtons').classList.remove('show');
+        if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+    }
     
     document.getElementById("addEventBtn")?.addEventListener("click", async () => {
         if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ!"); return; }
-        if (!selectedDateStr) {
-            alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ В КАЛЕНДАРЕ");
-            return;
-        }
+        if (!selectedDateStr) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ В КАЛЕНДАРЕ"); return; }
         const newName = document.getElementById("newEventName").value;
-        if (!newName.trim()) {
-            alert("ВВЕДИТЕ НАЗВАНИЕ");
-            return;
-        }
+        if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ"); return; }
         const newDesc = document.getElementById("newEventDesc").value;
         const newLink = document.getElementById("newEventLink").value;
         await addEventToDate(selectedDateStr, newName, newDesc, newLink);
@@ -1125,15 +993,19 @@
         document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     });
     
-    async function init() {
-        loadFromLocal();
-        renderCalendar();
-        await loadFromCloud();
-        renderCalendar();
-        checkStoredAccess();
+    function checkStoredAccess() {
+        const stored = localStorage.getItem('gameCalendarAdmin');
+        if (stored === 'true') {
+            isAdmin = true;
+            enableEditMode();
+        } else {
+            document.getElementById('loginPanel').style.display = 'block';
+        }
     }
     
-    init();
+    loadFromLocal();
+    renderCalendar();
+    checkStoredAccess();
 </script>
 </body>
 </html>
