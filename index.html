@@ -499,7 +499,7 @@
     <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
     
     <div class="admin-panel" id="adminPanel">
-        <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ АДМИНКИ</button>
+        <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ</button>
     </div>
 
     <div class="month-nav">
@@ -522,7 +522,7 @@
 
     <div id="adminForms" style="display: none;">
         <div class="add-event-form">
-            <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ" />
+            <input type="text" id="newEventName" placeholder="НАЗВАНИЕ" />
             <textarea id="newEventDesc" placeholder="КРАТКОЕ ОПИСАНИЕ"></textarea>
             <input type="text" id="newEventLink" placeholder="ССЫЛКА НА СОБЫТИЕ" />
             <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
@@ -533,14 +533,14 @@
         <span>🔐</span>
         <div>ВВЕДИТЕ КОД ДОСТУПА ДЛЯ РЕДАКТИРОВАНИЯ</div>
         <input type="password" id="accessCode" placeholder="КОД ДОСТУПА">
-        <input type="text" id="adminName" placeholder="ВАШ ПОЗЫВНОЙ (ДЛЯ ДРУГИХ АДМИНОВ)">
+        <input type="text" id="adminName" placeholder="ВАШ ПОЗЫВНОЙ">
         <button onclick="checkAccess()">ВОЙТИ</button>
     </div>
 </div>
 
 <script>
     // ========== НАСТРОЙКИ ==========
-    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyi-i77ajDV_Wl3BdPXN0nlSriIhQUPgGUmSyYbv-ZQ75M0vMKiyVZW8bKDamF7Z3SS2A/exec";
+    const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyZU2pqmE2zM8ZGBWssV99GIIgbM0UpmcFH_PWEky89WEEmi2IfIe-RgLingodpsT_S4w/exec";
     const ADMIN_CODE = "orden.sparta";
     const HEARTBEAT_INTERVAL = 30000; // 30 секунд
     const LOCK_TIMEOUT = 600000; // 10 минут
@@ -1028,7 +1028,7 @@
     window.voteClick = async (eventId, dateStr, voteType) => {
         let name = localStorage.getItem('userName');
         if (!name) {
-            name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
+            name = prompt("ВВЕДИ ПОЗЫВНОЙ");
             if (name && name.trim()) {
                 localStorage.setItem('userName', name.trim().toUpperCase());
             } else { return; }
@@ -1037,7 +1037,7 @@
     };
     
     window.changeVote = async (eventId, dateStr) => {
-        let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ ГОЛОСА", localStorage.getItem('userName') || "");
+        let name = prompt("ВВЕДИ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ ГОЛОСА", localStorage.getItem('userName') || "");
         if (name && name.trim()) {
             const userNameUpper = name.trim().toUpperCase();
             const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
@@ -1057,7 +1057,7 @@
         const nickname = document.getElementById('adminName').value.trim();
         
         if (!nickname) {
-            alert("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ!");
+            alert("ВВЕДИ ПОЗЫВНОЙ!");
             return;
         }
         
