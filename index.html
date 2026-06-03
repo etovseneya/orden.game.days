@@ -541,7 +541,7 @@
         </div>
     </div>
 
-    <div id="loginPanel" class="login-prompt" style="display: none;">
+    <div id="loginPanel" class="login-prompt">
         <span>🔐</span>
         <div>ВВЕДИТЕ КОД ДОСТУПА ДЛЯ РЕДАКТИРОВАНИЯ</div>
         <input type="password" id="accessCode" placeholder="КОД ДОСТУПА">
@@ -550,7 +550,7 @@
 </div>
 
 <script>
-    // ⚠️ ВСТАВЬТЕ ВАШ URL ИЗ GOOGLE APPS SCRIPT СЮДА ⚠️
+    // ⚠️ ВАШ URL ИЗ GOOGLE APPS SCRIPT ⚠️
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyi-i77ajDV_Wl3BdPXN0nlSriIhQUPgGUmSyYbv-ZQ75M0vMKiyVZW8bKDamF7Z3SS2A/exec";
     
     const ADMIN_CODE = "orden.sparta";
@@ -589,11 +589,9 @@
         if (isSaving) return;
         isSaving = true;
         const statusSpan = document.getElementById('syncStatusText');
-        const originalText = statusSpan.innerHTML;
         statusSpan.innerHTML = "💾 СОХРАНЕНИЕ...";
         
         try {
-            // Используем JSONP-подобный подход для обхода CORS
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
@@ -644,7 +642,6 @@
                         }));
                     }
                 }
-                // Сравниваем и обновляем только если данные изменились
                 if (JSON.stringify(eventsDB) !== JSON.stringify(newEventsDB)) {
                     eventsDB = newEventsDB;
                     saveToLocal();
@@ -1006,6 +1003,7 @@
         document.getElementById('editForms').style.display = 'none';
         document.getElementById('adminButtons').classList.remove('show');
         if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+        document.getElementById('loginPanel').style.display = 'block';
     }
     
     function checkStoredAccess() {
@@ -1013,8 +1011,7 @@
         if (stored === 'true') {
             isAdmin = true;
             enableEditMode();
-        } else {
-            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('loginPanel').style.display = 'none';
         }
     }
     
@@ -1048,7 +1045,7 @@
         selectedDateStr = "";
         selectedEventId = null;
         renderCalendar();
-        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ СОБЫТИЯМИ</small></div>`;
+        document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     });
     
     async function init() {
@@ -1058,7 +1055,6 @@
         renderCalendar();
         checkStoredAccess();
         
-        // Автосохранение каждые 30 секунд
         setInterval(async () => {
             if (!isSaving && !isLoading) {
                 await saveToCloud();
