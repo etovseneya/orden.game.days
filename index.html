@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
     <title>Календарь игр</title>
     <style>
         * {
@@ -42,37 +42,6 @@
             margin-top: 6px;
             color: #4a5b3a;
             border: 1px solid #c0b8a0;
-        }
-        .sync-status {
-            background: #e8e0d0;
-            padding: 8px 12px;
-            border-radius: 14px;
-            margin: 12px 0;
-            font-size: 0.75rem;
-            color: #5a6b4a;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-            border: 1px solid #d0c8b0;
-        }
-        .sync-btn {
-            background: #8a9e6a;
-            color: #f5f0e8;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.7rem;
-            font-weight: 500;
-        }
-        .admin-buttons {
-            display: none;
-            gap: 8px;
-        }
-        .admin-buttons.show {
-            display: flex;
         }
         .admin-panel {
             background: #e0d8c0;
@@ -482,6 +451,33 @@
             margin-top: 8px;
             cursor: pointer;
         }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-size: 1.2rem;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         small {
             color: #b0a890;
             font-size: 0.7rem;
@@ -502,16 +498,8 @@
     <h1>⚔️ КАЛЕНДАРЬ ИГР</h1>
     <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
     
-    <div class="sync-status">
-        <span id="syncStatusText">🔄 ЗАГРУЗКА...</span>
-        <button class="sync-btn" onclick="manualSync()">⟳ ОБНОВИТЬ</button>
-        <div class="admin-buttons" id="adminButtons">
-            <button class="sync-btn" onclick="forceSaveToCloud()" style="background:#6aae4a;">💾 СОХРАНИТЬ В ОБЛАКО</button>
-        </div>
-    </div>
-
     <div class="admin-panel" id="adminPanel">
-        <button class="admin-toggle" onclick="exitEditMode()">🔒 ВЫЙТИ ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ</button>
+        <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ АДМИНКИ</button>
     </div>
 
     <div class="month-nav">
@@ -532,7 +520,7 @@
         </div>
     </div>
 
-    <div id="editForms" style="display: none;">
+    <div id="adminForms" style="display: none;">
         <div class="add-event-form">
             <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ" />
             <textarea id="newEventDesc" placeholder="КРАТКОЕ ОПИСАНИЕ"></textarea>
@@ -545,15 +533,18 @@
         <span>🔐</span>
         <div>ВВЕДИТЕ КОД ДОСТУПА ДЛЯ РЕДАКТИРОВАНИЯ</div>
         <input type="password" id="accessCode" placeholder="КОД ДОСТУПА">
+        <input type="text" id="adminName" placeholder="ВАШ ПОЗЫВНОЙ (ДЛЯ ДРУГИХ АДМИНОВ)">
         <button onclick="checkAccess()">ВОЙТИ</button>
     </div>
 </div>
 
 <script>
-    // ⚠️ ВАШ URL ИЗ GOOGLE APPS SCRIPT ⚠️
+    // ========== НАСТРОЙКИ ==========
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyi-i77ajDV_Wl3BdPXN0nlSriIhQUPgGUmSyYbv-ZQ75M0vMKiyVZW8bKDamF7Z3SS2A/exec";
-    
     const ADMIN_CODE = "orden.sparta";
+    const HEARTBEAT_INTERVAL = 30000; // 30 секунд
+    const LOCK_TIMEOUT = 600000; // 10 минут
+    // ================================
     
     let eventsDB = {};
     let currentYear = 2026;
@@ -561,8 +552,37 @@
     let selectedDateStr = "";
     let selectedEventId = null;
     let isAdmin = false;
+    let adminNickname = "";
+    let heartbeatInterval = null;
     let isLoading = false;
-    let isSaving = false;
+    
+    // Проверка интернета
+    function isOnline() {
+        return navigator.onLine;
+    }
+    
+    function showNoInternetMessage() {
+        document.getElementById('calendarGrid').innerHTML = '<div style="text-align:center;padding:40px;color:#a04040;">❌ НЕТ ИНТЕРНЕТА<br>ПРОВЕРЬТЕ СОЕДИНЕНИЕ</div>';
+        document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#a04040;">НЕТ ИНТЕРНЕТА</div>';
+    }
+    
+    function showLoadingOverlay(show, message = "ЗАГРУЗКА...") {
+        let overlay = document.getElementById('loadingOverlay');
+        if (show) {
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'loadingOverlay';
+                overlay.className = 'loading-overlay';
+                overlay.innerHTML = `<div class="spinner"></div><div>${message}</div>`;
+                document.body.appendChild(overlay);
+            } else {
+                overlay.style.display = 'flex';
+                overlay.querySelector('div:last-child').innerHTML = message;
+            }
+        } else {
+            if (overlay) overlay.style.display = 'none';
+        }
+    }
     
     function formatDate(dateStr) {
         let parts = dateStr.split('-');
@@ -572,63 +592,88 @@
         return dateStr;
     }
     
-    function saveToLocal() {
-        localStorage.setItem('gameCalendarDB', JSON.stringify(eventsDB));
-    }
-    
-    function loadFromLocal() {
-        const saved = localStorage.getItem('gameCalendarDB');
-        if (saved && saved !== '{}') {
-            eventsDB = JSON.parse(saved);
-            return true;
-        }
-        return false;
-    }
-    
-    async function saveToCloud() {
-        if (isSaving) return;
-        isSaving = true;
-        const statusSpan = document.getElementById('syncStatusText');
-        statusSpan.innerHTML = "💾 СОХРАНЕНИЕ...";
-        
+    // Heartbeat для админа
+    async function sendHeartbeat() {
+        if (!isAdmin || !adminNickname) return;
         try {
             await fetch(GOOGLE_SCRIPT_URL, {
                 method: "POST",
                 mode: "no-cors",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ events: eventsDB, timestamp: Date.now() })
+                body: JSON.stringify({ 
+                    action: "heartbeat",
+                    nickname: adminNickname,
+                    timestamp: Date.now()
+                })
             });
-            statusSpan.innerHTML = "✅ СОХРАНЕНО";
-            setTimeout(() => {
-                if (statusSpan.innerHTML === "✅ СОХРАНЕНО") {
-                    statusSpan.innerHTML = "✅ ГОТОВО";
+        } catch(e) {}
+    }
+    
+    // Снятие блокировки админа
+    async function releaseAdminLock() {
+        if (!adminNickname) return;
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    action: "release",
+                    nickname: adminNickname
+                })
+            });
+        } catch(e) {}
+    }
+    
+    // Проверка, не занят ли админ
+    async function isAdminLocked() {
+        try {
+            const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getLock&_=${Date.now()}`);
+            const data = await response.json();
+            if (data.locked && data.nickname && data.nickname !== adminNickname) {
+                const timeDiff = Date.now() - data.timestamp;
+                if (timeDiff < LOCK_TIMEOUT) {
+                    alert(`⚠️ КАЛЕНДАРЬ СЕЙЧАС РЕДАКТИРУЕТ: ${data.nickname}\nПОПРОБУЙТЕ ПОЗЖЕ`);
+                    return true;
                 }
-            }, 1500);
+            }
+            return false;
         } catch(e) {
-            console.log("Ошибка сохранения", e);
-            statusSpan.innerHTML = "⚠️ ОФЛАЙН";
-        } finally {
-            isSaving = false;
+            return false;
         }
     }
     
-    async function forceSaveToCloud() {
-        if (!isAdmin) return;
-        await saveToCloud();
-        alert("✅ Данные сохранены в облако!");
+    // Установка блокировки админа
+    async function setAdminLock() {
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    action: "lock",
+                    nickname: adminNickname,
+                    timestamp: Date.now()
+                })
+            });
+        } catch(e) {}
     }
     
+    // ЗАГРУЗКА ИЗ GOOGLE SHEETS (ОСНОВНОЕ ХРАНИЛИЩЕ)
     async function loadFromCloud() {
-        if (isLoading) return;
+        if (!isOnline()) {
+            showNoInternetMessage();
+            return false;
+        }
+        
+        if (isLoading) return false;
         isLoading = true;
-        const statusSpan = document.getElementById('syncStatusText');
-        statusSpan.innerHTML = "🔄 ЗАГРУЗКА...";
         
         try {
             const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&_=${Date.now()}`);
             const data = await response.json();
             
-            if (data.success && data.events && Object.keys(data.events).length > 0) {
+            if (data.success && data.events) {
                 const newEventsDB = {};
                 for (let date in data.events) {
                     if (data.events[date] && data.events[date].length > 0) {
@@ -642,40 +687,57 @@
                         }));
                     }
                 }
-                if (JSON.stringify(eventsDB) !== JSON.stringify(newEventsDB)) {
-                    eventsDB = newEventsDB;
-                    saveToLocal();
-                    renderCalendar();
-                    if (selectedDateStr) showDayEvents(selectedDateStr);
-                }
-                statusSpan.innerHTML = "✅ ЗАГРУЖЕНО";
+                eventsDB = newEventsDB;
+                renderCalendar();
+                if (selectedDateStr) showDayEvents(selectedDateStr);
                 return true;
-            } else {
-                statusSpan.innerHTML = "📱 ЛОКАЛЬНО";
-                return false;
             }
+            throw new Error("Нет данных");
         } catch(e) {
             console.log("Ошибка загрузки", e);
-            statusSpan.innerHTML = "📱 ОФЛАЙН";
             return false;
         } finally {
             isLoading = false;
         }
     }
     
-    window.manualSync = async () => {
-        await loadFromCloud();
-        alert("✅ Данные обновлены из облака!");
-    };
-    
-    function getEventsForDate(dateStr) {
-        if (!eventsDB[dateStr]) eventsDB[dateStr] = [];
-        return eventsDB[dateStr];
+    // СОХРАНЕНИЕ В GOOGLE SHEETS
+    async function saveToCloud() {
+        if (!isOnline()) {
+            alert("❌ НЕТ ИНТЕРНЕТА! ДАННЫЕ НЕ СОХРАНЕНЫ");
+            return false;
+        }
+        
+        try {
+            await fetch(GOOGLE_SCRIPT_URL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ 
+                    action: "save",
+                    events: eventsDB,
+                    timestamp: Date.now()
+                })
+            });
+            return true;
+        } catch(e) {
+            alert("❌ ОШИБКА СОХРАНЕНИЯ");
+            return false;
+        }
     }
     
     async function addEventToDate(dateStr, eventName, eventDesc, eventLink) {
         if (!isAdmin) { alert("ТОЛЬКО АДМИН МОЖЕТ ДОБАВЛЯТЬ!"); return false; }
         if (!eventName.trim()) return false;
+        
+        // Проверяем, не истекла ли админ-сессия
+        const locked = await isAdminLocked();
+        if (locked && !await isAdminLocked()) {
+            alert("⚠️ ВАША СЕССИЯ ИСТЕКЛА, ВОЙДИТЕ ЗАНОВО");
+            exitAdminMode();
+            return false;
+        }
+        
         const events = getEventsForDate(dateStr);
         events.push({
             id: Date.now(),
@@ -685,28 +747,38 @@
             yesVotes: [],
             noVotes: []
         });
-        saveToLocal();
         await saveToCloud();
-        renderCalendar();
-        showDayEvents(dateStr);
+        await loadFromCloud(); // Перезагружаем свежие данные
         return true;
     }
     
     async function editEvent(eventId, dateStr, newName, newDesc, newLink) {
         if (!isAdmin) return;
+        
+        const locked = await isAdminLocked();
+        if (locked && !await isAdminLocked()) {
+            alert("⚠️ ВАША СЕССИЯ ИСТЕКЛА, ВОЙДИТЕ ЗАНОВО");
+            exitAdminMode();
+            return;
+        }
+        
         const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
         if (ev) {
             ev.name = newName.toUpperCase();
             ev.description = newDesc;
             ev.link = newLink;
         }
-        saveToLocal();
         await saveToCloud();
-        renderCalendar();
-        showEventDetails(dateStr, eventId);
+        await loadFromCloud();
+        if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
     }
     
     async function vote(eventId, dateStr, userName, voteType) {
+        if (!isOnline()) {
+            alert("❌ НЕТ ИНТЕРНЕТА! ГОЛОС НЕ СОХРАНЕН");
+            return;
+        }
+        
         const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
         if (!ev) return;
         const userNameUpper = userName.trim().toUpperCase();
@@ -719,14 +791,21 @@
         }
         ev.yesVotes.sort();
         ev.noVotes.sort();
-        saveToLocal();
         await saveToCloud();
-        renderCalendar();
+        await loadFromCloud();
         if (selectedEventId === eventId) showEventDetails(dateStr, eventId);
     }
     
     async function deleteEvent(eventId, dateStr) {
         if (!isAdmin) return;
+        
+        const locked = await isAdminLocked();
+        if (locked && !await isAdminLocked()) {
+            alert("⚠️ ВАША СЕССИЯ ИСТЕКЛА, ВОЙДИТЕ ЗАНОВО");
+            exitAdminMode();
+            return;
+        }
+        
         if (!eventsDB[dateStr]) return;
         eventsDB[dateStr] = eventsDB[dateStr].filter(e => e.id !== eventId);
         if (eventsDB[dateStr].length === 0) delete eventsDB[dateStr];
@@ -734,11 +813,14 @@
             selectedEventId = null;
             selectedDateStr = "";
         }
-        saveToLocal();
         await saveToCloud();
-        renderCalendar();
+        await loadFromCloud();
         if (selectedDateStr) showDayEvents(selectedDateStr);
-        else document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
+    }
+    
+    function getEventsForDate(dateStr) {
+        if (!eventsDB[dateStr]) eventsDB[dateStr] = [];
+        return eventsDB[dateStr];
     }
     
     function getDateKey(year, month, day) {
@@ -946,7 +1028,7 @@
     window.voteClick = async (eventId, dateStr, voteType) => {
         let name = localStorage.getItem('userName');
         if (!name) {
-            name = prompt("ВВЕДИ ПОЗЫВНОЙ");
+            name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
             if (name && name.trim()) {
                 localStorage.setItem('userName', name.trim().toUpperCase());
             } else { return; }
@@ -955,63 +1037,92 @@
     };
     
     window.changeVote = async (eventId, dateStr) => {
-        let name = prompt("ВВЕДИ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ ГОЛОСА", localStorage.getItem('userName') || "");
+        let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ ГОЛОСА", localStorage.getItem('userName') || "");
         if (name && name.trim()) {
             const userNameUpper = name.trim().toUpperCase();
             const ev = eventsDB[dateStr]?.find(e => e.id === eventId);
             if (ev) {
                 ev.yesVotes = ev.yesVotes.filter(v => v !== userNameUpper);
                 ev.noVotes = ev.noVotes.filter(v => v !== userNameUpper);
-                saveToLocal();
                 await saveToCloud();
-                renderCalendar();
+                await loadFromCloud();
                 showEventDetails(dateStr, eventId);
                 alert("ГОЛОС УДАЛЕН!");
             }
         }
     };
     
-    function checkAccess() {
+    async function checkAccess() {
         const code = document.getElementById('accessCode').value;
-        if (code === ADMIN_CODE) {
-            isAdmin = true;
-            localStorage.setItem('gameCalendarAdmin', 'true');
-            enableEditMode();
-            document.getElementById('loginPanel').style.display = 'none';
-            alert("✅ РЕЖИМ РЕДАКТИРОВАНИЯ ВКЛЮЧЕН!");
-        } else {
-            alert("❌ НЕВЕРНЫЙ КОД ДОСТУПА!");
+        const nickname = document.getElementById('adminName').value.trim();
+        
+        if (!nickname) {
+            alert("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ!");
+            return;
         }
+        
+        if (code !== ADMIN_CODE) {
+            alert("❌ НЕВЕРНЫЙ КОД ДОСТУПА!");
+            return;
+        }
+        
+        // Проверяем, не занят ли админ
+        const locked = await isAdminLocked();
+        if (locked) return;
+        
+        isAdmin = true;
+        adminNickname = nickname;
+        localStorage.setItem('gameCalendarAdmin', 'true');
+        localStorage.setItem('adminNickname', adminNickname);
+        
+        await setAdminLock();
+        
+        // Запускаем heartbeat
+        if (heartbeatInterval) clearInterval(heartbeatInterval);
+        heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
+        
+        enableEditMode();
+        document.getElementById('loginPanel').style.display = 'none';
+        alert(`✅ РЕЖИМ АДМИНИСТРАТОРА ВКЛЮЧЕН!\nВАШ ПОЗЫВНОЙ: ${adminNickname}`);
     }
     
     function enableEditMode() {
-        isAdmin = true;
         document.getElementById('modeBadge').innerHTML = '✏️ РЕЖИМ РЕДАКТИРОВАНИЯ';
         document.getElementById('modeBadge').style.background = '#d0c8b0';
         document.getElementById('adminPanel').classList.add('show');
-        document.getElementById('editForms').style.display = 'block';
-        document.getElementById('adminButtons').classList.add('show');
+        document.getElementById('adminForms').style.display = 'block';
         if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
     }
     
-    function exitEditMode() {
+    async function exitAdminMode() {
+        await releaseAdminLock();
+        if (heartbeatInterval) {
+            clearInterval(heartbeatInterval);
+            heartbeatInterval = null;
+        }
         isAdmin = false;
+        adminNickname = "";
         localStorage.removeItem('gameCalendarAdmin');
+        localStorage.removeItem('adminNickname');
         document.getElementById('modeBadge').innerHTML = '🗳️ РЕЖИМ ГОЛОСОВАНИЯ';
         document.getElementById('modeBadge').style.background = '#e0d8c8';
         document.getElementById('adminPanel').classList.remove('show');
-        document.getElementById('editForms').style.display = 'none';
-        document.getElementById('adminButtons').classList.remove('show');
-        if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+        document.getElementById('adminForms').style.display = 'none';
         document.getElementById('loginPanel').style.display = 'block';
+        if (selectedDateStr && selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+        await loadFromCloud();
     }
     
     function checkStoredAccess() {
         const stored = localStorage.getItem('gameCalendarAdmin');
-        if (stored === 'true') {
+        const storedNick = localStorage.getItem('adminNickname');
+        if (stored === 'true' && storedNick) {
+            adminNickname = storedNick;
             isAdmin = true;
             enableEditMode();
             document.getElementById('loginPanel').style.display = 'none';
+            setAdminLock();
+            heartbeatInterval = setInterval(sendHeartbeat, HEARTBEAT_INTERVAL);
         }
     }
     
@@ -1026,7 +1137,7 @@
         document.getElementById("newEventName").value = "";
         document.getElementById("newEventDesc").value = "";
         document.getElementById("newEventLink").value = "";
-        renderCalendar();
+        await loadFromCloud();
         showDayEvents(selectedDateStr);
     });
     
@@ -1048,21 +1159,23 @@
         document.getElementById('detailsSection').innerHTML = `<div id="selectedEventInfo"><small style="display:block;text-align:center;padding:12px;">👈 НАЖМИТЕ НА ДЕНЬ С СОБЫТИЯМИ</small></div>`;
     });
     
-    async function init() {
-        loadFromLocal();
-        renderCalendar();
-        await loadFromCloud();
-        renderCalendar();
-        checkStoredAccess();
-        
-        setInterval(async () => {
-            if (!isSaving && !isLoading) {
-                await saveToCloud();
-            }
-        }, 30000);
-    }
+    // Слушаем онлайн/офлайн события
+    window.addEventListener('online', () => {
+        loadFromCloud().then(() => location.reload());
+    });
     
-    init();
+    window.addEventListener('offline', () => {
+        showNoInternetMessage();
+    });
+    
+    // Запуск
+    if (!isOnline()) {
+        showNoInternetMessage();
+    } else {
+        loadFromCloud().then(() => {
+            checkStoredAccess();
+        });
+    }
 </script>
 </body>
 </html>
