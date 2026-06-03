@@ -57,6 +57,16 @@
             gap: 8px;
             border: 1px solid #d0c8b0;
         }
+        .sync-status span {
+            flex: 1;
+        }
+        .admin-buttons {
+            display: none;
+            gap: 8px;
+        }
+        .admin-buttons.show {
+            display: flex;
+        }
         .sync-btn {
             background: #8a9e6a;
             color: #f5f0e8;
@@ -66,13 +76,6 @@
             cursor: pointer;
             font-size: 0.7rem;
             font-weight: 500;
-        }
-        .admin-buttons {
-            display: none;
-            gap: 8px;
-        }
-        .admin-buttons.show {
-            display: flex;
         }
         .admin-panel {
             background: #e0d8c0;
@@ -454,6 +457,17 @@
         .edit-form button.cancel {
             background: #c0a080;
         }
+        .change-btn {
+            background: #8a7a5a;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 5px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
         small {
             color: #b0a890;
             font-size: 0.7rem;
@@ -486,16 +500,6 @@
             margin-top: 8px;
             cursor: pointer;
         }
-        .backup-notice {
-            background: #f0d8a0;
-            border: 1px solid #c0a060;
-            border-radius: 12px;
-            padding: 8px;
-            margin-top: 10px;
-            font-size: 0.7rem;
-            text-align: center;
-            display: none;
-        }
         @media (max-width: 480px) {
             body { padding: 8px; }
             .container { padding: 12px; }
@@ -516,8 +520,8 @@
     <div class="sync-status">
         <span id="syncStatusText">🔄 ЗАГРУЗКА...</span>
         <div class="admin-buttons" id="adminButtons">
-            <button class="sync-btn" onclick="manualSync()">⟳ ОБНОВИТЬ ИЗ ОБЛАКА</button>
-            <button class="sync-btn" onclick="forceSaveToCloud()" style="background:#6aae4a;">💾 СОХРАНИТЬ В ОБЛАКО</button>
+            <button class="sync-btn" onclick="manualSync()">⟳ ОБНОВИТЬ</button>
+            <button class="sync-btn" onclick="forceSaveToCloud()" style="background:#6aae4a;">💾 СОХРАНИТЬ</button>
         </div>
     </div>
 
@@ -558,11 +562,10 @@
         <input type="password" id="accessCode" placeholder="КОД ДОСТУПА">
         <button onclick="checkAccess()">ВОЙТИ</button>
     </div>
-    
-    <div id="backupNotice" class="backup-notice"></div>
 </div>
 
 <script>
+    // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТОТ URL НА ВАШ НОВЫЙ ИЗ GOOGLE APPS SCRIPT!
     const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw3B0byEj4fgNtBXAxVxxrYiOD6rxkzt0dlVLOULKeOOx9Tjw35vjHTPbeARN_FaF-cqA/exec";
     
     const ADMIN_CODE = "orden.sparta";
@@ -636,42 +639,35 @@
     
     async function loadFromCloud() {
         const statusSpan = document.getElementById('syncStatusText');
-        statusSpan.innerHTML = "🔄 ЗАГРУЗКА...";
-        const notice = document.getElementById('backupNotice');
+        statusSpan.innerHTML = "🔄 ЗАГРУЗКА ИЗ ОБЛАКА...";
         
         try {
             const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get&_=${Date.now()}`);
             const data = await response.json();
             
-            if (data.success && data.events && Object.keys(data.events).length > 0) {
-                eventsDB = data.events;
-                for (let date in eventsDB) {
-                    eventsDB[date] = eventsDB[date].map(ev => ({
-                        id: ev.id,
-                        name: ev.name,
-                        description: ev.description || "",
-                        link: ev.link || "",
-                        yesVotes: ev.yesVotes || ev.attendees || [],
-                        noVotes: ev.noVotes || []
-                    }));
-                }
-                saveToLocal();
-                statusSpan.innerHTML = "✅ ГОТОВО";
-                notice.style.display = "none";
-                return true;
-            } else {
-                statusSpan.innerHTML = "⚠️ ОБЛАКО ПУСТО";
-                if (isAdmin) {
-                    notice.innerHTML = "⚠️ В облаке нет данных. Нажмите 'СОХРАНИТЬ В ОБЛАКО'";
-                    notice.style.display = "block";
-                }
-                setTimeout(() => {
-                    if (statusSpan.innerHTML === "⚠️ ОБЛАКО ПУСТО") {
-                        statusSpan.innerHTML = "📱 ЛОКАЛЬНО";
+            if (data.success && data.events) {
+                // Очищаем текущие данные
+                eventsDB = {};
+                
+                // Загружаем новые
+                for (let date in data.events) {
+                    if (data.events[date] && data.events[date].length > 0) {
+                        eventsDB[date] = data.events[date].map(ev => ({
+                            id: ev.id,
+                            name: ev.name,
+                            description: ev.description || "",
+                            link: ev.link || "",
+                            yesVotes: ev.yesVotes || ev.attendees || [],
+                            noVotes: ev.noVotes || []
+                        }));
                     }
-                }, 3000);
-                return false;
+                }
+                
+                saveToLocal();
+                statusSpan.innerHTML = "✅ ЗАГРУЖЕНО";
+                return true;
             }
+            throw new Error("Нет данных");
         } catch (e) {
             console.log("Ошибка загрузки", e);
             statusSpan.innerHTML = "📱 ОФЛАЙН";
@@ -682,7 +678,6 @@
     async function forceSaveToCloud() {
         if (!isAdmin) return;
         const statusSpan = document.getElementById('syncStatusText');
-        const notice = document.getElementById('backupNotice');
         statusSpan.innerHTML = "💾 СОХРАНЕНИЕ...";
         
         try {
@@ -693,7 +688,6 @@
                 body: JSON.stringify({ events: eventsDB })
             });
             statusSpan.innerHTML = "✅ СОХРАНЕНО";
-            notice.style.display = "none";
             setTimeout(() => {
                 if (statusSpan.innerHTML === "✅ СОХРАНЕНО") {
                     statusSpan.innerHTML = "✅ ГОТОВО";
@@ -726,25 +720,31 @@
         const saved = localStorage.getItem('gameCalendarDB');
         if (saved && saved !== '{}') {
             eventsDB = JSON.parse(saved);
-        } else {
-            const backup = localStorage.getItem('gameCalendarBackup');
-            if (backup && backup !== '{}') {
-                eventsDB = JSON.parse(backup);
-            } else {
-                eventsDB = {
-                    "2026-06-02": [
-                        { id: Date.now() + 1, name: "ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00", link: "https://discord.gg/example", yesVotes: ["АННА", "ИВАН"], noVotes: [] },
-                        { id: Date.now() + 2, name: "СНАЙПЕРСКАЯ ЗАСАДА", description: "НУЖНЫ 2 СНАЙПЕРА", link: "", yesVotes: ["МАРИЯ"], noVotes: [] }
-                    ],
-                    "2026-06-03": [
-                        { id: Date.now() + 3, name: "ЗАХВАТ ТЕРРИТОРИИ", description: "ТАКТИКА 5Х5", link: "", yesVotes: ["ОЛЕГ"], noVotes: [] }
-                    ],
-                    "2026-06-07": [
-                        { id: Date.now() + 4, name: "ВОЕННО-ТАКТИЧЕСКАЯ НАСТОЛКА", description: "МАФИЯ, UNO", link: "", yesVotes: ["ЛЕНА", "ДИМА"], noVotes: [] }
-                    ]
-                };
-            }
+            console.log("Загружено из localStorage");
+            return;
         }
+        
+        const backup = localStorage.getItem('gameCalendarBackup');
+        if (backup && backup !== '{}') {
+            eventsDB = JSON.parse(backup);
+            console.log("Восстановлено из резервной копии");
+            return;
+        }
+        
+        // Демо-данные
+        eventsDB = {
+            "2026-06-02": [
+                { id: Date.now() + 1, name: "ТАКТИЧЕСКИЙ ШТУРМ", description: "СБОР В 19:00", link: "", yesVotes: ["АННА", "ИВАН"], noVotes: [] },
+                { id: Date.now() + 2, name: "СНАЙПЕРСКАЯ ЗАСАДА", description: "НУЖНЫ 2 СНАЙПЕРА", link: "", yesVotes: ["МАРИЯ"], noVotes: [] }
+            ],
+            "2026-06-03": [
+                { id: Date.now() + 3, name: "ЗАХВАТ ТЕРРИТОРИИ", description: "ТАКТИКА 5Х5", link: "", yesVotes: ["ОЛЕГ"], noVotes: [] }
+            ],
+            "2026-06-07": [
+                { id: Date.now() + 4, name: "ВОЕННО-ТАКТИЧЕСКАЯ НАСТОЛКА", description: "МАФИЯ, UNO", link: "", yesVotes: ["ЛЕНА", "ДИМА"], noVotes: [] }
+            ]
+        };
+        saveToLocal();
     }
     
     function getEventsForDate(dateStr) {
@@ -1071,17 +1071,13 @@
     
     window.manualSync = async () => {
         if (!isAdmin) return;
-        const result = await loadFromCloud();
-        if (result) {
-            renderCalendar();
-            if (selectedDateStr) {
-                if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
-                else showDayEvents(selectedDateStr);
-            }
-            alert("ДАННЫЕ ОБНОВЛЕНЫ ИЗ ОБЛАКА!");
-        } else {
-            alert("⚠️ Облако пусто. Нажмите 'СОХРАНИТЬ В ОБЛАКО'.");
+        await loadFromCloud();
+        renderCalendar();
+        if (selectedDateStr) {
+            if (selectedEventId) showEventDetails(selectedDateStr, selectedEventId);
+            else showDayEvents(selectedDateStr);
         }
+        alert("ДАННЫЕ ОБНОВЛЕНЫ!");
     };
     
     window.forceSaveToCloud = async () => {
