@@ -4,8 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
   <title>Календарь игр</title>
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
-    /* Ваши стили (полностью сохранены) */
+    /* ВСЕ ВАШИ СТИЛИ */
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
     body { background: #e8e0d0; padding: 12px; min-height: 100vh; }
     .container { max-width: 100%; margin: 0 auto; background: #f5f0e8; border-radius: 24px; padding: 16px; border: 1px solid #d4c9b0; }
@@ -71,7 +74,7 @@
   <h1>⚔️ КАЛЕНДАРЬ ИГР</h1>
   <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
 
-  <div class="status-bar" id="statusBar">🔄 ЗАГРУЗКА ДАННЫХ...</div>
+  <div class="status-bar" id="statusBar">🔄 ПОДКЛЮЧЕНИЕ К FIREBASE...</div>
 
   <div class="admin-panel" id="adminPanel">
     <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ АДМИНКИ</button>
@@ -105,23 +108,32 @@
     <button onclick="checkAdmin()">ВОЙТИ</button>
   </div>
 
-  <div class="refresh-note">🔄 ДЛЯ ОБНОВЛЕНИЯ ДАННЫХ — ОБНОВИТЕ СТРАНИЦУ (СВАЙП ВНИЗ ИЛИ F5)</div>
+  <div class="refresh-note">🔄 ВСЕ ИЗМЕНЕНИЯ СОХРАНЯЮТСЯ АВТОМАТИЧЕСКИ</div>
   <div class="refresh-note" id="saveIndicator" style="display:none;">💾 Сохранено: <span id="lastSaved">—</span></div>
 </div>
 
-<!-- Скрытый iframe для POST -->
-<iframe name="hidden_iframe" style="display:none;"></iframe>
-
 <script>
-  // ========== НАСТРОЙКИ ==========
-  const GOOGLE_URL = "https://script.google.com/macros/s/AKfycbwMgPsDMG3Jj0RybTUBTI40CLNpaBegOZEIXaHQNG2qJlNZeWYFcLKBfcvJ4C9VaSlK2Q/exec"; // ← ЗАМЕНИТЕ НА ВАШ
+  // ========== ВАШИ НАСТРОЙКИ FIREBASE ==========
+  const firebaseConfig = {
+    apiKey: "AIzaSyAgS4pyfIEDe5om_dhFeAhTMc9NnxYq_yQ",
+    authDomain: "game-calendar-7800a.firebaseapp.com",
+    projectId: "game-calendar-7800a",
+    storageBucket: "game-calendar-7800a.firebasestorage.app",
+    messagingSenderId: "687344707531",
+    appId: "1:687344707531:web:03c1fe16598782169a384e"
+  };
+  // ===============================================
+
+  // Инициализация Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
   const ADMIN_PASSWORD = "orden.sparta";
 
   let eventsDB = {};
-  let currentYear = 2026, currentMonth = 5; // май 2026
+  let currentYear = 2026, currentMonth = 5;
   let selectedDate = "", selectedEventId = null;
   let isAdmin = false;
-  let saveInProgress = false;
 
   function formatDate(dateStr) {
     let p = dateStr.split('-');
@@ -129,123 +141,51 @@
   }
 
   function updateStatus(text, isError = false) {
-    document.getElementById('statusBar').innerHTML = text;
-    document.getElementById('statusBar').style.color = isError ? '#a04040' : '#5a6b4a';
+    const statusBar = document.getElementById('statusBar');
+    statusBar.innerHTML = text;
+    statusBar.style.color = isError ? '#a04040' : '#5a6b4a';
   }
 
-  function updateSaveIndicator() {
-    document.getElementById('saveIndicator').style.display = 'block';
-    document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString();
-  }
-
-  // ========== ЗАГРУЗКА ДАННЫХ (JSONP) ==========
-  function loadFromGoogle() {
-    updateStatus("🔄 ЗАГРУЗКА ИЗ ОБЛАКА...");
-    var callbackName = 'jsonp_callback_' + Math.round(Math.random() * 1000000);
-    window[callbackName] = function(data) {
-      delete window[callbackName];
-      var script = document.getElementById(callbackName);
-      if (script) script.remove();
-
-      if (data.success && data.events) {
-        eventsDB = {};
-        for (let date in data.events) {
-          if (data.events[date] && data.events[date].length > 0) {
-            eventsDB[date] = data.events[date].map(ev => ({
-              id: ev.id,
-              name: ev.name,
-              description: ev.description || "",
-              link: ev.link || "",
-              yesVotes: ev.yesVotes || [],
-              noVotes: ev.noVotes || []
-            }));
-          }
-        }
-        updateStatus(`✅ ЗАГРУЖЕНО ${Object.keys(eventsDB).length} ДНЕЙ`);
-        renderCalendar();
-        if (selectedDate) showDayEvents(selectedDate);
-      } else {
-        updateStatus("⚠️ ОБЛАКО ПУСТО", true);
-      }
-    };
-
-    var script = document.createElement('script');
-    script.id = callbackName;
-    script.src = GOOGLE_URL + '?callback=' + callbackName + '&t=' + Date.now();
-    script.onerror = function() {
-      updateStatus("❌ ОШИБКА ЗАГРУЗКИ", true);
-      delete window[callbackName];
-      script.remove();
-    };
-    document.body.appendChild(script);
-  }
-
-  // ========== СОХРАНЕНИЕ ДАННЫХ (POST через iframe) ==========
-  window.onSaveSuccess = function() {
-    saveInProgress = false;
-    updateStatus("💾 СОХРАНЕНО");
-    updateSaveIndicator();
-  };
-
-  window.onSaveError = function(msg) {
-    saveInProgress = false;
-    updateStatus("❌ ОШИБКА СОХРАНЕНИЯ: " + msg, true);
-    alert("Не удалось сохранить: " + msg);
-  };
-
-  function saveToGoogle(callback) {
-    if (saveInProgress) {
-      setTimeout(() => saveToGoogle(callback), 100);
-      return;
+  // ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE
+  async function loadFromFirebase() {
+    updateStatus("🔄 ЗАГРУЗКА ДАННЫХ...");
+    try {
+      const snapshot = await db.collection("events").get();
+      eventsDB = {};
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        eventsDB[doc.id] = data.events || [];
+      });
+      updateStatus(`✅ ЗАГРУЖЕНО ${Object.keys(eventsDB).length} ДНЕЙ С СОБЫТИЯМИ`);
+      renderCalendar();
+      if (selectedDate) showDayEvents(selectedDate);
+    } catch (error) {
+      console.error("Ошибка загрузки:", error);
+      updateStatus("❌ ОШИБКА ПОДКЛЮЧЕНИЯ К FIREBASE. ПРОВЕРЬТЕ НАСТРОЙКИ!", true);
     }
-    updateStatus("💾 СОХРАНЕНИЕ...");
-    saveInProgress = true;
-
-    // Создаём форму и отправляем через iframe
-    var form = document.createElement('form');
-    form.method = 'POST';
-    form.action = GOOGLE_URL;
-    form.target = 'hidden_iframe';
-    form.style.display = 'none';
-
-    // Передаём весь объект событий в виде JSON-строки в поле data
-    var input = document.createElement('input');
-    input.type = 'hidden';
-    input.name = 'data';
-    input.value = JSON.stringify(eventsDB);
-    form.appendChild(input);
-
-    document.body.appendChild(form);
-    form.submit();
-    form.remove();
-
-    // Ждём завершения
-    var checkCount = 0;
-    var interval = setInterval(function() {
-      checkCount++;
-      try {
-        if (window.frames['hidden_iframe'].document.readyState === 'complete') {
-          clearInterval(interval);
-          // onSaveSuccess/onSaveError уже должны были вызваться из ответа
-          if (saveInProgress) {
-            // Не получили ответ от скрипта – считаем успехом спустя 3 секунды
-            saveInProgress = false;
-            updateStatus("💾 СОХРАНЕНО (без ответа)");
-            updateSaveIndicator();
-            if (callback) callback();
-          }
-        }
-      } catch(e) {}
-      if (checkCount > 50) {
-        clearInterval(interval);
-        saveInProgress = false;
-        updateStatus("❌ ТАЙМАУТ СОХРАНЕНИЯ", true);
-        if (callback) callback();
-      }
-    }, 100);
   }
 
-  // ========== ОСНОВНЫЕ ФУНКЦИИ ==========
+  // СОХРАНЕНИЕ В FIREBASE
+  async function saveToFirebase() {
+    try {
+      const batch = db.batch();
+      for (const [date, events] of Object.entries(eventsDB)) {
+        const docRef = db.collection("events").doc(date);
+        batch.set(docRef, { events: events, updatedAt: new Date() });
+      }
+      await batch.commit();
+      updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
+      document.getElementById('saveIndicator').style.display = 'block';
+      document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString();
+      setTimeout(() => {
+        document.getElementById('saveIndicator').style.display = 'none';
+      }, 2000);
+    } catch (error) {
+      console.error("Ошибка сохранения:", error);
+      updateStatus("❌ ОШИБКА СОХРАНЕНИЯ", true);
+    }
+  }
+
   function getEventsForDate(date) {
     if (!eventsDB[date]) eventsDB[date] = [];
     return eventsDB[date];
@@ -262,10 +202,9 @@
       yesVotes: [],
       noVotes: []
     });
-    saveToGoogle(function() {
-      renderCalendar();
-      showDayEvents(date);
-    });
+    await saveToFirebase();
+    renderCalendar();
+    showDayEvents(date);
     return true;
   }
 
@@ -277,9 +216,8 @@
       ev.description = newDesc;
       ev.link = newLink;
     }
-    saveToGoogle(function() {
-      showEventDetails(date, eventId);
-    });
+    await saveToFirebase();
+    showEventDetails(date, eventId);
   }
 
   async function vote(eventId, date, userName, type) {
@@ -292,10 +230,9 @@
     else if (type === 'no') ev.noVotes.push(uname);
     ev.yesVotes.sort();
     ev.noVotes.sort();
-    saveToGoogle(function() {
-      if (selectedEventId === eventId) showEventDetails(date, eventId);
-      renderCalendar();
-    });
+    await saveToFirebase();
+    if (selectedEventId === eventId) showEventDetails(date, eventId);
+    renderCalendar();
   }
 
   async function deleteEvent(eventId, date) {
@@ -306,14 +243,12 @@
       selectedEventId = null;
       selectedDate = "";
     }
-    saveToGoogle(function() {
-      renderCalendar();
-      if (selectedDate) showDayEvents(selectedDate);
-      else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
-    });
+    await saveToFirebase();
+    renderCalendar();
+    if (selectedDate) showDayEvents(selectedDate);
+    else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
   }
 
-  // ========== ОТРИСОВКА КАЛЕНДАРЯ ==========
   function renderCalendar() {
     const firstDay = new Date(currentYear, currentMonth, 1);
     let offset = firstDay.getDay() - 1;
@@ -488,16 +423,14 @@
       if (ev) {
         ev.yesVotes = ev.yesVotes.filter(v => v !== uname);
         ev.noVotes = ev.noVotes.filter(v => v !== uname);
-        saveToGoogle(function() {
-          renderCalendar();
-          showEventDetails(date, id);
-          alert("ГОЛОС УДАЛЕН!");
-        });
+        await saveToFirebase();
+        renderCalendar();
+        showEventDetails(date, id);
+        alert("ГОЛОС УДАЛЕН!");
       }
     }
   };
 
-  // ========== АДМИНКА ==========
   function checkAdmin() {
     const code = document.getElementById('adminCode').value;
     const nickname = document.getElementById('adminNick').value.trim();
@@ -523,7 +456,7 @@
     document.getElementById('adminForms').style.display = 'none';
     document.getElementById('loginBox').style.display = 'block';
     if (selectedDate) showDayEvents(selectedDate);
-    loadFromGoogle();
+    loadFromFirebase();
   }
 
   function checkStoredAdmin() {
@@ -537,7 +470,6 @@
     }
   }
 
-  // ========== КНОПКИ ==========
   document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
@@ -567,9 +499,8 @@
     document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
   });
 
-  // ========== ЗАПУСК ==========
   async function init() {
-    await loadFromGoogle();
+    await loadFromFirebase();
     checkStoredAdmin();
   }
 
