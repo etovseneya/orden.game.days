@@ -62,6 +62,9 @@
     .add-form { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .add-form input, .add-form textarea { padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0; }
     .add-form button { background: #8a9e6a; color: white; border: none; padding: 10px; border-radius: 14px; cursor: pointer; }
+    .login-box { background: #e0d8c0; padding: 16px; border-radius: 20px; text-align: center; margin-top: 16px; }
+    .login-box input { padding: 10px; border-radius: 30px; width: 100%; margin-top: 8px; border: 1px solid #c0b8a0; }
+    .login-box button { background: #8a7a5a; color: white; border: none; padding: 8px 20px; border-radius: 30px; margin-top: 10px; cursor: pointer; }
     .login-box {
   background: transparent;
   padding: 8px 0;
@@ -310,12 +313,12 @@
       const events = eventsDB[dateKey] || [];
       const hasEvents = events.length > 0;
       const isWeekend = (new Date(currentYear, currentMonth, d).getDay() === 0 || new Date(currentYear, currentMonth, d).getDay() === 6);
-      let bg = hasEvents ? '#e8a0a0' : (isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8')));
+      let bg = hasEvents ? '#e8a0a0' : (isWeekend ? '#d8e8d0' : (dateKey < today ? '#f0ece0' : '#f8f4e8'));
       let border = dateKey === today ? '3px solid #c0a040' : (selectedDate === dateKey ? '3px solid #8a9e6a' : '1px solid #d0c8b0');
 
       html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border}; position:relative;'>`;
       html += `<div class='day-number'>${d}</div>`;
-      
+
       if (hasEvents) {
         html += `<div class='viking-icon'>⚔️</div>`;
         // Показываем каждое событие с его личными отметками
@@ -357,44 +360,30 @@
   function showDayEvents(date) {
     const events = getEventsForDate(date);
     if (!events.length) {
-  document.getElementById('detailsSection').innerHTML = `
-    <div>
-      <div class='event-title'>📅 ${formatDate(date)}</div>
-      <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
-      ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ</button>` : ''}
-    </div>`;
-  return;
-}
-
-// Если событие одно - показываем его сразу без выпадающего списка
-if (events.length === 1) {
-  const singleEvent = events[0];
-  selectedEventId = singleEvent.id;
-  document.getElementById('detailsSection').innerHTML = `
-    <div>
-      <div class='event-title'>📅 ${formatDate(date)}</div>
-      <div id='eventDetail'></div>
-    </div>
-  `;
-  showEventDetails(date, singleEvent.id);
-} else {
-  // Если событий несколько - показываем выпадающий список
-  let html = `
-    <div>
-      <div class='event-title'>📅 ${formatDate(date)}</div>
-      <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
-        <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
-        ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
-      </select>
-      <div id='eventDetail'></div>
-    </div>
-  `;
-  document.getElementById('detailsSection').innerHTML = html;
-  if (selectedEventId && events.find(e => e.id === selectedEventId)) {
-    document.getElementById('eventSelect').value = selectedEventId;
-    showEventDetails(date, selectedEventId);
+      document.getElementById('detailsSection').innerHTML = `
+        <div>
+          <div class='event-title'>📅 ${formatDate(date)}</div>
+          <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
+          ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ</button>` : ''}
+        </div>`;
+      return;
+    }
+    let html = `
+      <div>
+        <div class='event-title'>📅 ${formatDate(date)}</div>
+        <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
+          <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
+          ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
+        </select>
+        <div id='eventDetail'></div>
+      </div>
+    `;
+    document.getElementById('detailsSection').innerHTML = html;
+    if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+      document.getElementById('eventSelect').value = selectedEventId;
+      showEventDetails(date, selectedEventId);
+    }
   }
-}
 
   window.selectEvent = (eventId) => {
     if (eventId) {
