@@ -357,8 +357,11 @@
     });
   }
 
+  // ========== ИСПРАВЛЕННАЯ ФУНКЦИЯ showDayEvents ==========
   function showDayEvents(date) {
     const events = getEventsForDate(date);
+    
+    // Если событий нет
     if (!events.length) {
       document.getElementById('detailsSection').innerHTML = `
         <div>
@@ -368,22 +371,39 @@
         </div>`;
       return;
     }
-    let html = `
-      <div>
-        <div class='event-title'>📅 ${formatDate(date)}</div>
-        <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
-          <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
-          ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
-        </select>
-        <div id='eventDetail'></div>
-      </div>
-    `;
-    document.getElementById('detailsSection').innerHTML = html;
-    if (selectedEventId && events.find(e => e.id === selectedEventId)) {
-      document.getElementById('eventSelect').value = selectedEventId;
-      showEventDetails(date, selectedEventId);
+    
+    // Если событие ОДНО - показываем его сразу, без выпадающего списка
+    if (events.length === 1) {
+      const singleEvent = events[0];
+      selectedEventId = singleEvent.id;
+      document.getElementById('detailsSection').innerHTML = `
+        <div>
+          <div class='event-title'>📅 ${formatDate(date)}</div>
+          <div id='eventDetail'></div>
+        </div>
+      `;
+      showEventDetails(date, singleEvent.id);
+    } 
+    // Если событий НЕСКОЛЬКО - показываем выпадающий список
+    else {
+      let html = `
+        <div>
+          <div class='event-title'>📅 ${formatDate(date)}</div>
+          <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
+            <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
+            ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
+          </select>
+          <div id='eventDetail'></div>
+        </div>
+      `;
+      document.getElementById('detailsSection').innerHTML = html;
+      if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+        document.getElementById('eventSelect').value = selectedEventId;
+        showEventDetails(date, selectedEventId);
+      }
     }
   }
+  // =======================================================
 
   window.selectEvent = (eventId) => {
     if (eventId) {
