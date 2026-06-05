@@ -310,7 +310,7 @@
       const events = eventsDB[dateKey] || [];
       const hasEvents = events.length > 0;
       const isWeekend = (new Date(currentYear, currentMonth, d).getDay() === 0 || new Date(currentYear, currentMonth, d).getDay() === 6);
-      let bg = hasEvents ? '#e8a0a0' : (isWeekend ? '#d8e8d0' : (dateKey < today ? '#f0ece0' : '#f8f4e8'));
+      let bg = hasEvents ? '#e8a0a0' : (isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8')));
       let border = dateKey === today ? '3px solid #c0a040' : (selectedDate === dateKey ? '3px solid #8a9e6a' : '1px solid #d0c8b0');
 
       html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border}; position:relative;'>`;
@@ -357,30 +357,44 @@
   function showDayEvents(date) {
     const events = getEventsForDate(date);
     if (!events.length) {
-      document.getElementById('detailsSection').innerHTML = `
-        <div>
-          <div class='event-title'>📅 ${formatDate(date)}</div>
-          <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
-          ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ</button>` : ''}
-        </div>`;
-      return;
-    }
-    let html = `
-      <div>
-        <div class='event-title'>📅 ${formatDate(date)}</div>
-        <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
-          <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
-          ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
-        </select>
-        <div id='eventDetail'></div>
-      </div>
-    `;
-    document.getElementById('detailsSection').innerHTML = html;
-    if (selectedEventId && events.find(e => e.id === selectedEventId)) {
-      document.getElementById('eventSelect').value = selectedEventId;
-      showEventDetails(date, selectedEventId);
-    }
+  document.getElementById('detailsSection').innerHTML = `
+    <div>
+      <div class='event-title'>📅 ${formatDate(date)}</div>
+      <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
+      ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ</button>` : ''}
+    </div>`;
+  return;
+}
+
+// Если событие одно - показываем его сразу без выпадающего списка
+if (events.length === 1) {
+  const singleEvent = events[0];
+  selectedEventId = singleEvent.id;
+  document.getElementById('detailsSection').innerHTML = `
+    <div>
+      <div class='event-title'>📅 ${formatDate(date)}</div>
+      <div id='eventDetail'></div>
+    </div>
+  `;
+  showEventDetails(date, singleEvent.id);
+} else {
+  // Если событий несколько - показываем выпадающий список
+  let html = `
+    <div>
+      <div class='event-title'>📅 ${formatDate(date)}</div>
+      <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
+        <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
+        ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
+      </select>
+      <div id='eventDetail'></div>
+    </div>
+  `;
+  document.getElementById('detailsSection').innerHTML = html;
+  if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+    document.getElementById('eventSelect').value = selectedEventId;
+    showEventDetails(date, selectedEventId);
   }
+}
 
   window.selectEvent = (eventId) => {
     if (eventId) {
