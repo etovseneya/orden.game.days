@@ -522,6 +522,32 @@
     const hasYes = yesList.includes(userName);
     const hasNo = noList.includes(userName);
 
+    // Определяем иконку и цвет для формата события
+    let formatIcon = '';
+    let formatColor = '';
+    let formatBg = '';
+    switch(ev.format) {
+      case 'training':
+        formatIcon = '🏋️';
+        formatColor = '#4a7a9e';
+        formatBg = '#87CEEB';
+        break;
+      case 'sunday':
+        formatIcon = '⛪';
+        formatColor = '#7a5a9e';
+        formatBg = '#DDA0DD';
+        break;
+      case 'away':
+        formatIcon = '🚌';
+        formatColor = '#c04040';
+        formatBg = '#e8a0a0';
+        break;
+      default:
+        formatIcon = '⚔️';
+        formatColor = '#4a5b3a';
+        formatBg = '#e8a0a0';
+    }
+
     let adminBtns = '';
     if (isAdmin) {
       adminBtns = `
@@ -529,7 +555,7 @@
           <button class='action-btn edit' onclick='toggleEditForm(${ev.id})'>✏️ РЕДАКТИРОВАТЬ</button>
           <button class='action-btn delete' onclick='if(confirm("УДАЛИТЬ?")) deleteEvent(${ev.id},"${date}")'>🗑 УДАЛИТЬ</button>
         </div>
-                <div id='editForm-${ev.id}' class='edit-form'>
+        <div id='editForm-${ev.id}' class='edit-form'>
           <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}'>
           <textarea id='editDesc-${ev.id}'>${ev.description || ''}</textarea>
           <input type='text' id='editLink-${ev.id}' value='${ev.link || ''}'>
@@ -546,7 +572,14 @@
 
     document.getElementById('eventDetail').innerHTML = `
       <div style='border-top: 2px solid #d0c8b0; padding-top: 12px; margin-top: 8px;'>
-        <div class='event-title'>⚔️ ${ev.name}</div>
+        <div class='event-title' style='display: flex; align-items: center; gap: 10px; flex-wrap: wrap;'>
+          <span style='background: ${formatBg}; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; color: #333;'>
+            ${formatIcon} ${ev.name}
+          </span>
+          <span style='background: ${formatBg}; border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; color: #333; font-weight: normal;'>
+            ${ev.format === 'training' ? 'ТРЕНИРОВКА' : ev.format === 'sunday' ? 'ВОСКРЕСНАЯ ИГРА' : 'ВЫЕЗДНАЯ ИГРА'}
+          </span>
+        </div>
         ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
         ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
         
