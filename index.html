@@ -461,16 +461,37 @@
         default: formatIcon = '⚔️';
       }
       
+            // Определяем цвет фона для кликабельного события
+      let eventBgColor = '';
+      let eventHoverColor = '';
+      switch(ev.format) {
+        case 'training':
+          eventBgColor = '#B0E0E6';  // более насыщенный небесный
+          eventHoverColor = '#9AC0CD';
+          break;
+        case 'sunday':
+          eventBgColor = '#D8BFD8';  // более насыщенный фиолетовый
+          eventHoverColor = '#C8AFC8';
+          break;
+        case 'away':
+          eventBgColor = '#e8a0a0';   // красный
+          eventHoverColor = '#d08080';
+          break;
+        default:
+          eventBgColor = '#e8e4d8';
+          eventHoverColor = '#e0d8c8';
+      }
+      
       eventsListHtml += `
         <div class='event-list-item' data-event-id='${ev.id}' style='
-          background: #e8e4d8;
+          background: ${eventBgColor};
           border-radius: 12px;
           padding: 10px 12px;
           margin-bottom: 8px;
           cursor: pointer;
           transition: all 0.2s ease;
           border: 1px solid #d0c8b0;
-        ' onmouseover='this.style.background="#e0d8c8"' onmouseout='this.style.background="#e8e4d8"'>
+        ' onmouseover='this.style.background="${eventHoverColor}"' onmouseout='this.style.background="${eventBgColor}"'>
           <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
             <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name}</span>
             <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
