@@ -416,14 +416,21 @@
     
     document.getElementById('detailsSection').innerHTML = eventsListHtml;
     
-    // Добавляем обработчики кликов на каждый элемент списка
+        // Добавляем обработчики кликов на каждый элемент списка (открыть/закрыть)
     document.querySelectorAll('.event-list-item').forEach(item => {
       item.addEventListener('click', (e) => {
-        // Не даём событию всплыть, чтобы не конфликтовать
         e.stopPropagation();
         const eventId = parseInt(item.dataset.eventId);
-        selectedEventId = eventId;
-        showEventDetails(date, eventId);
+        
+        // Если это событие уже открыто - закрываем его
+        if (selectedEventId === eventId) {
+          selectedEventId = null;
+          document.getElementById('eventDetail').innerHTML = '';
+        } else {
+          // Иначе открываем новое событие
+          selectedEventId = eventId;
+          showEventDetails(date, eventId);
+        }
       });
     });
     
@@ -460,40 +467,29 @@
     }
 
     document.getElementById('eventDetail').innerHTML = `
-  <div style='border-top: 2px solid #d0c8b0; padding-top: 12px; margin-top: 8px;'>
-    <div style='display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;'>
-      <div class='event-title'>⚔️ ${ev.name}</div>
-      <button onclick='closeEventDetails()' style='
-        background: #c0b8a0;
-        border: none;
-        border-radius: 20px;
-        padding: 4px 12px;
-        font-size: 0.7rem;
-        cursor: pointer;
-        color: #4a5b3a;
-      '>✖ СВЕРНУТЬ</button>
-    </div>
-    ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
-    ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
-    <div class='vote-buttons'>
-      <button class='vote-btn yes ${hasYes ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","yes")'>✅ ИДУ</button>
-      <button class='vote-btn no ${hasNo ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","no")'>❌ НЕ ИДУ</button>
-    </div>
-    <div class='vote-columns'>
-      <div class='vote-col green'>
-        <div class='vote-col-title'>✅ ИДУ (${yesList.length})</div>
-        ${yesList.length ? yesList.map((n,i) => `<div class='attendee-item'><span class='attendee-num'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>'}
+      <div style='border-top: 2px solid #d0c8b0; padding-top: 12px; margin-top: 8px;'>
+        <div class='event-title'>⚔️ ${ev.name}</div>
+        ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
+        ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
+        <div class='vote-buttons'>
+          <button class='vote-btn yes ${hasYes ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","yes")'>✅ ИДУ</button>
+          <button class='vote-btn no ${hasNo ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","no")'>❌ НЕ ИДУ</button>
+        </div>
+        <div class='vote-columns'>
+          <div class='vote-col green'>
+            <div class='vote-col-title'>✅ ИДУ (${yesList.length})</div>
+            ${yesList.length ? yesList.map((n,i) => `<div class='attendee-item'><span class='attendee-num'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>'}
+          </div>
+          <div class='vote-col red'>
+            <div class='vote-col-title'>❌ НЕ ИДУ (${noList.length})</div>
+            ${noList.length ? noList.map((n,i) => `<div class='attendee-item'><span class='attendee-num'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>'}
+          </div>
+        </div>
+        ${hasYes || hasNo ? `<div class='current-vote ${hasYes ? "yes" : "no"}'>🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${hasYes ? "✅ ИДУ" : "❌ НЕ ИДУ"}</div>` : ''}
+        <button class='change-btn' onclick='changeVote(${ev.id},"${date}")'>🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ</button>
+        ${adminBtns}
       </div>
-      <div class='vote-col red'>
-        <div class='vote-col-title'>❌ НЕ ИДУ (${noList.length})</div>
-        ${noList.length ? noList.map((n,i) => `<div class='attendee-item'><span class='attendee-num'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes">😴 ПОКА НИКТО</div>'}
-      </div>
-    </div>
-    ${hasYes || hasNo ? `<div class='current-vote ${hasYes ? "yes" : "no"}'>🗳️ ВЫ ПРОГОЛОСОВАЛИ: ${hasYes ? "✅ ИДУ" : "❌ НЕ ИДУ"}</div>` : ''}
-    <button class='change-btn' onclick='changeVote(${ev.id},"${date}")'>🔄 ИЗМЕНИТЬ/ОТМЕНИТЬ</button>
-    ${adminBtns}
-  </div>
-`;
+    `;
   }
 
   window.toggleEditForm = (id) => {
@@ -536,13 +532,6 @@
       }
     }
   };
-    function closeEventDetails() {
-    document.getElementById('eventDetail').innerHTML = '';
-    selectedEventId = null;
-    if (selectedDate) {
-      showDayEvents(selectedDate);
-    }
-  }
 
   function checkAdmin() {
     const code = document.getElementById('adminCode').value;
