@@ -111,7 +111,13 @@
   color: white;
 }
     .refresh-note { text-align: center; font-size: 0.65rem; color: #8a9e6a; margin-top: 8px; }
-    @media (max-width: 500px) { .day-cell { min-height: 70px; } .event-badge { font-size: 0.5rem; white-space: normal; } .vote-buttons { gap: 8px; } .vote-btn { padding: 4px 12px; font-size: 0.7rem; } }
+    @media (max-width: 500px) { .day-cell { min-height: 70px; } .event-badge { font-size: 0.5rem; white-space: normal; } .vote-buttons { gap: 8px; } .vote-btn { padding: 4px 12px; font-size: 0.7rem; } }   /* Стили для списка событий */
+    .event-list-item {
+      transition: all 0.2s ease;
+    }
+    .event-list-item:active {
+      transform: scale(0.99);
+    }
   </style>
 </head>
 <body>
