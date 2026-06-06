@@ -118,6 +118,34 @@
     .event-list-item:active {
       transform: scale(0.99);
     }
+     /* Цвета для форматов событий */
+    .event-format-training { background: #87CEEB !important; }
+    .event-format-sunday { background: #DDA0DD !important; }
+    .event-format-away { background: #e8a0a0 !important; }
+    .event-format-default { background: #e8a0a0 !important; }
+
+    /* Легенда под календарем */
+    .legend {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 16px;
+      padding: 10px;
+      background: #e8e4d8;
+      border-radius: 20px;
+      flex-wrap: wrap;
+    }
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.7rem;
+    }
+    .legend-color {
+      width: 20px;
+      height: 20px;
+      border-radius: 6px;
+    }
   </style>
 </head>
 <body>
@@ -137,17 +165,29 @@
     <button id="nextMonthBtn">▶</button>
   </div>
 
-  <div class="calendar-grid" id="calendarGrid"></div>
+  <div class="calendar-grid" id="calendarGrid"></div>  
+  <!-- Легенда цветов -->
+  <div class="legend">
+    <div class="legend-item"><div class="legend-color" style="background: #87CEEB;"></div><span>🏋️ Тренировка</span></div>
+    <div class="legend-item"><div class="legend-color" style="background: #DDA0DD;"></div><span>⛪ Воскресная игра</span></div>
+    <div class="legend-item"><div class="legend-color" style="background: #e8a0a0;"></div><span>🚌 Выездная игра</span></div>
+  </div>
 
   <div class="details-section" id="detailsSection">
     <div style="text-align: center; padding: 20px; color: #b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>
   </div>
 
-  <div id="adminForms" style="display: none;">
+    <div id="adminForms" style="display: none;">
     <div class="add-form">
       <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ">
       <textarea id="newEventDesc" placeholder="ОПИСАНИЕ"></textarea>
       <input type="text" id="newEventLink" placeholder="ССЫЛКА">
+      <select id="newEventFormat" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
+        <option value="">ВЫБЕРИТЕ ФОРМАТ</option>
+        <option value="training">🏋️ ТРЕНИРОВКА</option>
+        <option value="sunday">⛪ ВОСКРЕСНАЯ ИГРА</option>
+        <option value="away">🚌 ВЫЕЗДНАЯ ИГРА</option>
+      </select>
       <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
     </div>
   </div>
@@ -242,14 +282,16 @@
     return eventsDB[date];
   }
 
-  async function addEvent(date, name, desc, link) {
+    async function addEvent(date, name, desc, link, format) {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return false; }
     if (!name.trim()) return false;
+    if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return false; }
     getEventsForDate(date).push({
       id: Date.now(),
       name: name.trim().toUpperCase(),
       description: desc,
       link: link,
+      format: format,  // training, sunday, away
       yesVotes: [],
       noVotes: []
     });
@@ -259,13 +301,14 @@
     return true;
   }
 
-  async function editEvent(eventId, date, newName, newDesc, newLink) {
+    async function editEvent(eventId, date, newName, newDesc, newLink, newFormat) {
     if (!isAdmin) return;
     const ev = eventsDB[date]?.find(e => e.id === eventId);
     if (ev) {
       ev.name = newName.toUpperCase();
       ev.description = newDesc;
       ev.link = newLink;
+      if (newFormat) ev.format = newFormat;
     }
     await saveToFirebase();
     showEventDetails(date, eventId);
@@ -316,7 +359,27 @@
       const events = eventsDB[dateKey] || [];
       const hasEvents = events.length > 0;
       const isWeekend = (new Date(currentYear, currentMonth, d).getDay() === 0 || new Date(currentYear, currentMonth, d).getDay() === 6);
-      let bg = hasEvents ? '#e8a0a0' : (isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8')));
+            // Определяем цвет ячейки в зависимости от формата события
+      let bg;
+      if (hasEvents) {
+        // Берём формат первого события (если несколько событий с разными форматами — используем первый)
+        const firstEventFormat = events[0].format || 'default';
+        switch(firstEventFormat) {
+          case 'training':
+            bg = '#87CEEB';
+            break;
+          case 'sunday':
+            bg = '#DDA0DD';
+            break;
+          case 'away':
+            bg = '#e8a0a0';
+            break;
+          default:
+            bg = '#e8a0a0';
+        }
+      } else {
+        bg = isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8'));
+      }
       let border = dateKey === today ? '3px solid #c0a040' : (selectedDate === dateKey ? '3px solid #8a9e6a' : '1px solid #d0c8b0');
 
       html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border}; position:relative;'>`;
@@ -384,9 +447,18 @@
     // Сортируем события по имени (опционально)
     const sortedEvents = [...events].sort((a, b) => a.name.localeCompare(b.name));
     
-    sortedEvents.forEach(ev => {
+       sortedEvents.forEach(ev => {
       const yesCount = ev.yesVotes?.length || 0;
       const noCount = ev.noVotes?.length || 0;
+      
+      // Определяем иконку в зависимости от формата
+      let formatIcon = '';
+      switch(ev.format) {
+        case 'training': formatIcon = '🏋️'; break;
+        case 'sunday': formatIcon = '⛪'; break;
+        case 'away': formatIcon = '🚌'; break;
+        default: formatIcon = '⚔️';
+      }
       
       eventsListHtml += `
         <div class='event-list-item' data-event-id='${ev.id}' style='
@@ -399,7 +471,7 @@
           border: 1px solid #d0c8b0;
         ' onmouseover='this.style.background="#e0d8c8"' onmouseout='this.style.background="#e8e4d8"'>
           <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
-            <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>⚔️ ${ev.name}</span>
+            <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name}</span>
             <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
               ✅ ${yesCount} | ❌ ${noCount}
             </span>
@@ -456,10 +528,15 @@
           <button class='action-btn edit' onclick='toggleEditForm(${ev.id})'>✏️ РЕДАКТИРОВАТЬ</button>
           <button class='action-btn delete' onclick='if(confirm("УДАЛИТЬ?")) deleteEvent(${ev.id},"${date}")'>🗑 УДАЛИТЬ</button>
         </div>
-        <div id='editForm-${ev.id}' class='edit-form'>
+                <div id='editForm-${ev.id}' class='edit-form'>
           <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}'>
           <textarea id='editDesc-${ev.id}'>${ev.description || ''}</textarea>
           <input type='text' id='editLink-${ev.id}' value='${ev.link || ''}'>
+          <select id='editFormat-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
+            <option value='training' ${ev.format === 'training' ? 'selected' : ''}>🏋️ ТРЕНИРОВКА</option>
+            <option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option>
+            <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
+          </select>
           <button onclick='saveEdit(${ev.id},"${date}")'>💾 СОХРАНИТЬ</button>
           <button onclick='toggleEditForm(${ev.id})'>❌ ОТМЕНА</button>
         </div>
@@ -531,12 +608,13 @@
     if (form) form.classList.toggle('show');
   };
 
-  window.saveEdit = async (id, date) => {
+    window.saveEdit = async (id, date) => {
     const newName = document.getElementById(`editName-${id}`).value;
     const newDesc = document.getElementById(`editDesc-${id}`).value;
     const newLink = document.getElementById(`editLink-${id}`).value;
+    const newFormat = document.getElementById(`editFormat-${id}`).value;
     if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
-    await editEvent(id, date, newName, newDesc, newLink);
+    await editEvent(id, date, newName, newDesc, newLink, newFormat);
     toggleEditForm(id);
   };
 
@@ -606,15 +684,18 @@
     }
   }
 
-  document.getElementById("addEventBtn")?.addEventListener("click", async () => {
+    document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
     const name = document.getElementById("newEventName").value;
+    const format = document.getElementById("newEventFormat").value;
     if (!name.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
-    await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value);
+    if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return; }
+    await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value, format);
     document.getElementById("newEventName").value = "";
     document.getElementById("newEventDesc").value = "";
     document.getElementById("newEventLink").value = "";
+    document.getElementById("newEventFormat").value = "";
   });
 
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
