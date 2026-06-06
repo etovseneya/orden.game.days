@@ -356,38 +356,76 @@
 
   function showDayEvents(date) {
     const events = getEventsForDate(date);
+    
+    // Если событий нет
     if (!events.length) {
       document.getElementById('detailsSection').innerHTML = `
         <div>
           <div class='event-title'>📅 ${formatDate(date)}</div>
           <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
-          ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ</button>` : ''}
+          ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
         </div>`;
       return;
     }
-    let html = `
+    
+    // Показываем список событий
+    let eventsListHtml = `
       <div>
         <div class='event-title'>📅 ${formatDate(date)}</div>
-        <select class='event-select' id='eventSelect' onchange='selectEvent(this.value)'>
-          <option value=''>ВЫБЕРИТЕ СОБЫТИЕ</option>
-          ${events.map(ev => `<option value='${ev.id}'>${ev.name}</option>`).join('')}
-        </select>
-        <div id='eventDetail'></div>
+        <div style='margin-top: 12px;' id='eventsList'>
+    `;
+    
+    // Сортируем события по имени (опционально)
+    const sortedEvents = [...events].sort((a, b) => a.name.localeCompare(b.name));
+    
+    sortedEvents.forEach(ev => {
+      const yesCount = ev.yesVotes?.length || 0;
+      const noCount = ev.noVotes?.length || 0;
+      
+      eventsListHtml += `
+        <div class='event-list-item' data-event-id='${ev.id}' style='
+          background: #e8e4d8;
+          border-radius: 12px;
+          padding: 10px 12px;
+          margin-bottom: 8px;
+          cursor: pointer;
+          transition: all 0.2s ease;
+          border: 1px solid #d0c8b0;
+        ' onmouseover='this.style.background="#e0d8c8"' onmouseout='this.style.background="#e8e4d8"'>
+          <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
+            <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>⚔️ ${ev.name}</span>
+            <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
+              ✅ ${yesCount} | ❌ ${noCount}
+            </span>
+          </div>
+        </div>
+      `;
+    });
+    
+    eventsListHtml += `
+        </div>
+        <div id='eventDetail' style='margin-top: 16px;'></div>
       </div>
     `;
-    document.getElementById('detailsSection').innerHTML = html;
+    
+    document.getElementById('detailsSection').innerHTML = eventsListHtml;
+    
+    // Добавляем обработчики кликов на каждый элемент списка
+    document.querySelectorAll('.event-list-item').forEach(item => {
+      item.addEventListener('click', (e) => {
+        // Не даём событию всплыть, чтобы не конфликтовать
+        e.stopPropagation();
+        const eventId = parseInt(item.dataset.eventId);
+        selectedEventId = eventId;
+        showEventDetails(date, eventId);
+      });
+    });
+    
+    // Если ранее было выбрано событие и оно существует - показываем его
     if (selectedEventId && events.find(e => e.id === selectedEventId)) {
-      document.getElementById('eventSelect').value = selectedEventId;
       showEventDetails(date, selectedEventId);
     }
   }
-
-  window.selectEvent = (eventId) => {
-    if (eventId) {
-      selectedEventId = parseInt(eventId);
-      showEventDetails(selectedDate, selectedEventId);
-    }
-  };
 
   function showEventDetails(date, eventId) {
     const ev = eventsDB[date]?.find(e => e.id === eventId);
