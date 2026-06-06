@@ -183,11 +183,20 @@
       <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ">
       <textarea id="newEventDesc" placeholder="ОПИСАНИЕ"></textarea>
       <input type="text" id="newEventLink" placeholder="ССЫЛКА">
-      <select id="newEventFormat" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
+            <select id="newEventFormat" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
         <option value="">ВЫБЕРИТЕ ФОРМАТ</option>
         <option value="training">🏋️ ТРЕНИРОВКА</option>
         <option value="sunday">⛪ ВОСКРЕСНАЯ ИГРА</option>
         <option value="away">🚌 ВЫЕЗДНАЯ ИГРА</option>
+      </select>
+      <select id="newEventDuration" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
+        <option value="1">📅 ДЛИТЕЛЬНОСТЬ: 1 ДЕНЬ</option>
+        <option value="2">📅 ДЛИТЕЛЬНОСТЬ: 2 ДНЯ</option>
+        <option value="3">📅 ДЛИТЕЛЬНОСТЬ: 3 ДНЯ</option>
+        <option value="4">📅 ДЛИТЕЛЬНОСТЬ: 4 ДНЯ</option>
+        <option value="5">📅 ДЛИТЕЛЬНОСТЬ: 5 ДНЕЙ</option>
+        <option value="6">📅 ДЛИТЕЛЬНОСТЬ: 6 ДНЕЙ</option>
+        <option value="7">📅 ДЛИТЕЛЬНОСТЬ: 7 ДНЕЙ</option>
       </select>
       <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
     </div>
@@ -283,35 +292,84 @@
     return eventsDB[date];
   }
 
-    async function addEvent(date, name, desc, link, format) {
+     async function addEvent(date, name, desc, link, format, duration) {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return false; }
     if (!name.trim()) return false;
     if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return false; }
-    getEventsForDate(date).push({
-      id: Date.now(),
-      name: name.trim().toUpperCase(),
-      description: desc,
-      link: link,
-      format: format,  // training, sunday, away
-      yesVotes: [],
-      noVotes: []
-    });
+    if (!duration) duration = 1;
+    
+    const eventId = Date.now();
+    const startDate = new Date(date);
+    
+    // Добавляем событие на каждый день длительности
+    for (let i = 0; i < duration; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      const dateKey = currentDate.toISOString().split('T')[0];
+      
+      // Проверяем, есть ли уже событие с таким же ID в этот день (чтобы не дублировать)
+      const existingEvents = getEventsForDate(dateKey);
+      const alreadyExists = existingEvents.some(e => e.id === eventId);
+      
+      if (!alreadyExists) {
+        existingEvents.push({
+          id: eventId,
+          name: name.trim().toUpperCase(),
+          description: desc,
+          link: link,
+          format: format,
+          duration: duration,
+          yesVotes: [],
+          noVotes: []
+        });
+      }
+    }
+    
     await saveToFirebase();
     renderCalendar();
-    showDayEvents(date);
+    if (selectedDate) showDayEvents(selectedDate);
     return true;
   }
 
-    async function editEvent(eventId, date, newName, newDesc, newLink, newFormat) {
+      async function editEvent(eventId, date, newName, newDesc, newLink, newFormat, newDuration) {
     if (!isAdmin) return;
-    const ev = eventsDB[date]?.find(e => e.id === eventId);
-    if (ev) {
-      ev.name = newName.toUpperCase();
-      ev.description = newDesc;
-      ev.link = newLink;
-      if (newFormat) ev.format = newFormat;
+    
+    // Находим все дни, где есть это событие
+    const datesWithEvent = [];
+    for (const [d, events] of Object.entries(eventsDB)) {
+      if (events.some(e => e.id === eventId)) {
+        datesWithEvent.push(d);
+      }
     }
+    
+    // Удаляем событие из всех дней
+    for (const d of datesWithEvent) {
+      eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
+      if (eventsDB[d].length === 0) delete eventsDB[d];
+    }
+    
+    // Добавляем событие заново с новыми параметрами на новую длительность
+    const startDate = new Date(date);
+    for (let i = 0; i < newDuration; i++) {
+      const currentDate = new Date(startDate);
+      currentDate.setDate(startDate.getDate() + i);
+      const dateKey = currentDate.toISOString().split('T')[0];
+      
+      const existingEvents = getEventsForDate(dateKey);
+      existingEvents.push({
+        id: eventId,
+        name: newName.trim().toUpperCase(),
+        description: newDesc,
+        link: newLink,
+        format: newFormat,
+        duration: newDuration,
+        yesVotes: [],
+        noVotes: []
+      });
+    }
+    
     await saveToFirebase();
+    renderCalendar();
     showEventDetails(date, eventId);
   }
 
@@ -603,6 +661,15 @@
             <option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option>
             <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
           </select>
+          <select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
+            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option>
+            <option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
+            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option>
+            <option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
+            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option>
+            <option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
+            <option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option>
+          </select>
           <button onclick='saveEdit(${ev.id},"${date}")'>💾 СОХРАНИТЬ</button>
           <button onclick='toggleEditForm(${ev.id})'>❌ ОТМЕНА</button>
         </div>
@@ -621,7 +688,8 @@
         </div>
         ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
         ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
-        
+        ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.75rem; color: #8a9e6a; margin-top: 8px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
+       
         <div class='vote-columns' style='display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;'>
           
           <!-- СТОЛБИК "ИДУ" - ПРИГЛУШЁННЫЙ ЗЕЛЁНЫЙ -->
@@ -702,13 +770,14 @@
     if (form) form.classList.toggle('show');
   };
 
-    window.saveEdit = async (id, date) => {
+      window.saveEdit = async (id, date) => {
     const newName = document.getElementById(`editName-${id}`).value;
     const newDesc = document.getElementById(`editDesc-${id}`).value;
     const newLink = document.getElementById(`editLink-${id}`).value;
     const newFormat = document.getElementById(`editFormat-${id}`).value;
+    const newDuration = parseInt(document.getElementById(`editDuration-${id}`).value);
     if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
-    await editEvent(id, date, newName, newDesc, newLink, newFormat);
+    await editEvent(id, date, newName, newDesc, newLink, newFormat, newDuration);
     toggleEditForm(id);
   };
 
@@ -778,18 +847,20 @@
     }
   }
 
-    document.getElementById("addEventBtn")?.addEventListener("click", async () => {
+      document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
     const name = document.getElementById("newEventName").value;
     const format = document.getElementById("newEventFormat").value;
+    const duration = parseInt(document.getElementById("newEventDuration").value);
     if (!name.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return; }
-    await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value, format);
+    await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value, format, duration);
     document.getElementById("newEventName").value = "";
     document.getElementById("newEventDesc").value = "";
     document.getElementById("newEventLink").value = "";
     document.getElementById("newEventFormat").value = "";
+    document.getElementById("newEventDuration").value = "1";
   });
 
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
