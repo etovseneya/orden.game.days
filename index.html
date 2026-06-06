@@ -360,23 +360,40 @@
       const events = eventsDB[dateKey] || [];
       const hasEvents = events.length > 0;
       const isWeekend = (new Date(currentYear, currentMonth, d).getDay() === 0 || new Date(currentYear, currentMonth, d).getDay() === 6);
-            // Определяем цвет ячейки в зависимости от формата события
+           // Определяем цвет ячейки в зависимости от форматов событий
       let bg;
       if (hasEvents) {
-        // Берём формат первого события (если несколько событий с разными форматами — используем первый)
-        const firstEventFormat = events[0].format || 'default';
-        switch(firstEventFormat) {
-          case 'training':
-            bg = '#87CEEB';
-            break;
-          case 'sunday':
-            bg = '#DDA0DD';
-            break;
-          case 'away':
-            bg = '#e8a0a0';
-            break;
-          default:
-            bg = '#e8a0a0';
+        // Собираем уникальные форматы событий в этом дне (максимум 4)
+        const formats = [...new Set(events.map(ev => ev.format || 'away'))].slice(0, 4);
+        
+        if (formats.length === 1) {
+          // Если все события одного формата - используем один цвет
+          switch(formats[0]) {
+            case 'training': bg = '#87CEEB'; break;
+            case 'sunday': bg = '#DDA0DD'; break;
+            case 'away': bg = '#e8a0a0'; break;
+            default: bg = '#e8a0a0';
+          }
+        } else {
+          // Если форматов несколько - создаём градиент
+          const colorMap = {
+            'training': '#87CEEB',
+            'sunday': '#DDA0DD',
+            'away': '#e8a0a0'
+          };
+          
+          const colors = formats.map(f => colorMap[f] || '#e8a0a0');
+          
+          if (colors.length === 2) {
+            // Два цвета - линейный градиент слева направо
+            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 50%, ${colors[1]} 50%, ${colors[1]} 100%)`;
+          } else if (colors.length === 3) {
+            // Три цвета - деление на три части
+            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 33%, ${colors[1]} 33%, ${colors[1]} 66%, ${colors[2]} 66%, ${colors[2]} 100%)`;
+          } else {
+            // Четыре цвета - деление на четыре части
+            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 25%, ${colors[1]} 25%, ${colors[1]} 50%, ${colors[2]} 50%, ${colors[2]} 75%, ${colors[3]} 75%, ${colors[3]} 100%)`;
+          }
         }
       } else {
         bg = isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8'));
