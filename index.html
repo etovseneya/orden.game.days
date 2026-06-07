@@ -572,7 +572,7 @@
     });
   }
 
-  function showDayEvents(date) {
+   function showDayEvents(date) {
     const events = getEventsForDate(date);
     
     // Если событий нет
@@ -593,94 +593,287 @@
         <div style='margin-top: 12px;' id='eventsList'>
     `;
     
-    // Сортируем события по имени (опционально)
+    // Сортируем события по имени
     const sortedEvents = [...events].sort((a, b) => a.name.localeCompare(b.name));
     
-       sortedEvents.forEach(ev => {
+    sortedEvents.forEach(ev => {
       const yesCount = ev.yesVotes?.length || 0;
       const noCount = ev.noVotes?.length || 0;
       
       // Определяем иконку в зависимости от формата
       let formatIcon = '';
-      switch(ev.format) {
-        case 'training': formatIcon = '🏋️'; break;
-        case 'sunday': formatIcon = '⛪'; break;
-        case 'away': formatIcon = '🚌'; break;
-        default: formatIcon = '⚔️';
-      }
-      
-            // Определяем цвет фона для кликабельного события
       let eventBgColor = '';
-      let eventHoverColor = '';
       switch(ev.format) {
         case 'training':
-          eventBgColor = '#B0E0E6';  // более насыщенный небесный
-          eventHoverColor = '#9AC0CD';
+          formatIcon = '🏋️';
+          eventBgColor = '#B0E0E6';
           break;
         case 'sunday':
-          eventBgColor = '#D8BFD8';  // более насыщенный фиолетовый
-          eventHoverColor = '#C8AFC8';
+          formatIcon = '⛪';
+          eventBgColor = '#D8BFD8';
           break;
         case 'away':
-          eventBgColor = '#e8a0a0';   // красный
-          eventHoverColor = '#d08080';
+          formatIcon = '🚌';
+          eventBgColor = '#e8a0a0';
           break;
         default:
+          formatIcon = '⚔️';
           eventBgColor = '#e8e4d8';
-          eventHoverColor = '#e0d8c8';
       }
       
+      // Генерируем уникальный ID для контейнера с деталями
+      const detailId = `eventDetail-${ev.id}`;
+      
       eventsListHtml += `
-        <div class='event-list-item' data-event-id='${ev.id}' style='
-          background: ${eventBgColor};
-          border-radius: 12px;
-          padding: 10px 12px;
-          margin-bottom: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          border: 1px solid #d0c8b0;
-        ' onmouseover='this.style.background="${eventHoverColor}"' onmouseout='this.style.background="${eventBgColor}"'>
-          <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
-            <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name}</span>
-            <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
-              ✅ ${yesCount} | ❌ ${noCount}
-            </span>
+        <div class='event-list-wrapper' style='margin-bottom: 8px;'>
+          <div class='event-list-item' data-event-id='${ev.id}' data-detail-id='${detailId}' style='
+            background: ${eventBgColor};
+            border-radius: 12px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid #d0c8b0;
+          ' onmouseover='this.style.filter="brightness(0.97)"' onmouseout='this.style.filter="brightness(1)"'>
+            <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
+              <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name}</span>
+              <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
+                ✅ ${yesCount} | ❌ ${noCount}
+              </span>
+            </div>
           </div>
+          <div id='${detailId}' class='event-detail-container' style='display: none; margin-top: 4px;'></div>
         </div>
       `;
     });
     
     eventsListHtml += `
         </div>
-        <div id='eventDetail' style='margin-top: 16px;'></div>
       </div>
     `;
     
     document.getElementById('detailsSection').innerHTML = eventsListHtml;
     
-        // Добавляем обработчики кликов на каждый элемент списка (открыть/закрыть)
+    // Добавляем обработчики кликов на каждый элемент списка
     document.querySelectorAll('.event-list-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         const eventId = parseInt(item.dataset.eventId);
+        const detailId = item.dataset.detailId;
+        const detailContainer = document.getElementById(detailId);
         
-        // Если это событие уже открыто - закрываем его
-        if (selectedEventId === eventId) {
+        // Находим событие в данных
+        const ev = events.find(e => e.id === eventId);
+        if (!ev) return;
+        
+        // Если контейнер уже открыт и содержит данные - закрываем
+        if (detailContainer.style.display === 'block' && detailContainer.innerHTML !== '') {
+          detailContainer.style.display = 'none';
+          detailContainer.innerHTML = '';
           selectedEventId = null;
-          document.getElementById('eventDetail').innerHTML = '';
         } else {
-          // Иначе открываем новое событие
+          // Закрываем все другие открытые детали
+          document.querySelectorAll('.event-detail-container').forEach(container => {
+            container.style.display = 'none';
+            container.innerHTML = '';
+          });
+          // Открываем текущую
+          detailContainer.style.display = 'block';
           selectedEventId = eventId;
-          showEventDetails(date, eventId);
+          // Рендерим детали события внутрь контейнера
+          renderEventDetailsInline(date, eventId, detailId);
         }
       });
     });
     
-    // Если ранее было выбрано событие и оно существует - показываем его
-    if (selectedEventId && events.find(e => e.id === selectedEventId)) {
-      showEventDetails(date, selectedEventId);
+    // Если было выбрано событие ранее - открываем его
+        if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+      const selectedItem = document.querySelector(`.event-list-item[data-event-id='${selectedEventId}']`);
+      if (selectedItem) {
+        selectedItem.click();
+      }
     }
   }
+
+  // ========== НОВАЯ ФУНКЦИЯ ==========
+  function renderEventDetailsInline(date, eventId, containerId) {
+    const ev = eventsDB[date]?.find(e => e.id === eventId);
+    if (!ev) return;
+    
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    const yesList = [...(ev.yesVotes || [])].sort();
+    const noList = [...(ev.noVotes || [])].sort();
+    const userName = localStorage.getItem('userName') || "";
+    const hasYes = yesList.includes(userName);
+    const hasNo = noList.includes(userName);
+
+    // Определяем иконку и цвет для формата события
+    let formatIcon = '';
+    let formatBg = '';
+    switch(ev.format) {
+      case 'training':
+        formatIcon = '🏋️';
+        formatBg = '#87CEEB';
+        break;
+      case 'sunday':
+        formatIcon = '⛪';
+        formatBg = '#DDA0DD';
+        break;
+      case 'away':
+        formatIcon = '🚌';
+        formatBg = '#e8a0a0';
+        break;
+      default:
+        formatIcon = '⚔️';
+        formatBg = '#e8a0a0';
+    }
+
+    // Текст для объединённой кнопки
+    let voteStatusText = '';
+    if (hasYes) voteStatusText = '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | НЕПРАВИЛЬНО?';
+    else if (hasNo) voteStatusText = '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | НЕПРАВИЛЬНО?';
+    else voteStatusText = '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ';
+
+    let adminBtns = '';
+    if (isAdmin) {
+      adminBtns = `
+        <div class='action-btns' style='display: flex; gap: 8px; margin-top: 12px;'>
+          <button class='action-btn edit' onclick='toggleEditForm(${ev.id})' style='background: #8aae6a; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>✏️ РЕДАКТИРОВАТЬ</button>
+          <button class='action-btn delete' onclick='if(confirm("УДАЛИТЬ?")) deleteEvent(${ev.id},"${date}")' style='background: #c08080; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>🗑 УДАЛИТЬ</button>
+        </div>
+        <div id='editForm-${ev.id}' class='edit-form' style='background: #e8e4d8; border-radius: 14px; padding: 12px; margin-top: 12px; display: none;'>
+          <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>
+          <textarea id='editDesc-${ev.id}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>${ev.description || ''}</textarea>
+          <input type='text' id='editLink-${ev.id}' value='${ev.link || ''}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>
+          <select id='editFormat-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
+            <option value='training' ${ev.format === 'training' ? 'selected' : ''}>🏋️ ТРЕНИРОВКА</option>
+            <option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option>
+            <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
+          </select>
+          <select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
+            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option>
+            <option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
+            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option>
+            <option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
+            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option>
+            <option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
+            <option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option>
+          </select>
+          <button onclick='saveEdit(${ev.id},"${date}")' style='background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>💾 СОХРАНИТЬ</button>
+          <button onclick='toggleEditForm(${ev.id})' style='background: #c0b8a0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>❌ ОТМЕНА</button>
+        </div>
+      `;
+    }
+
+    container.innerHTML = `
+      <div style='background: #f5f0e8; border-radius: 12px; padding: 12px; border-left: 3px solid ${formatBg}; margin-bottom: 4px;'>
+        ${ev.description ? `<div class='event-desc' style='font-size: 0.8rem; color: #6a7b5a; margin-bottom: 8px;'>📝 ${ev.description}</div>` : ''}
+        ${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}
+        ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
+        
+        <div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'>
+          
+          <!-- СТОЛБИК "УЧАСТВУЮ" -->
+          <div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
+            <button onclick='voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='
+              background: ${hasYes ? '#6b8c5e' : '#5a7a4e'};
+              color: white;
+              border: none;
+              border-radius: 30px;
+              padding: 8px 12px;
+              font-size: 0.75rem;
+              font-weight: bold;
+              cursor: pointer;
+              margin-bottom: 10px;
+              width: 100%;
+              opacity: ${hasYes ? 0.7 : 1};
+            '>✅ УЧАСТВУЮ</button>
+            <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div>
+            <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
+              ${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #e0ffe0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
+            </div>
+          </div>
+          
+          <!-- СТОЛБИК "НЕ УЧАСТВУЮ" -->
+          <div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
+            <button onclick='voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='
+              background: ${hasNo ? '#9a6a5a' : '#8a5a4a'};
+              color: white;
+              border: none;
+              border-radius: 30px;
+              padding: 8px 12px;
+              font-size: 0.75rem;
+              font-weight: bold;
+              cursor: pointer;
+              margin-bottom: 10px;
+              width: 100%;
+              opacity: ${hasNo ? 0.7 : 1};
+            '>❌ НЕ УЧАСТВУЮ</button>
+            <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div>
+            <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
+              ${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #ffe0e0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
+            </div>
+          </div>
+        </div>
+        
+        <!-- ОБЪЕДИНЁННАЯ КНОПКА -->
+        <div style='margin-top: 12px; width: 100%;'>
+          <button onclick='changeVoteInline(${ev.id},"${date}", "${containerId}")' style='
+            background: #c0b8a0;
+            border: none;
+            border-radius: 30px;
+            padding: 6px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            width: 100%;
+            color: #4a5b3a;
+          '>${voteStatusText}</button>
+        </div>
+        
+        ${adminBtns}
+      </div>
+    `;
+  }
+    window.voteClickInline = async (id, date, type, containerId) => {
+    let name = localStorage.getItem('userName');
+    if (!name) {
+      name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
+      if (name && name.trim()) {
+        localStorage.setItem('userName', name.trim().toUpperCase());
+      } else { return; }
+    }
+    await vote(id, date, name.trim().toUpperCase(), type);
+    renderEventDetailsInline(date, id, containerId);
+    renderCalendar();
+  };
+
+  window.changeVoteInline = async (id, date, containerId) => {
+    let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ", localStorage.getItem('userName') || "");
+    if (name && name.trim()) {
+      const uname = name.trim().toUpperCase();
+      
+      const datesWithEvent = [];
+      for (const [d, events] of Object.entries(eventsDB)) {
+        if (events.some(e => e.id === id)) {
+          datesWithEvent.push(d);
+        }
+      }
+      
+      for (const d of datesWithEvent) {
+        const ev = eventsDB[d]?.find(e => e.id === id);
+        if (ev) {
+          ev.yesVotes = ev.yesVotes.filter(v => v !== uname);
+          ev.noVotes = ev.noVotes.filter(v => v !== uname);
+        }
+      }
+      
+      await saveToFirebase();
+      renderCalendar();
+      renderEventDetailsInline(date, id, containerId);
+      alert("ГОЛОС УДАЛЕН!");
+    }
+  };
 
  function showEventDetails(date, eventId) {
     const ev = eventsDB[date]?.find(e => e.id === eventId);
