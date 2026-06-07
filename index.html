@@ -404,7 +404,7 @@
     showEventDetails(date, eventId);
   }
 
-    async function vote(eventId, date, userName, type) {
+      async function vote(eventId, date, userName, type) {
     // Находим все дни, где есть это событие
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
@@ -431,8 +431,17 @@
     
     // Обновляем отображение
     renderCalendar();
-    if (selectedEventId === eventId && selectedDate) {
-      showEventDetails(selectedDate, eventId);
+    if (selectedDate) {
+      showDayEvents(selectedDate);
+      // После перерисовки нужно снова открыть текущее событие, если оно было открыто
+      if (selectedEventId) {
+        setTimeout(() => {
+          const selectedItem = document.querySelector(`.event-list-item[data-event-id='${selectedEventId}']`);
+          if (selectedItem) {
+            selectedItem.click();
+          }
+        }, 50);
+      }
     }
   }
 
@@ -835,7 +844,7 @@
       </div>
     `;
   }
-    window.voteClickInline = async (id, date, type, containerId) => {
+      window.voteClickInline = async (id, date, type, containerId) => {
     let name = localStorage.getItem('userName');
     if (!name) {
       name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
@@ -844,11 +853,14 @@
       } else { return; }
     }
     await vote(id, date, name.trim().toUpperCase(), type);
-    renderEventDetailsInline(date, id, containerId);
+    // Обновляем календарь и перерисовываем список событий для текущего дня
     renderCalendar();
+    if (selectedDate) {
+      showDayEvents(selectedDate);
+    }
   };
 
-  window.changeVoteInline = async (id, date, containerId) => {
+    window.changeVoteInline = async (id, date, containerId) => {
     let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ", localStorage.getItem('userName') || "");
     if (name && name.trim()) {
       const uname = name.trim().toUpperCase();
@@ -870,7 +882,9 @@
       
       await saveToFirebase();
       renderCalendar();
-      renderEventDetailsInline(date, id, containerId);
+      if (selectedDate) {
+        showDayEvents(selectedDate);
+      }
       alert("ГОЛОС УДАЛЕН!");
     }
   };
