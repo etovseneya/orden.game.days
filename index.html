@@ -895,7 +895,7 @@
       </div>
     `;
   }
-      window.voteClickInline = async (id, date, type, containerId) => {
+        window.voteClickInline = async (id, date, type, containerId) => {
     let name = localStorage.getItem('userName');
     if (!name) {
       name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
@@ -904,10 +904,21 @@
       } else { return; }
     }
     await vote(id, date, name.trim().toUpperCase(), type);
-    // Обновляем календарь и перерисовываем список событий для текущего дня
+    
+    // Обновляем календарь
     renderCalendar();
+    
+    // Перерисовываем список событий для текущего дня
     if (selectedDate) {
       showDayEvents(selectedDate);
+      
+      // После перерисовки снова открываем это же событие
+      setTimeout(() => {
+        const selectedItem = document.querySelector(`.event-list-item[data-event-id='${id}']`);
+        if (selectedItem) {
+          selectedItem.click();
+        }
+      }, 50);
     }
   };
 
@@ -1097,7 +1108,7 @@
     if (form) form.classList.toggle('show');
   };
 
-      window.saveEdit = async (id, date) => {
+        window.saveEdit = async (id, date) => {
     const newName = document.getElementById(`editName-${id}`).value;
     const newDesc = document.getElementById(`editDesc-${id}`).value;
     const newLink = document.getElementById(`editLink-${id}`).value;
@@ -1106,6 +1117,11 @@
     if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     await editEvent(id, date, newName, newDesc, newLink, newFormat, newDuration);
     toggleEditForm(id);
+    // Обновляем отображение после редактирования
+    renderCalendar();
+    if (selectedDate) {
+      showDayEvents(selectedDate);
+    }
   };
 
   window.voteClick = async (id, date, type) => {
