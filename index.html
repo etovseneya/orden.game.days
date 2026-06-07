@@ -178,27 +178,47 @@
     <div style="text-align: center; padding: 20px; color: #b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>
   </div>
 
-    <div id="adminForms" style="display: none;">
-    <div class="add-form">
-      <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ">
-      <textarea id="newEventDesc" placeholder="ОПИСАНИЕ"></textarea>
-      <input type="text" id="newEventLink" placeholder="ССЫЛКА">
-            <select id="newEventFormat" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
-        <option value="">ВЫБЕРИТЕ ФОРМАТ</option>
-        <option value="training">🏋️ ТРЕНИРОВКА</option>
-        <option value="sunday">⛪ ВОСКРЕСНАЯ ИГРА</option>
-        <option value="away">🚌 ВЫЕЗДНАЯ ИГРА</option>
-      </select>
-      <select id="newEventDuration" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
-        <option value="1">📅 ДЛИТЕЛЬНОСТЬ: 1 ДЕНЬ</option>
-        <option value="2">📅 ДЛИТЕЛЬНОСТЬ: 2 ДНЯ</option>
-        <option value="3">📅 ДЛИТЕЛЬНОСТЬ: 3 ДНЯ</option>
-        <option value="4">📅 ДЛИТЕЛЬНОСТЬ: 4 ДНЯ</option>
-        <option value="5">📅 ДЛИТЕЛЬНОСТЬ: 5 ДНЕЙ</option>
-        <option value="6">📅 ДЛИТЕЛЬНОСТЬ: 6 ДНЕЙ</option>
-        <option value="7">📅 ДЛИТЕЛЬНОСТЬ: 7 ДНЕЙ</option>
-      </select>
-      <button id="addEventBtn">➕ ДОБАВИТЬ СОБЫТИЕ</button>
+      <div id="adminForms" style="display: none;">
+    <!-- Кнопка для показа формы добавления -->
+    <button id="showAddFormBtn" style="
+      background: #8a9e6a;
+      color: white;
+      border: none;
+      border-radius: 30px;
+      padding: 10px 16px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: 100%;
+      margin-bottom: 12px;
+      font-weight: bold;
+    ">➕ ДОБАВИТЬ СОБЫТИЕ</button>
+    
+    <!-- Скрытая форма -->
+    <div id="addEventForm" style="display: none; background: #e8e4d8; border-radius: 16px; padding: 12px; margin-top: 8px;">
+      <div class="add-form">
+        <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ">
+        <textarea id="newEventDesc" placeholder="ОПИСАНИЕ"></textarea>
+        <input type="text" id="newEventLink" placeholder="ССЫЛКА">
+        <select id="newEventFormat" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
+          <option value="">ВЫБЕРИТЕ ФОРМАТ</option>
+          <option value="training">🏋️ ТРЕНИРОВКА</option>
+          <option value="sunday">⛪ ВОСКРЕСНАЯ ИГРА</option>
+          <option value="away">🚌 ВЫЕЗДНАЯ ИГРА</option>
+        </select>
+        <select id="newEventDuration" style="padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0;">
+          <option value="1">📅 ДЛИТЕЛЬНОСТЬ: 1 ДЕНЬ</option>
+          <option value="2">📅 ДЛИТЕЛЬНОСТЬ: 2 ДНЯ</option>
+          <option value="3">📅 ДЛИТЕЛЬНОСТЬ: 3 ДНЯ</option>
+          <option value="4">📅 ДЛИТЕЛЬНОСТЬ: 4 ДНЯ</option>
+          <option value="5">📅 ДЛИТЕЛЬНОСТЬ: 5 ДНЕЙ</option>
+          <option value="6">📅 ДЛИТЕЛЬНОСТЬ: 6 ДНЕЙ</option>
+          <option value="7">📅 ДЛИТЕЛЬНОСТЬ: 7 ДНЕЙ</option>
+        </select>
+        <div style="display: flex; gap: 8px; margin-top: 8px;">
+          <button id="addEventBtn" style="background: #8a9e6a; color: white; border: none; padding: 10px; border-radius: 14px; cursor: pointer; flex: 1;">✅ СОХРАНИТЬ</button>
+          <button id="cancelAddEventBtn" style="background: #c0b8a0; color: #4a5b3a; border: none; padding: 10px; border-radius: 14px; cursor: pointer; flex: 1;">❌ ОТМЕНА</button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -915,7 +935,7 @@
     }
   }
 
-      document.getElementById("addEventBtn")?.addEventListener("click", async () => {
+        document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
     const name = document.getElementById("newEventName").value;
@@ -924,11 +944,19 @@
     if (!name.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return; }
     await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value, format, duration);
+    
+    // Очищаем поля
     document.getElementById("newEventName").value = "";
     document.getElementById("newEventDesc").value = "";
     document.getElementById("newEventLink").value = "";
     document.getElementById("newEventFormat").value = "";
     document.getElementById("newEventDuration").value = "1";
+    
+    // Скрываем форму и показываем кнопку
+    const addEventForm = document.getElementById('addEventForm');
+    const showAddFormBtn = document.getElementById('showAddFormBtn');
+    if (addEventForm) addEventForm.style.display = 'none';
+    if (showAddFormBtn) showAddFormBtn.style.display = 'block';
   });
 
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
@@ -948,6 +976,29 @@
     renderCalendar();
     document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
   });
+    // Управление формой добавления события
+  const showAddFormBtn = document.getElementById('showAddFormBtn');
+  const addEventForm = document.getElementById('addEventForm');
+  const cancelAddEventBtn = document.getElementById('cancelAddEventBtn');
+  
+  if (showAddFormBtn) {
+    showAddFormBtn.addEventListener('click', () => {
+      addEventForm.style.display = 'block';
+      showAddFormBtn.style.display = 'none';
+    });
+  }
+  
+  if (cancelAddEventBtn) {
+    cancelAddEventBtn.addEventListener('click', () => {
+      addEventForm.style.display = 'none';
+      showAddFormBtn.style.display = 'block';
+      document.getElementById("newEventName").value = "";
+      document.getElementById("newEventDesc").value = "";
+      document.getElementById("newEventLink").value = "";
+      document.getElementById("newEventFormat").value = "";
+      document.getElementById("newEventDuration").value = "1";
+    });
+  }
 
   async function init() {
     await loadFromFirebase();
