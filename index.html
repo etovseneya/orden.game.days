@@ -682,7 +682,7 @@
     }
   }
 
-  function showEventDetails(date, eventId) {
+ function showEventDetails(date, eventId) {
     const ev = eventsDB[date]?.find(e => e.id === eventId);
     if (!ev) return;
     const yesList = [...(ev.yesVotes || [])].sort();
@@ -714,8 +714,8 @@
 
     // Текст для объединённой кнопки
     let voteStatusText = '';
-    if (hasYes) voteStatusText = '✅ ВЫ ПРОГОЛОСОВАЛИ "ИДУ" | НЕПРАВИЛЬНО?';
-    else if (hasNo) voteStatusText = '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ ИДУ" | НЕПРАВИЛЬНО?';
+    if (hasYes) voteStatusText = '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | ИЗМЕНИТЬ ГОЛОС?';
+    else if (hasNo) voteStatusText = '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | ИЗМЕНИТЬ ГОЛОС?';
     else voteStatusText = '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ';
 
     let adminBtns = '';
@@ -762,55 +762,51 @@
         ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
         ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
         ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.75rem; color: #8a9e6a; margin-top: 8px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
-       
+        
         <div class='vote-columns' style='display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;'>
           
-          <!-- СТОЛБИК "ИДУ" - ПРИГЛУШЁННЫЙ ЗЕЛЁНЫЙ -->
+          <!-- СТОЛБИК "УЧАСТВУЮ" -->
           <div class='vote-col green' style='flex: 1; background: #8bac7c; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(0,0,0,0.1);'>
-            <div class='vote-col-title' style='font-weight: bold; text-align: center; padding: 8px; font-size: 0.85rem; background: rgba(255,255,255,0.2); border-radius: 12px; margin-bottom: 12px; color: white;'>
-              ✅ ИДУ (${yesList.length})
-            </div>
-            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px; margin-bottom: 8px;'>
-              ${yesList.length ? yesList.map((n,i) => `<div class='attendee-item' style='padding: 6px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #e0ffe0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
-            </div>
             <button class='vote-btn yes ${hasYes ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","yes")' style='
               background: ${hasYes ? '#6b8c5e' : '#5a7a4e'};
               color: white;
               border: none;
               border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
+              padding: 10px 12px;
+              font-size: 0.8rem;
               font-weight: bold;
               cursor: pointer;
-              margin-top: 8px;
+              margin-bottom: 12px;
               width: 100%;
               opacity: ${hasYes ? 0.7 : 1};
               transition: all 0.2s ease;
-            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>✅ ПРОГОЛОСОВАТЬ "ИДУ"</button>
+            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>✅ УЧАСТВУЮ</button>
+            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px;'>
+              <div style='font-weight: bold; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 6px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div>
+              ${yesList.length ? yesList.map((n,i) => `<div class='attendee-item' style='padding: 5px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #e0ffe0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
+            </div>
           </div>
           
-          <!-- СТОЛБИК "НЕ ИДУ" - ПРИГЛУШЁННЫЙ КРАСНЫЙ -->
+          <!-- СТОЛБИК "НЕ УЧАСТВУЮ" -->
           <div class='vote-col red' style='flex: 1; background: #b88a7a; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(0,0,0,0.1);'>
-            <div class='vote-col-title' style='font-weight: bold; text-align: center; padding: 8px; font-size: 0.85rem; background: rgba(255,255,255,0.2); border-radius: 12px; margin-bottom: 12px; color: white;'>
-              ❌ НЕ ИДУ (${noList.length})
-            </div>
-            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; padding: 6px; margin-bottom: 8px;'>
-              ${noList.length ? noList.map((n,i) => `<div class='attendee-item' style='padding: 6px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #ffe0e0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
-            </div>
             <button class='vote-btn no ${hasNo ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","no")' style='
               background: ${hasNo ? '#9a6a5a' : '#8a5a4a'};
               color: white;
               border: none;
               border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
+              padding: 10px 12px;
+              font-size: 0.8rem;
               font-weight: bold;
               cursor: pointer;
-              margin-top: 8px;
+              margin-bottom: 12px;
               width: 100%;
               opacity: ${hasNo ? 0.7 : 1};
               transition: all 0.2s ease;
-            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>❌ ПРОГОЛОСОВАТЬ "НЕ ИДУ"</button>
+            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>❌ НЕ УЧАСТВУЮ</button>
+            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px;'>
+              <div style='font-weight: bold; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 6px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div>
+              ${noList.length ? noList.map((n,i) => `<div class='attendee-item' style='padding: 5px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #ffe0e0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
+            </div>
           </div>
         </div>
         
