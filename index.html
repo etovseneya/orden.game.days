@@ -8,7 +8,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
   <style>
-    /* ВСЕ ВАШИ СТИЛИ */
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
     body { background: #e8e0d0; padding: 12px; min-height: 100vh; }
     .container { max-width: 100%; margin: 0 auto; background: #f5f0e8; border-radius: 24px; padding: 16px; border: 1px solid #d4c9b0; }
@@ -25,11 +24,9 @@
     .weekday { text-align: center; padding: 8px 2px; background: #d8d0c0; border-radius: 12px; font-size: 0.7rem; font-weight: 600; }
     .day-cell { border-radius: 12px; min-height: 85px; padding: 5px 3px; cursor: pointer; border: 1px solid #d0c8b0; background: #faf8f0; position: relative; overflow-y: auto; }
     .day-cell.has-event { border: 2px solid #c04040 !important; }
-/* background убираем, чтобы не перебивал цвета форматов */
     .viking-icon { position: absolute; top: 2px; right: 2px; font-size: 0.9rem; }
     .day-number { font-weight: bold; font-size: 0.8rem; width: 26px; text-align: center; border-radius: 30px; padding: 2px 0; }
     .event-badge { background: #8a9e6a; color: white; border-radius: 8px; padding: 2px 4px; font-size: 0.55rem; margin: 2px 0; pointer-events: none; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .vote-info { font-size: 0.55rem; background: rgba(0,0,0,0.1); border-radius: 8px; padding: 2px; text-align: center; margin-top: 2px; }
     .empty-day { text-align: center; margin-top: 25px; font-size: 0.65rem; color: #b0a890; }
     .details-section { background: #f0ece0; border-radius: 20px; padding: 16px; margin-top: 16px; }
     .event-title { font-size: 1.2rem; font-weight: bold; color: #4a5b3a; }
@@ -56,76 +53,49 @@
     .edit-form input, .edit-form textarea { width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0; }
     .edit-form button { background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
     .change-btn { background: #c0b8a0; border: none; border-radius: 30px; padding: 6px; font-size: 0.7rem; cursor: pointer; width: 100%; margin-top: 12px; }
-    .current-vote { text-align: center; font-size: 0.7rem; font-weight: bold; padding: 6px; border-radius: 20px; margin-top: 12px; }
-    .current-vote.yes { background: #d0e8c0; color: #4a6a2a; }
-    .current-vote.no { background: #e8c0c0; color: #a04040; }
     .event-select { width: 100%; padding: 10px; border-radius: 14px; margin: 10px 0; border: 1px solid #d0c8b0; }
     .add-form { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .add-form input, .add-form textarea { padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0; }
     .add-form button { background: #8a9e6a; color: white; border: none; padding: 10px; border-radius: 14px; cursor: pointer; }
     .login-box {
-  background: transparent;
-  padding: 8px 0;
-  margin-top: 16px;
-  text-align: center;
-  border-top: 1px dashed #d0c8b0;
-  opacity: 0.4;
-  transition: opacity 0.3s ease;
-}
-.login-box:hover {
-  opacity: 1;
-}
-.login-box > div {
-  color: #b0a890;
-  font-size: 0.65rem;
-  margin-bottom: 6px;
-}
-.login-box input {
-  padding: 4px 8px;
-  width: auto;
-  display: inline-block;
-  margin: 0 4px;
-  font-size: 0.7rem;
-  border: 1px solid #d0c8b0;
-  border-radius: 16px;
-  background: #faf8f0;
-}
-.login-box input:first-of-type {
-  width: 100px;
-}
-.login-box input:last-of-type {
-  width: 100px;
-}
-.login-box button {
-  background: #c0b8a0;
-  color: #4a5b3a;
-  border: none;
-  padding: 4px 12px;
-  border-radius: 20px;
-  font-size: 0.65rem;
-  cursor: pointer;
-  display: inline-block;
-  margin-top: 0;
-}
-.login-box button:hover {
-  background: #8a9e6a;
-  color: white;
-}
+      background: transparent;
+      padding: 8px 0;
+      margin-top: 16px;
+      text-align: center;
+      border-top: 1px dashed #d0c8b0;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+    .login-box:hover { opacity: 1; }
+    .login-box > div { color: #b0a890; font-size: 0.65rem; margin-bottom: 6px; }
+    .login-box input {
+      padding: 4px 8px;
+      width: auto;
+      display: inline-block;
+      margin: 0 4px;
+      font-size: 0.7rem;
+      border: 1px solid #d0c8b0;
+      border-radius: 16px;
+      background: #faf8f0;
+    }
+    .login-box input:first-of-type { width: 100px; }
+    .login-box input:last-of-type { width: 100px; }
+    .login-box button {
+      background: #c0b8a0;
+      color: #4a5b3a;
+      border: none;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.65rem;
+      cursor: pointer;
+      display: inline-block;
+      margin-top: 0;
+    }
+    .login-box button:hover { background: #8a9e6a; color: white; }
     .refresh-note { text-align: center; font-size: 0.65rem; color: #8a9e6a; margin-top: 8px; }
-    @media (max-width: 500px) { .day-cell { min-height: 70px; } .event-badge { font-size: 0.5rem; white-space: normal; } .vote-buttons { gap: 8px; } .vote-btn { padding: 4px 12px; font-size: 0.7rem; } }   /* Стили для списка событий */
-    .event-list-item {
-      transition: all 0.2s ease;
-    }
-    .event-list-item:active {
-      transform: scale(0.99);
-    }
-     /* Цвета для форматов событий */
-    .event-format-training { background: #87CEEB !important; }
-    .event-format-sunday { background: #DDA0DD !important; }
-    .event-format-away { background: #e8a0a0 !important; }
-    .event-format-default { background: #e8a0a0 !important; }
-
-    /* Легенда под календарем */
+    @media (max-width: 500px) { .day-cell { min-height: 70px; } .event-badge { font-size: 0.5rem; white-space: normal; } .vote-buttons { gap: 8px; } .vote-btn { padding: 4px 12px; font-size: 0.7rem; } }
+    .event-list-item { transition: all 0.2s ease; }
+    .event-list-item:active { transform: scale(0.99); }
     .legend {
       display: flex;
       justify-content: center;
@@ -136,64 +106,34 @@
       border-radius: 20px;
       flex-wrap: wrap;
     }
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 0.7rem;
-    }
-    .legend-color {
-      width: 20px;
-      height: 20px;
-      border-radius: 6px;
-    }
+    .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; }
+    .legend-color { width: 20px; height: 20px; border-radius: 6px; }
   </style>
 </head>
 <body>
 <div class="container">
   <h1>⚔️ КАЛЕНДАРЬ ИГР</h1>
   <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
-
   <div class="status-bar" id="statusBar">🔄 ПОДКЛЮЧЕНИЕ К FIREBASE...</div>
-
   <div class="admin-panel" id="adminPanel">
     <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ</button>
   </div>
-
   <div class="month-nav">
     <button id="prevMonthBtn">◀</button>
     <span class="current-month" id="currentMonthLabel"></span>
     <button id="nextMonthBtn">▶</button>
   </div>
-
-  <div class="calendar-grid" id="calendarGrid"></div>  
-  <!-- Легенда цветов -->
+  <div class="calendar-grid" id="calendarGrid"></div>
   <div class="legend">
     <div class="legend-item"><div class="legend-color" style="background: #87CEEB;"></div><span>🏋️ Тренировка</span></div>
     <div class="legend-item"><div class="legend-color" style="background: #DDA0DD;"></div><span>⛪ Воскресная игра</span></div>
     <div class="legend-item"><div class="legend-color" style="background: #e8a0a0;"></div><span>🚌 Выездная игра</span></div>
   </div>
-
   <div class="details-section" id="detailsSection">
     <div style="text-align: center; padding: 20px; color: #b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>
   </div>
-
-      <div id="adminForms" style="display: none;">
-    <!-- Кнопка для показа формы добавления -->
-    <button id="showAddFormBtn" style="
-      background: #8a9e6a;
-      color: white;
-      border: none;
-      border-radius: 30px;
-      padding: 10px 16px;
-      font-size: 0.8rem;
-      cursor: pointer;
-      width: 100%;
-      margin-bottom: 12px;
-      font-weight: bold;
-    ">➕ ДОБАВИТЬ СОБЫТИЕ</button>
-    
-    <!-- Скрытая форма -->
+  <div id="adminForms" style="display: none;">
+    <button id="showAddFormBtn" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 10px 16px; font-size: 0.8rem; cursor: pointer; width: 100%; margin-bottom: 12px; font-weight: bold;">➕ ДОБАВИТЬ СОБЫТИЕ</button>
     <div id="addEventForm" style="display: none; background: #e8e4d8; border-radius: 16px; padding: 12px; margin-top: 8px;">
       <div class="add-form">
         <input type="text" id="newEventName" placeholder="НАЗВАНИЕ ИГРЫ">
@@ -221,20 +161,17 @@
       </div>
     </div>
   </div>
-
   <div id="loginBox" class="login-box">
     <div>🔐 ДОСТУП К РЕЖИМУ РЕДАКТИРОВАНИЯ</div>
     <input type="password" id="adminCode" placeholder="КОД ДОСТУПА">
     <input type="text" id="adminNick" placeholder="ВАШ ПОЗЫВНОЙ">
     <button onclick="checkAdmin()">ВОЙТИ</button>
   </div>
-
   <div class="refresh-note">🔄 ВСЕ ИЗМЕНЕНИЯ СОХРАНЯЮТСЯ АВТОМАТИЧЕСКИ</div>
   <div class="refresh-note" id="saveIndicator" style="display:none;">💾 Сохранено: <span id="lastSaved">—</span></div>
 </div>
 
 <script>
-  // ========== ВАШИ НАСТРОЙКИ FIREBASE ==========
   const firebaseConfig = {
     apiKey: "AIzaSyAgS4pyfIEDe5om_dhFeAhTMc9NnxYq_yQ",
     authDomain: "game-calendar-7800a.firebaseapp.com",
@@ -243,14 +180,11 @@
     messagingSenderId: "687344707531",
     appId: "1:687344707531:web:03c1fe16598782169a384e"
   };
-  // ===============================================
 
-  // Инициализация Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
   const ADMIN_PASSWORD = "orden.sparta";
-
   let eventsDB = {};
   let currentYear = 2026, currentMonth = 5;
   let selectedDate = "", selectedEventId = null;
@@ -260,9 +194,8 @@
     let p = dateStr.split('-');
     return `${p[2]}.${p[1]}.${p[0].slice(2)}`;
   }
-  
-    function isPastEvent(eventDate) {
-    // eventDate в формате "YYYY-MM-DD"
+
+  function isPastEvent(eventDate) {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     const eventDay = new Date(eventDate);
@@ -276,16 +209,12 @@
     statusBar.style.color = isError ? '#a04040' : '#5a6b4a';
   }
 
-  // ЗАГРУЗКА ДАННЫХ ИЗ FIREBASE
   async function loadFromFirebase() {
     updateStatus("🔄 ЗАГРУЗКА ДАННЫХ...");
     try {
       const snapshot = await db.collection("events").get();
       eventsDB = {};
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        eventsDB[doc.id] = data.events || [];
-      });
+      snapshot.forEach(doc => { eventsDB[doc.id] = doc.data().events || []; });
       updateStatus(`✅ ЗАГРУЖЕНО ${Object.keys(eventsDB).length} ДНЕЙ С СОБЫТИЯМИ`);
       renderCalendar();
       if (selectedDate) showDayEvents(selectedDate);
@@ -295,21 +224,17 @@
     }
   }
 
-  // СОХРАНЕНИЕ В FIREBASE
   async function saveToFirebase() {
     try {
       const batch = db.batch();
       for (const [date, events] of Object.entries(eventsDB)) {
-        const docRef = db.collection("events").doc(date);
-        batch.set(docRef, { events: events, updatedAt: new Date() });
+        batch.set(db.collection("events").doc(date), { events: events, updatedAt: new Date() });
       }
       await batch.commit();
       updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
       document.getElementById('saveIndicator').style.display = 'block';
       document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString();
-      setTimeout(() => {
-        document.getElementById('saveIndicator').style.display = 'none';
-      }, 2000);
+      setTimeout(() => document.getElementById('saveIndicator').style.display = 'none', 2000);
     } catch (error) {
       console.error("Ошибка сохранения:", error);
       updateStatus("❌ ОШИБКА СОХРАНЕНИЯ", true);
@@ -321,59 +246,38 @@
     return eventsDB[date];
   }
 
-     async function addEvent(date, name, desc, link, format, duration) {
+  async function addEvent(date, name, desc, link, format, duration) {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return false; }
     if (!name.trim()) return false;
     if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return false; }
     if (!duration) duration = 1;
-    
     const eventId = Date.now();
     const startDate = new Date(date);
-    
-    // Добавляем событие на каждый день длительности
     for (let i = 0; i < duration; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
       const dateKey = currentDate.toISOString().split('T')[0];
-      
-      // Проверяем, есть ли уже событие с таким же ID в этот день (чтобы не дублировать)
       const existingEvents = getEventsForDate(dateKey);
-      const alreadyExists = existingEvents.some(e => e.id === eventId);
-      
-      if (!alreadyExists) {
+      if (!existingEvents.some(e => e.id === eventId)) {
         existingEvents.push({
-          id: eventId,
-          name: name.trim().toUpperCase(),
-          description: desc,
-          link: link,
-          format: format,
-          duration: duration,
-          yesVotes: [],
-          noVotes: []
+          id: eventId, name: name.trim().toUpperCase(), description: desc, link: link,
+          format: format, duration: duration, yesVotes: [], noVotes: []
         });
       }
     }
-    
     await saveToFirebase();
     renderCalendar();
     if (selectedDate) showDayEvents(selectedDate);
     return true;
   }
 
-      async function editEvent(eventId, date, newName, newDesc, newLink, newFormat, newDuration) {
+  async function editEvent(eventId, date, newName, newDesc, newLink, newFormat, newDuration) {
     if (!isAdmin) return;
-    
-    // Находим все дни, где есть это событие
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) {
-        datesWithEvent.push(d);
-      }
+      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
     }
-    
-    // Получаем оригинальное событие (для сохранения голосов)
-    let originalYesVotes = [];
-    let originalNoVotes = [];
+    let originalYesVotes = [], originalNoVotes = [];
     if (datesWithEvent.length > 0) {
       const originalEvent = eventsDB[datesWithEvent[0]]?.find(e => e.id === eventId);
       if (originalEvent) {
@@ -381,48 +285,30 @@
         originalNoVotes = originalEvent.noVotes || [];
       }
     }
-    
-    // Удаляем событие из всех дней
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
       if (eventsDB[d].length === 0) delete eventsDB[d];
     }
-    
-    // Добавляем событие заново с новыми параметрами на новую длительность
     const startDate = new Date(date);
     for (let i = 0; i < newDuration; i++) {
       const currentDate = new Date(startDate);
       currentDate.setDate(startDate.getDate() + i);
       const dateKey = currentDate.toISOString().split('T')[0];
-      
-      const existingEvents = getEventsForDate(dateKey);
-      existingEvents.push({
-        id: eventId,
-        name: newName.trim().toUpperCase(),
-        description: newDesc,
-        link: newLink,
-        format: newFormat,
-        duration: newDuration,
-        yesVotes: [...originalYesVotes],  // сохраняем голоса
-        noVotes: [...originalNoVotes]      // сохраняем голоса
+      getEventsForDate(dateKey).push({
+        id: eventId, name: newName.trim().toUpperCase(), description: newDesc, link: newLink,
+        format: newFormat, duration: newDuration, yesVotes: [...originalYesVotes], noVotes: [...originalNoVotes]
       });
     }
-    
     await saveToFirebase();
     renderCalendar();
-    showEventDetails(date, eventId);
+    showDayEvents(date);
   }
 
-      async function vote(eventId, date, userName, type) {
-    // Находим все дни, где есть это событие
+  async function vote(eventId, date, userName, type) {
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) {
-        datesWithEvent.push(d);
-      }
+      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
     }
-    
-    // Обновляем голос во всех днях, где есть это событие
     for (const d of datesWithEvent) {
       const ev = eventsDB[d]?.find(e => e.id === eventId);
       if (ev) {
@@ -435,76 +321,40 @@
         ev.noVotes.sort();
       }
     }
-    
     await saveToFirebase();
-    
-    // Обновляем отображение
     renderCalendar();
     if (selectedDate) {
       showDayEvents(selectedDate);
-      // После перерисовки нужно снова открыть текущее событие, если оно было открыто
       if (selectedEventId) {
         setTimeout(() => {
           const selectedItem = document.querySelector(`.event-list-item[data-event-id='${selectedEventId}']`);
-          if (selectedItem) {
-            selectedItem.click();
-          }
+          if (selectedItem) selectedItem.click();
         }, 50);
       }
     }
   }
 
-     async function deleteEvent(eventId, date) {
-    if (!isAdmin) {
-      alert("ТОЛЬКО АДМИН!");
-      return;
-    }
-    
-    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) {
-      return;
-    }
-    
-    // Находим все дни, где есть это событие
+  async function deleteEvent(eventId, date) {
+    if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
+    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) return;
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) {
-        datesWithEvent.push(d);
-      }
+      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
     }
-    
-    console.log("Удаляем событие", eventId, "из дней:", datesWithEvent);
-    
-    // Удаляем событие из всех найденных дней
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
-      if (eventsDB[d].length === 0) {
-        delete eventsDB[d];
-      }
+      if (eventsDB[d].length === 0) delete eventsDB[d];
     }
-    
-    // Если текущий выбранный день или событие были удалены - сбрасываем
-    if (selectedEventId === eventId) {
-      selectedEventId = null;
-      selectedDate = "";
-    }
-    
-    // Сохраняем в Firebase
+    if (selectedEventId === eventId) { selectedEventId = null; selectedDate = ""; }
     await saveToFirebase();
-    
-    // Перерисовываем календарь
     renderCalendar();
-    
-    // Очищаем нижнюю панель
     const detailsSection = document.getElementById('detailsSection');
     if (detailsSection) {
       detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
       setTimeout(() => {
-        if (detailsSection && !selectedDate) {
-          detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
-        }
+        if (detailsSection && !selectedDate) detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
       }, 2000);
     }
-    
     alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
@@ -515,86 +365,53 @@
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date().toISOString().split('T')[0];
     const grid = document.getElementById("calendarGrid");
-
     let html = "<div class='weekday'>ПН</div><div class='weekday'>ВТ</div><div class='weekday'>СР</div><div class='weekday'>ЧТ</div><div class='weekday'>ПТ</div><div class='weekday'>СБ</div><div class='weekday'>ВС</div>";
     for (let i = 0; i < offset; i++) html += `<div class='day-cell' style='background:#e8e4d8;'><div class='empty-day'>—</div></div>`;
-
     for (let d = 1; d <= daysInMonth; d++) {
       const dateKey = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
       const events = eventsDB[dateKey] || [];
       const hasEvents = events.length > 0;
       const isWeekend = (new Date(currentYear, currentMonth, d).getDay() === 0 || new Date(currentYear, currentMonth, d).getDay() === 6);
-           // Определяем цвет ячейки в зависимости от форматов событий
       let bg;
       if (hasEvents) {
-        // Собираем уникальные форматы событий в этом дне (максимум 4)
         const formats = [...new Set(events.map(ev => ev.format || 'away'))].slice(0, 4);
-        
         if (formats.length === 1) {
-          // Если все события одного формата - используем один цвет
           switch(formats[0]) {
             case 'training': bg = '#87CEEB'; break;
             case 'sunday': bg = '#DDA0DD'; break;
-            case 'away': bg = '#e8a0a0'; break;
             default: bg = '#e8a0a0';
           }
         } else {
-          // Если форматов несколько - создаём градиент
-          const colorMap = {
-            'training': '#87CEEB',
-            'sunday': '#DDA0DD',
-            'away': '#e8a0a0'
-          };
-          
+          const colorMap = { 'training': '#87CEEB', 'sunday': '#DDA0DD', 'away': '#e8a0a0' };
           const colors = formats.map(f => colorMap[f] || '#e8a0a0');
-          
-          if (colors.length === 2) {
-            // Два цвета - линейный градиент слева направо
-            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 50%, ${colors[1]} 50%, ${colors[1]} 100%)`;
-          } else if (colors.length === 3) {
-            // Три цвета - деление на три части
-            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 33%, ${colors[1]} 33%, ${colors[1]} 66%, ${colors[2]} 66%, ${colors[2]} 100%)`;
-          } else {
-            // Четыре цвета - деление на четыре части
-            bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 25%, ${colors[1]} 25%, ${colors[1]} 50%, ${colors[2]} 50%, ${colors[2]} 75%, ${colors[3]} 75%, ${colors[3]} 100%)`;
-          }
+          if (colors.length === 2) bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 50%, ${colors[1]} 50%, ${colors[1]} 100%)`;
+          else if (colors.length === 3) bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 33%, ${colors[1]} 33%, ${colors[1]} 66%, ${colors[2]} 66%, ${colors[2]} 100%)`;
+          else bg = `linear-gradient(135deg, ${colors[0]} 0%, ${colors[0]} 25%, ${colors[1]} 25%, ${colors[1]} 50%, ${colors[2]} 50%, ${colors[2]} 75%, ${colors[3]} 75%, ${colors[3]} 100%)`;
         }
       } else {
         bg = isWeekend ? '#d8e8d0' : (dateKey === today ? '#fff4c4' : (dateKey < today ? '#f0ece0' : '#f8f4e8'));
       }
       let border = dateKey === today ? '3px solid #c0a040' : (selectedDate === dateKey ? '3px solid #8a9e6a' : '1px solid #d0c8b0');
-
-      html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border}; position:relative;'>`;
-      html += `<div class='day-number'>${d}</div>`;
-      
+      html += `<div class='day-cell ${hasEvents ? 'has-event' : ''}' data-date='${dateKey}' style='background:${bg}; border:${border}; position:relative;'><div class='day-number'>${d}</div>`;
       if (hasEvents) {
         html += `<div class='viking-icon'>⚔️</div>`;
-        // Показываем каждое событие с его личными отметками
         events.forEach(ev => {
           let short = ev.name.length > 18 ? ev.name.substring(0, 16) + '..' : ev.name;
           const yesCount = ev.yesVotes?.length || 0;
           const noCount = ev.noVotes?.length || 0;
-          html += `<div class='event-badge' style='display:flex; justify-content:space-between; align-items:center; gap:4px;'>`;
-          html += `<span style='white-space:nowrap; overflow:hidden; text-overflow:ellipsis;'>🏷️ ${short}</span>`;
-          if (yesCount + noCount > 0) {
-            html += `<span style='background:rgba(0,0,0,0.2); border-radius:10px; padding:0px 6px; font-size:0.5rem; flex-shrink:0;'>✅${yesCount} ❌${noCount}</span>`;
-          }
+          html += `<div class='event-badge' style='display:flex; justify-content:space-between; align-items:center; gap:4px;'><span style='white-space:nowrap; overflow:hidden; text-overflow:ellipsis;'>🏷️ ${short}</span>`;
+          if (yesCount + noCount > 0) html += `<span style='background:rgba(0,0,0,0.2); border-radius:10px; padding:0px 6px; font-size:0.5rem; flex-shrink:0;'>✅${yesCount} ❌${noCount}</span>`;
           html += `</div>`;
         });
-      } else {
-        html += `<div class='empty-day'>➕</div>`;
-      }
+      } else html += `<div class='empty-day'>➕</div>`;
       html += `</div>`;
     }
-
     const total = offset + daysInMonth;
     const rem = (7 - (total % 7)) % 7;
     for (let i = 0; i < rem; i++) html += `<div class='day-cell' style='background:#e8e4d8;'><div class='empty-day'></div></div>`;
-
     grid.innerHTML = html;
     const months = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮНЬ','ИЮЛЬ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
     document.getElementById("currentMonthLabel").innerHTML = `${months[currentMonth]} ${currentYear}`;
-
     document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
       cell.addEventListener('click', () => {
         selectedDate = cell.dataset.date;
@@ -605,516 +422,78 @@
     });
   }
 
-   function showDayEvents(date) {
+  function showDayEvents(date) {
     const events = getEventsForDate(date);
-    
-    // Если событий нет
-        if (!events.length) {
-      document.getElementById('detailsSection').innerHTML = `
-        <div>
-          <div class='event-title'>📅 ${formatDate(date)}</div>
-          <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
-        </div>`;
+    if (!events.length) {
+      document.getElementById('detailsSection').innerHTML = `<div><div class='event-title'>📅 ${formatDate(date)}</div><div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div></div>`;
       return;
     }
-    
-    // Показываем список событий
-    let eventsListHtml = `
-      <div>
-        <div class='event-title'>📅 ${formatDate(date)}</div>
-        <div style='margin-top: 12px;' id='eventsList'>
-    `;
-    
-    // Сортируем события по имени
+    let eventsListHtml = `<div><div class='event-title'>📅 ${formatDate(date)}</div><div style='margin-top: 12px;' id='eventsList'>`;
     const sortedEvents = [...events].sort((a, b) => a.name.localeCompare(b.name));
-    
     sortedEvents.forEach(ev => {
       const yesCount = ev.yesVotes?.length || 0;
       const noCount = ev.noVotes?.length || 0;
-      
-      // Определяем иконку в зависимости от формата
-      let formatIcon = '';
-      let eventBgColor = '';
+      let formatIcon = '', eventBgColor = '';
       switch(ev.format) {
-        case 'training':
-          formatIcon = '🏋️';
-          eventBgColor = '#B0E0E6';
-          break;
-        case 'sunday':
-          formatIcon = '⛪';
-          eventBgColor = '#D8BFD8';
-          break;
-        case 'away':
-          formatIcon = '🚌';
-          eventBgColor = '#e8a0a0';
-          break;
-        default:
-          formatIcon = '⚔️';
-          eventBgColor = '#e8e4d8';
+        case 'training': formatIcon = '🏋️'; eventBgColor = '#B0E0E6'; break;
+        case 'sunday': formatIcon = '⛪'; eventBgColor = '#D8BFD8'; break;
+        case 'away': formatIcon = '🚌'; eventBgColor = '#e8a0a0'; break;
+        default: formatIcon = '⚔️'; eventBgColor = '#e8e4d8';
       }
-      
-      // Генерируем уникальный ID для контейнера с деталями
       const detailId = `eventDetail-${ev.id}`;
-      
-            // Определяем, прошло ли событие
       const isPast = isPastEvent(date);
-      
-      eventsListHtml += `
-        <div class='event-list-wrapper' style='margin-bottom: 8px;'>
-          <div class='event-list-item' data-event-id='${ev.id}' data-detail-id='${detailId}' style='
-            background: ${eventBgColor}${isPast ? '80' : ''};
-            border-radius: 12px;
-            padding: 10px 12px;
-            cursor: ${isPast ? 'default' : 'pointer'};
-            transition: all 0.2s ease;
-            border: 1px solid #d0c8b0;
-            opacity: ${isPast ? 0.7 : 1};
-          ' ${!isPast ? `onmouseover='this.style.filter="brightness(0.97)"' onmouseout='this.style.filter="brightness(1)"'` : ''}>
-            <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
-              <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name} ${isPast ? '🔒' : ''}</span>
-              <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
-                ✅ ${yesCount} | ❌ ${noCount}
-              </span>
-            </div>
-          </div>
-          <div id='${detailId}' class='event-detail-container' style='display: none; margin-top: 4px;'></div>
-        </div>
-      `;
+      eventsListHtml += `<div class='event-list-wrapper' style='margin-bottom: 8px;'><div class='event-list-item' data-event-id='${ev.id}' data-detail-id='${detailId}' style='background: ${eventBgColor}${isPast ? '80' : ''}; border-radius: 12px; padding: 10px 12px; cursor: ${isPast ? 'default' : 'pointer'}; transition: all 0.2s ease; border: 1px solid #d0c8b0; opacity: ${isPast ? 0.7 : 1};' ${!isPast ? `onmouseover='this.style.filter="brightness(0.97)"' onmouseout='this.style.filter="brightness(1)"'` : ''}><div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'><span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name} ${isPast ? '🔒' : ''}</span><span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>✅ ${yesCount} | ❌ ${noCount}</span></div></div><div id='${detailId}' class='event-detail-container' style='display: none; margin-top: 4px;'></div></div>`;
     });
-    
-    eventsListHtml += `
-        </div>
-      </div>
-    `;
-    
+    eventsListHtml += `</div></div>`;
     document.getElementById('detailsSection').innerHTML = eventsListHtml;
-    
-    // Добавляем обработчики кликов на каждый элемент списка
     document.querySelectorAll('.event-list-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         const eventId = parseInt(item.dataset.eventId);
         const detailId = item.dataset.detailId;
         const detailContainer = document.getElementById(detailId);
-        
-        // Находим событие в данных
         const ev = events.find(e => e.id === eventId);
         if (!ev) return;
-        
-        // Если контейнер уже открыт и содержит данные - закрываем
         if (detailContainer.style.display === 'block' && detailContainer.innerHTML !== '') {
           detailContainer.style.display = 'none';
           detailContainer.innerHTML = '';
           selectedEventId = null;
         } else {
-          // Закрываем все другие открытые детали
-          document.querySelectorAll('.event-detail-container').forEach(container => {
-            container.style.display = 'none';
-            container.innerHTML = '';
-          });
-          // Открываем текущую
+          document.querySelectorAll('.event-detail-container').forEach(container => { container.style.display = 'none'; container.innerHTML = ''; });
           detailContainer.style.display = 'block';
           selectedEventId = eventId;
-          // Рендерим детали события внутрь контейнера
           renderEventDetailsInline(date, eventId, detailId);
         }
       });
     });
-    
-    // Если было выбрано событие ранее - открываем его
-        if (selectedEventId && events.find(e => e.id === selectedEventId)) {
+    if (selectedEventId && events.find(e => e.id === selectedEventId)) {
       const selectedItem = document.querySelector(`.event-list-item[data-event-id='${selectedEventId}']`);
-      if (selectedItem) {
-        selectedItem.click();
-      }
+      if (selectedItem) selectedItem.click();
     }
   }
 
-  // ========== НОВАЯ ФУНКЦИЯ ==========
   function renderEventDetailsInline(date, eventId, containerId) {
     const ev = eventsDB[date]?.find(e => e.id === eventId);
     if (!ev) return;
-    
     const container = document.getElementById(containerId);
     if (!container) return;
-    
     const yesList = [...(ev.yesVotes || [])].sort();
     const noList = [...(ev.noVotes || [])].sort();
     const userName = localStorage.getItem('userName') || "";
     const hasYes = yesList.includes(userName);
     const hasNo = noList.includes(userName);
-
-    // Определяем иконку и цвет для формата события
-    let formatIcon = '';
     let formatBg = '';
     switch(ev.format) {
-      case 'training':
-        formatIcon = '🏋️';
-        formatBg = '#87CEEB';
-        break;
-      case 'sunday':
-        formatIcon = '⛪';
-        formatBg = '#DDA0DD';
-        break;
-      case 'away':
-        formatIcon = '🚌';
-        formatBg = '#e8a0a0';
-        break;
-      default:
-        formatIcon = '⚔️';
-        formatBg = '#e8a0a0';
+      case 'training': formatBg = '#87CEEB'; break;
+      case 'sunday': formatBg = '#DDA0DD'; break;
+      default: formatBg = '#e8a0a0';
     }
-
-    // Текст для объединённой кнопки
-    let voteStatusText = '';
-    if (hasYes) voteStatusText = '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?';
-    else if (hasNo) voteStatusText = '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?';
-    else voteStatusText = '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ';
-
+    let voteStatusText = hasYes ? '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?' : (hasNo ? '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?' : '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ');
     let adminBtns = '';
     if (isAdmin) {
-      adminBtns = `
-        <div class='action-btns' style='display: flex; gap: 8px; margin-top: 12px;'>
-          <button class='action-btn edit' onclick='toggleEditForm(${ev.id})' style='background: #8aae6a; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>✏️ РЕДАКТИРОВАТЬ</button>
-          <button class='action-btn delete' onclick='if(confirm("УДАЛИТЬ?")) deleteEvent(${ev.id},"${date}")' style='background: #c08080; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>🗑 УДАЛИТЬ</button>
-        </div>
-        <div id='editForm-${ev.id}' class='edit-form' style='background: #e8e4d8; border-radius: 14px; padding: 12px; margin-top: 12px; display: none;'>
-          <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>
-          <textarea id='editDesc-${ev.id}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>${ev.description || ''}</textarea>
-          <input type='text' id='editLink-${ev.id}' value='${ev.link || ''}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>
-          <select id='editFormat-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
-            <option value='training' ${ev.format === 'training' ? 'selected' : ''}>🏋️ ТРЕНИРОВКА</option>
-            <option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option>
-            <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
-          </select>
-          <select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
-            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option>
-            <option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
-            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option>
-            <option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
-            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option>
-            <option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
-            <option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option>
-          </select>
-          <button onclick='saveEdit(${ev.id},"${date}")' style='background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>💾 СОХРАНИТЬ</button>
-          <button onclick='toggleEditForm(${ev.id})' style='background: #c0b8a0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>❌ ОТМЕНА</button>
-        </div>
-      `;
+      adminBtns = `<div class='action-btns' style='display: flex; gap: 8px; margin-top: 12px;'><button class='action-btn edit' onclick='toggleEditForm(${ev.id})' style='background: #8aae6a; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>✏️ РЕДАКТИРОВАТЬ</button><button class='action-btn delete' onclick='deleteEvent(${ev.id},"${date}")' style='background: #c08080; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>🗑 УДАЛИТЬ</button></div><div id='editForm-${ev.id}' class='edit-form' style='background: #e8e4d8; border-radius: 14px; padding: 12px; margin-top: 12px; display: none;'><input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'><textarea id='editDesc-${ev.id}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>${ev.description || ''}</textarea><input type='text' id='editLink-${ev.id}' value='${ev.link || ''}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'><select id='editFormat-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'><option value='training' ${ev.format === 'training' ? 'selected' : ''}>🏋️ ТРЕНИРОВКА</option><option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option><option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option></select><select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'><option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option><option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option><option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option><option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option><option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option><option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option><option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option></select><button onclick='saveEdit(${ev.id},"${date}")' style='background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>💾 СОХРАНИТЬ</button><button onclick='toggleEditForm(${ev.id})' style='background: #c0b8a0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>❌ ОТМЕНА</button></div>`;
     }
-
-    container.innerHTML = `
-      <div style='background: #f5f0e8; border-radius: 12px; padding: 12px; border-left: 3px solid ${formatBg}; margin-bottom: 4px;'>
-        ${ev.description ? `<div class='event-desc' style='font-size: 0.8rem; color: #6a7b5a; margin-bottom: 8px;'>📝 ${ev.description}</div>` : ''}
-        ${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}
-        ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
-        
-                <div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'>
-          
-          <!-- СТОЛБИК "УЧАСТВУЮ" -->
-          <div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
-            ${!isPastEvent(date) ? `
-            <button onclick='voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='
-              background: ${hasYes ? '#6b8c5e' : '#5a7a4e'};
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
-              font-weight: bold;
-              cursor: pointer;
-              margin-bottom: 10px;
-              width: 100%;
-              opacity: ${hasYes ? 0.7 : 1};
-            '>✅ УЧАСТВУЮ</button>
-            ` : `
-            <div style='
-              background: #8a9e6a;
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
-              font-weight: bold;
-              margin-bottom: 10px;
-              width: 100%;
-              text-align: center;
-              opacity: 0.5;
-            '>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>
-            `}
-            <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div>
-            <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
-              ${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #e0ffe0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
-            </div>
-          </div>
-          
-          <!-- СТОЛБИК "НЕ УЧАСТВУЮ" -->
-          <div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
-            ${!isPastEvent(date) ? `
-            <button onclick='voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='
-              background: ${hasNo ? '#9a6a5a' : '#8a5a4a'};
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
-              font-weight: bold;
-              cursor: pointer;
-              margin-bottom: 10px;
-              width: 100%;
-              opacity: ${hasNo ? 0.7 : 1};
-            '>❌ НЕ УЧАСТВУЮ</button>
-            ` : `
-            <div style='
-              background: #b88a7a;
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 8px 12px;
-              font-size: 0.75rem;
-              font-weight: bold;
-              margin-bottom: 10px;
-              width: 100%;
-              text-align: center;
-              opacity: 0.5;
-            '>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>
-            `}
-            <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div>
-            <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
-              ${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #ffe0e0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
-            </div>
-          </div>
-        </div>
-        
-        <!-- ОБЪЕДИНЁННАЯ КНОПКА (скрываем для прошлых событий) -->
-        ${!isPastEvent(date) ? `
-        <div style='margin-top: 12px; width: 100%;'>
-          <button onclick='changeVoteInline(${ev.id},"${date}", "${containerId}")' style='
-            background: #c0b8a0;
-            border: none;
-            border-radius: 30px;
-            padding: 6px 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            width: 100%;
-            color: #4a5b3a;
-          '>${voteStatusText}</button>
-        </div>
-        ` : `
-        <div style='margin-top: 12px; width: 100%; text-align: center;'>
-          <span style='background: #e0d8c0; border-radius: 20px; padding: 6px 12px; font-size: 0.65rem; color: #8a9e6a;'>🔒 СОБЫТИЕ ПРОШЛО • ГОЛОСОВАНИЕ ЗАКРЫТО</span>
-        </div>
-        `}
-        
-        ${adminBtns}
-      </div>
-    `;
-  }
-        window.voteClickInline = async (id, date, type, containerId) => {
-    let name = localStorage.getItem('userName');
-    if (!name) {
-      name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
-      if (name && name.trim()) {
-        localStorage.setItem('userName', name.trim().toUpperCase());
-      } else { return; }
-    }
-    await vote(id, date, name.trim().toUpperCase(), type);
-    
-    // Обновляем календарь
-    renderCalendar();
-    
-    // Перерисовываем список событий для текущего дня
-    if (selectedDate) {
-      showDayEvents(selectedDate);
-      
-      // После перерисовки снова открываем это же событие
-      setTimeout(() => {
-        const selectedItem = document.querySelector(`.event-list-item[data-event-id='${id}']`);
-        if (selectedItem) {
-          selectedItem.click();
-        }
-      }, 50);
-    }
-  };
-
-    window.changeVoteInline = async (id, date, containerId) => {
-    let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ", localStorage.getItem('userName') || "");
-    if (name && name.trim()) {
-      const uname = name.trim().toUpperCase();
-      
-      const datesWithEvent = [];
-      for (const [d, events] of Object.entries(eventsDB)) {
-        if (events.some(e => e.id === id)) {
-          datesWithEvent.push(d);
-        }
-      }
-      
-      for (const d of datesWithEvent) {
-        const ev = eventsDB[d]?.find(e => e.id === id);
-        if (ev) {
-          ev.yesVotes = ev.yesVotes.filter(v => v !== uname);
-          ev.noVotes = ev.noVotes.filter(v => v !== uname);
-        }
-      }
-      
-      await saveToFirebase();
-      renderCalendar();
-      if (selectedDate) {
-        showDayEvents(selectedDate);
-      }
-      alert("ГОЛОС УДАЛЕН!");
-    }
-  };
-
- function showEventDetails(date, eventId) {
-    const ev = eventsDB[date]?.find(e => e.id === eventId);
-    if (!ev) return;
-    const yesList = [...(ev.yesVotes || [])].sort();
-    const noList = [...(ev.noVotes || [])].sort();
-    const userName = localStorage.getItem('userName') || "";
-    const hasYes = yesList.includes(userName);
-    const hasNo = noList.includes(userName);
-
-    // Определяем иконку и цвет для формата события
-    let formatIcon = '';
-    let formatBg = '';
-    switch(ev.format) {
-      case 'training':
-        formatIcon = '🏋️';
-        formatBg = '#87CEEB';
-        break;
-      case 'sunday':
-        formatIcon = '⛪';
-        formatBg = '#DDA0DD';
-        break;
-      case 'away':
-        formatIcon = '🚌';
-        formatBg = '#e8a0a0';
-        break;
-      default:
-        formatIcon = '⚔️';
-        formatBg = '#e8a0a0';
-    }
-
-    // Текст для объединённой кнопки
-    let voteStatusText = '';
-    if (hasYes) voteStatusText = '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | ИЗМЕНИТЬ ГОЛОС?';
-    else if (hasNo) voteStatusText = '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | ИЗМЕНИТЬ ГОЛОС?';
-    else voteStatusText = '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ';
-
-    let adminBtns = '';
-    if (isAdmin) {
-      adminBtns = `
-        <div class='action-btns'>
-          <button class='action-btn edit' onclick='toggleEditForm(${ev.id})'>✏️ РЕДАКТИРОВАТЬ</button>
-          <button class='action-btn delete' onclick='if(confirm("УДАЛИТЬ?")) deleteEvent(${ev.id},"${date}")'>🗑 УДАЛИТЬ</button>
-        </div>
-        <div id='editForm-${ev.id}' class='edit-form'>
-          <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}'>
-          <textarea id='editDesc-${ev.id}'>${ev.description || ''}</textarea>
-          <input type='text' id='editLink-${ev.id}' value='${ev.link || ''}'>
-          <select id='editFormat-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
-            <option value='training' ${ev.format === 'training' ? 'selected' : ''}>🏋️ ТРЕНИРОВКА</option>
-            <option value='sunday' ${ev.format === 'sunday' ? 'selected' : ''}>⛪ ВОСКРЕСНАЯ ИГРА</option>
-            <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
-          </select>
-          <select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
-            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option>
-            <option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
-            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option>
-            <option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
-            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option>
-            <option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
-            <option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option>
-          </select>
-          <button onclick='saveEdit(${ev.id},"${date}")'>💾 СОХРАНИТЬ</button>
-          <button onclick='toggleEditForm(${ev.id})'>❌ ОТМЕНА</button>
-        </div>
-      `;
-    }
-
-    document.getElementById('eventDetail').innerHTML = `
-      <div style='border-top: 2px solid #d0c8b0; padding-top: 12px; margin-top: 8px;'>
-        <div class='event-title' style='display: flex; align-items: center; gap: 10px; flex-wrap: wrap;'>
-          <span style='background: ${formatBg}; padding: 4px 12px; border-radius: 20px; font-size: 0.85rem; color: #333;'>
-            ${formatIcon} ${ev.name}
-          </span>
-          <span style='background: ${formatBg}; border-radius: 20px; padding: 4px 12px; font-size: 0.7rem; color: #333; font-weight: normal;'>
-            ${ev.format === 'training' ? 'ТРЕНИРОВКА' : ev.format === 'sunday' ? 'ВОСКРЕСНАЯ ИГРА' : 'ВЫЕЗДНАЯ ИГРА'}
-          </span>
-        </div>
-        ${ev.description ? `<div class='event-desc'>📝 ${ev.description}</div>` : ''}
-        ${ev.link ? `<div class='event-link'>🔗 <a href='${ev.link}' target='_blank'>ССЫЛКА</a></div>` : ''}
-        ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.75rem; color: #8a9e6a; margin-top: 8px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
-        
-        <div class='vote-columns' style='display: flex; gap: 16px; flex-wrap: wrap; margin-top: 16px;'>
-          
-          <!-- СТОЛБИК "УЧАСТВУЮ" -->
-          <div class='vote-col green' style='flex: 1; background: #8bac7c; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(0,0,0,0.1);'>
-            <button class='vote-btn yes ${hasYes ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","yes")' style='
-              background: ${hasYes ? '#6b8c5e' : '#5a7a4e'};
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 10px 12px;
-              font-size: 0.8rem;
-              font-weight: bold;
-              cursor: pointer;
-              margin-bottom: 12px;
-              width: 100%;
-              opacity: ${hasYes ? 0.7 : 1};
-              transition: all 0.2s ease;
-            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>✅ УЧАСТВУЮ</button>
-            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px;'>
-              <div style='font-weight: bold; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 6px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div>
-              ${yesList.length ? yesList.map((n,i) => `<div class='attendee-item' style='padding: 5px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #e0ffe0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
-            </div>
-          </div>
-          
-          <!-- СТОЛБИК "НЕ УЧАСТВУЮ" -->
-          <div class='vote-col red' style='flex: 1; background: #b88a7a; border-radius: 16px; padding: 12px; display: flex; flex-direction: column; box-shadow: 0 1px 4px rgba(0,0,0,0.1);'>
-            <button class='vote-btn no ${hasNo ? 'disabled' : ''}' onclick='voteClick(${ev.id},"${date}","no")' style='
-              background: ${hasNo ? '#9a6a5a' : '#8a5a4a'};
-              color: white;
-              border: none;
-              border-radius: 30px;
-              padding: 10px 12px;
-              font-size: 0.8rem;
-              font-weight: bold;
-              cursor: pointer;
-              margin-bottom: 12px;
-              width: 100%;
-              opacity: ${hasNo ? 0.7 : 1};
-              transition: all 0.2s ease;
-            ' onmouseover='this.style.transform="scale(1.02)"' onmouseout='this.style.transform="scale(1)"'>❌ НЕ УЧАСТВУЮ</button>
-            <div style='flex: 1; min-height: 60px; background: rgba(255,255,255,0.15); border-radius: 12px; padding: 8px;'>
-              <div style='font-weight: bold; font-size: 0.7rem; color: rgba(255,255,255,0.8); margin-bottom: 6px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div>
-              ${noList.length ? noList.map((n,i) => `<div class='attendee-item' style='padding: 5px 8px; font-size: 0.75rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2); color: white;'><span class='attendee-num' style='color: #ffe0e0; font-weight: 600; margin-right: 8px;'>${i+1}.</span> ${n}</div>`).join('') : '<div class="no-votes" style="text-align: center; padding: 12px; font-size: 0.7rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
-            </div>
-          </div>
-        </div>
-        
-        <!-- ОБЪЕДИНЁННАЯ КНОПКА НА ДВА СТОЛБЦА -->
-        <div style='margin-top: 16px; width: 100%;'>
-          <button onclick='changeVote(${ev.id},"${date}")' style='
-            background: #c0b8a0;
-            border: none;
-            border-radius: 40px;
-            padding: 10px 16px;
-            font-size: 0.75rem;
-            font-weight: bold;
-            cursor: pointer;
-            width: 100%;
-            color: #4a5b3a;
-            transition: all 0.2s ease;
-            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-          ' onmouseover='this.style.background="#b0a890"; this.style.transform="scale(1.01)"' onmouseout='this.style.background="#c0b8a0"; this.style.transform="scale(1)"'>
-            ${voteStatusText}
-          </button>
-        </div>
-        
-        ${adminBtns}
-      </div>
-    `;
+    container.innerHTML = `<div style='background: #f5f0e8; border-radius: 12px; padding: 12px; border-left: 3px solid ${formatBg}; margin-bottom: 4px;'>${ev.description ? `<div class='event-desc' style='font-size: 0.8rem; color: #6a7b5a; margin-bottom: 8px;'>📝 ${ev.description}</div>` : ''}${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}<div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'><div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>${!isPastEvent(date) ? `<button onclick='voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='background: ${hasYes ? '#6b8c5e' : '#5a7a4e'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasYes ? 0.7 : 1};'>✅ УЧАСТВУЮ</button>` : `<div style='background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #e0ffe0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}</div></div><div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>${!isPastEvent(date) ? `<button onclick='voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='background: ${hasNo ? '#9a6a5a' : '#8a5a4a'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasNo ? 0.7 : 1};'>❌ НЕ УЧАСТВУЮ</button>` : `<div style='background: #b88a7a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #ffe0e0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}</div></div></div>${!isPastEvent(date) ? `<div style='margin-top: 12px; width: 100%;'><button onclick='changeVoteInline(${ev.id},"${date}", "${containerId}")' style='background: #c0b8a0; border: none; border-radius: 30px; padding: 6px 12px; font-size: 0.7rem; cursor: pointer; width: 100%; color: #4a5b3a;'>${voteStatusText}</button></div>` : `<div style='margin-top: 12px; width: 100%; text-align: center;'><span style='background: #e0d8c0; border-radius: 20px; padding: 6px 12px; font-size: 0.65rem; color: #8a9e6a;'>🔒 СОБЫТИЕ ПРОШЛО • ГОЛОСОВАНИЕ ЗАКРЫТО</span></div>`}${adminBtns}</div>`;
   }
 
   window.toggleEditForm = (id) => {
@@ -1122,7 +501,7 @@
     if (form) form.classList.toggle('show');
   };
 
-        window.saveEdit = async (id, date) => {
+  window.saveEdit = async (id, date) => {
     const newName = document.getElementById(`editName-${id}`).value;
     const newDesc = document.getElementById(`editDesc-${id}`).value;
     const newLink = document.getElementById(`editLink-${id}`).value;
@@ -1131,38 +510,36 @@
     if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     await editEvent(id, date, newName, newDesc, newLink, newFormat, newDuration);
     toggleEditForm(id);
-    // Обновляем отображение после редактирования
     renderCalendar();
-    if (selectedDate) {
-      showDayEvents(selectedDate);
-    }
+    if (selectedDate) showDayEvents(selectedDate);
   };
 
-  window.voteClick = async (id, date, type) => {
+  window.voteClickInline = async (id, date, type, containerId) => {
     let name = localStorage.getItem('userName');
     if (!name) {
       name = prompt("ВВЕДИТЕ ВАШ ПОЗЫВНОЙ");
-      if (name && name.trim()) {
-        localStorage.setItem('userName', name.trim().toUpperCase());
-      } else { return; }
+      if (name && name.trim()) localStorage.setItem('userName', name.trim().toUpperCase());
+      else return;
     }
     await vote(id, date, name.trim().toUpperCase(), type);
+    renderCalendar();
+    if (selectedDate) {
+      showDayEvents(selectedDate);
+      setTimeout(() => {
+        const selectedItem = document.querySelector(`.event-list-item[data-event-id='${id}']`);
+        if (selectedItem) selectedItem.click();
+      }, 50);
+    }
   };
 
-    window.changeVote = async (id, date) => {
+  window.changeVoteInline = async (id, date, containerId) => {
     let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ", localStorage.getItem('userName') || "");
     if (name && name.trim()) {
       const uname = name.trim().toUpperCase();
-      
-      // Находим все дни, где есть это событие
       const datesWithEvent = [];
       for (const [d, events] of Object.entries(eventsDB)) {
-        if (events.some(e => e.id === id)) {
-          datesWithEvent.push(d);
-        }
+        if (events.some(e => e.id === id)) datesWithEvent.push(d);
       }
-      
-      // Удаляем голос во всех днях
       for (const d of datesWithEvent) {
         const ev = eventsDB[d]?.find(e => e.id === id);
         if (ev) {
@@ -1170,13 +547,10 @@
           ev.noVotes = ev.noVotes.filter(v => v !== uname);
         }
       }
-      
       await saveToFirebase();
       renderCalendar();
-      if (selectedDate) {
-        showEventDetails(selectedDate, id);
-      }
-      alert("ГОЛОС УДАЛЕН ВО ВСЕ ДНИ СОБЫТИЯ!");
+      if (selectedDate) showDayEvents(selectedDate);
+      alert("ГОЛОС УДАЛЕН!");
     }
   };
 
@@ -1219,7 +593,7 @@
     }
   }
 
-        document.getElementById("addEventBtn")?.addEventListener("click", async () => {
+  document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
     const name = document.getElementById("newEventName").value;
@@ -1228,19 +602,13 @@
     if (!name.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     if (!format) { alert("ВЫБЕРИТЕ ФОРМАТ СОБЫТИЯ!"); return; }
     await addEvent(selectedDate, name, document.getElementById("newEventDesc").value, document.getElementById("newEventLink").value, format, duration);
-    
-    // Очищаем поля
     document.getElementById("newEventName").value = "";
     document.getElementById("newEventDesc").value = "";
     document.getElementById("newEventLink").value = "";
     document.getElementById("newEventFormat").value = "";
     document.getElementById("newEventDuration").value = "1";
-    
-    // Скрываем форму и показываем кнопку
-    const addEventForm = document.getElementById('addEventForm');
-    const showAddFormBtn = document.getElementById('showAddFormBtn');
-    if (addEventForm) addEventForm.style.display = 'none';
-    if (showAddFormBtn) showAddFormBtn.style.display = 'block';
+    document.getElementById('addEventForm').style.display = 'none';
+    document.getElementById('showAddFormBtn').style.display = 'block';
   });
 
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
@@ -1260,35 +628,25 @@
     renderCalendar();
     document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
   });
-    // Управление формой добавления события
+
   const showAddFormBtn = document.getElementById('showAddFormBtn');
   const addEventForm = document.getElementById('addEventForm');
   const cancelAddEventBtn = document.getElementById('cancelAddEventBtn');
-  
-  if (showAddFormBtn) {
-    showAddFormBtn.addEventListener('click', () => {
-      addEventForm.style.display = 'block';
-      showAddFormBtn.style.display = 'none';
-    });
-  }
-  
-  if (cancelAddEventBtn) {
-    cancelAddEventBtn.addEventListener('click', () => {
-      addEventForm.style.display = 'none';
-      showAddFormBtn.style.display = 'block';
-      document.getElementById("newEventName").value = "";
-      document.getElementById("newEventDesc").value = "";
-      document.getElementById("newEventLink").value = "";
-      document.getElementById("newEventFormat").value = "";
-      document.getElementById("newEventDuration").value = "1";
-    });
-  }
+  if (showAddFormBtn) showAddFormBtn.addEventListener('click', () => { addEventForm.style.display = 'block'; showAddFormBtn.style.display = 'none'; });
+  if (cancelAddEventBtn) cancelAddEventBtn.addEventListener('click', () => {
+    addEventForm.style.display = 'none';
+    showAddFormBtn.style.display = 'block';
+    document.getElementById("newEventName").value = "";
+    document.getElementById("newEventDesc").value = "";
+    document.getElementById("newEventLink").value = "";
+    document.getElementById("newEventFormat").value = "";
+    document.getElementById("newEventDuration").value = "1";
+  });
 
   async function init() {
     await loadFromFirebase();
     checkStoredAdmin();
   }
-
   init();
 </script>
 </body>
