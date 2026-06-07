@@ -260,6 +260,15 @@
     let p = dateStr.split('-');
     return `${p[2]}.${p[1]}.${p[0].slice(2)}`;
   }
+  
+    function isPastEvent(eventDate) {
+    // eventDate в формате "YYYY-MM-DD"
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const eventDay = new Date(eventDate);
+    eventDay.setHours(0, 0, 0, 0);
+    return eventDay < today;
+  }
 
   function updateStatus(text, isError = false) {
     const statusBar = document.getElementById('statusBar');
@@ -633,18 +642,22 @@
       // Генерируем уникальный ID для контейнера с деталями
       const detailId = `eventDetail-${ev.id}`;
       
+            // Определяем, прошло ли событие
+      const isPast = isPastEvent(date);
+      
       eventsListHtml += `
         <div class='event-list-wrapper' style='margin-bottom: 8px;'>
           <div class='event-list-item' data-event-id='${ev.id}' data-detail-id='${detailId}' style='
-            background: ${eventBgColor};
+            background: ${eventBgColor}${isPast ? '80' : ''};
             border-radius: 12px;
             padding: 10px 12px;
-            cursor: pointer;
+            cursor: ${isPast ? 'default' : 'pointer'};
             transition: all 0.2s ease;
             border: 1px solid #d0c8b0;
-          ' onmouseover='this.style.filter="brightness(0.97)"' onmouseout='this.style.filter="brightness(1)"'>
+            opacity: ${isPast ? 0.7 : 1};
+          ' ${!isPast ? `onmouseover='this.style.filter="brightness(0.97)"' onmouseout='this.style.filter="brightness(1)"'` : ''}>
             <div style='display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;'>
-              <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name}</span>
+              <span style='font-weight: bold; font-size: 0.9rem; color: #4a5b3a;'>${formatIcon} ${ev.name} ${isPast ? '🔒' : ''}</span>
               <span style='background: #8a9e6a; border-radius: 20px; padding: 4px 10px; font-size: 0.7rem; color: white;'>
                 ✅ ${yesCount} | ❌ ${noCount}
               </span>
@@ -781,10 +794,11 @@
         ${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}
         ${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}
         
-        <div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'>
+                <div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'>
           
           <!-- СТОЛБИК "УЧАСТВУЮ" -->
           <div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
+            ${!isPastEvent(date) ? `
             <button onclick='voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='
               background: ${hasYes ? '#6b8c5e' : '#5a7a4e'};
               color: white;
@@ -798,6 +812,21 @@
               width: 100%;
               opacity: ${hasYes ? 0.7 : 1};
             '>✅ УЧАСТВУЮ</button>
+            ` : `
+            <div style='
+              background: #8a9e6a;
+              color: white;
+              border: none;
+              border-radius: 30px;
+              padding: 8px 12px;
+              font-size: 0.75rem;
+              font-weight: bold;
+              margin-bottom: 10px;
+              width: 100%;
+              text-align: center;
+              opacity: 0.5;
+            '>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>
+            `}
             <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>УЧАСТНИКИ (${yesList.length})</div>
             <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
               ${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #e0ffe0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0;">😴 ПОКА НИКТО</div>'}
@@ -806,6 +835,7 @@
           
           <!-- СТОЛБИК "НЕ УЧАСТВУЮ" -->
           <div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column;'>
+            ${!isPastEvent(date) ? `
             <button onclick='voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='
               background: ${hasNo ? '#9a6a5a' : '#8a5a4a'};
               color: white;
@@ -819,6 +849,21 @@
               width: 100%;
               opacity: ${hasNo ? 0.7 : 1};
             '>❌ НЕ УЧАСТВУЮ</button>
+            ` : `
+            <div style='
+              background: #b88a7a;
+              color: white;
+              border: none;
+              border-radius: 30px;
+              padding: 8px 12px;
+              font-size: 0.75rem;
+              font-weight: bold;
+              margin-bottom: 10px;
+              width: 100%;
+              text-align: center;
+              opacity: 0.5;
+            '>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>
+            `}
             <div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.8); margin-bottom: 5px; text-align: center;'>НЕ УЧАСТВУЮТ (${noList.length})</div>
             <div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>
               ${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white;'><span style='color: #ffe0e0; margin-right: 6px;'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0;">😴 ПОКА НИКТО</div>'}
@@ -826,7 +871,8 @@
           </div>
         </div>
         
-        <!-- ОБЪЕДИНЁННАЯ КНОПКА -->
+        <!-- ОБЪЕДИНЁННАЯ КНОПКА (скрываем для прошлых событий) -->
+        ${!isPastEvent(date) ? `
         <div style='margin-top: 12px; width: 100%;'>
           <button onclick='changeVoteInline(${ev.id},"${date}", "${containerId}")' style='
             background: #c0b8a0;
@@ -839,6 +885,11 @@
             color: #4a5b3a;
           '>${voteStatusText}</button>
         </div>
+        ` : `
+        <div style='margin-top: 12px; width: 100%; text-align: center;'>
+          <span style='background: #e0d8c0; border-radius: 20px; padding: 6px 12px; font-size: 0.65rem; color: #8a9e6a;'>🔒 СОБЫТИЕ ПРОШЛО • ГОЛОСОВАНИЕ ЗАКРЫТО</span>
+        </div>
+        `}
         
         ${adminBtns}
       </div>
