@@ -594,12 +594,11 @@
     const events = getEventsForDate(date);
     
     // Если событий нет
-    if (!events.length) {
+        if (!events.length) {
       document.getElementById('detailsSection').innerHTML = `
         <div>
           <div class='event-title'>📅 ${formatDate(date)}</div>
           <div style='color:#8a9e6a;'>НЕТ СОБЫТИЙ</div>
-          ${isAdmin ? `<button class='vote-btn' style='width:100%; margin-top:12px;' onclick='document.getElementById("newEventName").focus()'>➕ ДОБАВИТЬ СОБЫТИЕ</button>` : ''}
         </div>`;
       return;
     }
