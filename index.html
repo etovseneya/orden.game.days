@@ -454,8 +454,15 @@
     }
   }
 
-    async function deleteEvent(eventId, date) {
-    if (!isAdmin) return;
+     async function deleteEvent(eventId, date) {
+    if (!isAdmin) {
+      alert("ТОЛЬКО АДМИН!");
+      return;
+    }
+    
+    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) {
+      return;
+    }
     
     // Находим все дни, где есть это событие
     const datesWithEvent = [];
@@ -464,6 +471,8 @@
         datesWithEvent.push(d);
       }
     }
+    
+    console.log("Удаляем событие", eventId, "из дней:", datesWithEvent);
     
     // Удаляем событие из всех найденных дней
     for (const d of datesWithEvent) {
@@ -479,18 +488,24 @@
       selectedDate = "";
     }
     
+    // Сохраняем в Firebase
     await saveToFirebase();
+    
+    // Перерисовываем календарь
     renderCalendar();
     
-    // Показываем сообщение об успешном удалении
-    document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
+    // Очищаем нижнюю панель
+    const detailsSection = document.getElementById('detailsSection');
+    if (detailsSection) {
+      detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
+      setTimeout(() => {
+        if (detailsSection && !selectedDate) {
+          detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+        }
+      }, 2000);
+    }
     
-    // Через 2 секунды возвращаем стандартное сообщение
-    setTimeout(() => {
-      if (!selectedDate) {
-        document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
-      }
-    }, 2000);
+    alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
   function renderCalendar() {
