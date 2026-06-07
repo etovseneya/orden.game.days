@@ -342,6 +342,17 @@
       }
     }
     
+    // Получаем оригинальное событие (для сохранения голосов)
+    let originalYesVotes = [];
+    let originalNoVotes = [];
+    if (datesWithEvent.length > 0) {
+      const originalEvent = eventsDB[datesWithEvent[0]]?.find(e => e.id === eventId);
+      if (originalEvent) {
+        originalYesVotes = originalEvent.yesVotes || [];
+        originalNoVotes = originalEvent.noVotes || [];
+      }
+    }
+    
     // Удаляем событие из всех дней
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
@@ -363,8 +374,8 @@
         link: newLink,
         format: newFormat,
         duration: newDuration,
-        yesVotes: [],
-        noVotes: []
+        yesVotes: [...originalYesVotes],  // сохраняем голоса
+        noVotes: [...originalNoVotes]      // сохраняем голоса
       });
     }
     
@@ -405,18 +416,43 @@
     }
   }
 
-  async function deleteEvent(eventId, date) {
+    async function deleteEvent(eventId, date) {
     if (!isAdmin) return;
-    eventsDB[date] = eventsDB[date].filter(e => e.id !== eventId);
-    if (eventsDB[date].length === 0) delete eventsDB[date];
+    
+    // Находим все дни, где есть это событие
+    const datesWithEvent = [];
+    for (const [d, events] of Object.entries(eventsDB)) {
+      if (events.some(e => e.id === eventId)) {
+        datesWithEvent.push(d);
+      }
+    }
+    
+    // Удаляем событие из всех найденных дней
+    for (const d of datesWithEvent) {
+      eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
+      if (eventsDB[d].length === 0) {
+        delete eventsDB[d];
+      }
+    }
+    
+    // Если текущий выбранный день или событие были удалены - сбрасываем
     if (selectedEventId === eventId) {
       selectedEventId = null;
       selectedDate = "";
     }
+    
     await saveToFirebase();
     renderCalendar();
-    if (selectedDate) showDayEvents(selectedDate);
-    else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+    
+    // Показываем сообщение об успешном удалении
+    document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
+    
+    // Через 2 секунды возвращаем стандартное сообщение
+    setTimeout(() => {
+      if (!selectedDate) {
+        document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+      }
+    }, 2000);
   }
 
   function renderCalendar() {
