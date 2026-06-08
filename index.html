@@ -333,7 +333,7 @@
     }
   }
 
-    async function deleteEvent(eventId, date) {
+      async function deleteEvent(eventId, date) {
     if (!isAdmin) { 
       alert("ТОЛЬКО АДМИН!"); 
       return; 
@@ -343,43 +343,72 @@
       return;
     }
     
-    console.log("Удаляем событие:", eventId);
+    console.log("=== НАЧАЛО УДАЛЕНИЯ ===");
+    console.log("Удаляем событие ID:", eventId);
+    console.log("Текущий eventsDB ДО удаления:", JSON.parse(JSON.stringify(eventsDB)));
     
-    // Находим все дни, где есть это событие
+    // 1. Находим все дни, где есть это событие
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
       if (events.some(e => e.id === eventId)) {
         datesWithEvent.push(d);
-        console.log("Найдено в дне:", d);
+        console.log("Событие найдено в дне:", d);
       }
     }
     
     if (datesWithEvent.length === 0) {
-      alert("Событие не найдено!");
+      alert("Событие не найдено в текущей сессии!");
       return;
     }
     
-    // Удаляем событие из всех найденных дней
+    // 2. Удаляем событие из всех найденных дней
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
+      console.log(`После удаления в дне ${d}:`, eventsDB[d]);
       if (eventsDB[d].length === 0) {
         delete eventsDB[d];
+        console.log(`День ${d} удалён (стал пустым)`);
       }
     }
     
-    // Сбрасываем выбранное событие
+    console.log("eventsDB ПОСЛЕ удаления:", eventsDB);
+    
+    // 3. Сохраняем в Firebase (принудительно перезаписываем)
+    try {
+      const batch = db.batch();
+      // Удаляем документы для пустых дней
+      for (const d of datesWithEvent) {
+        if (!eventsDB[d] || eventsDB[d].length === 0) {
+          const docRef = db.collection("events").doc(d);
+          batch.delete(docRef);
+          console.log(`Документ ${d} помечен на удаление из Firebase`);
+        } else {
+          const docRef = db.collection("events").doc(d);
+          batch.set(docRef, { events: eventsDB[d], updatedAt: new Date() });
+          console.log(`Документ ${d} обновлён в Firebase`);
+        }
+      }
+      await batch.commit();
+      console.log("Batch коммит выполнен");
+    } catch (error) {
+      console.error("Ошибка при сохранении в Firebase:", error);
+      alert("Ошибка при удалении из базы данных!");
+      return;
+    }
+    
+    // 4. Сбрасываем выбранное событие
     if (selectedEventId === eventId) {
       selectedEventId = null;
       selectedDate = "";
     }
     
-    // Сохраняем в Firebase
-    await saveToFirebase();
+    // 5. Принудительно перезагружаем данные из Firebase (чтобы убедиться)
+    await loadFromFirebase();
     
-    // Перерисовываем календарь
+    // 6. Перерисовываем календарь
     renderCalendar();
     
-    // Очищаем нижнюю панель
+    // 7. Очищаем нижнюю панель
     const detailsSection = document.getElementById('detailsSection');
     if (detailsSection) {
       detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
@@ -390,6 +419,7 @@
       }, 2000);
     }
     
+    console.log("=== УДАЛЕНИЕ ЗАВЕРШЕНО ===");
     alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
