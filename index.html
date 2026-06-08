@@ -333,27 +333,63 @@
     }
   }
 
-  async function deleteEvent(eventId, date) {
-    if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
-    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) return;
+    async function deleteEvent(eventId, date) {
+    if (!isAdmin) { 
+      alert("ТОЛЬКО АДМИН!"); 
+      return; 
+    }
+    
+    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) {
+      return;
+    }
+    
+    console.log("Удаляем событие:", eventId);
+    
+    // Находим все дни, где есть это событие
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
+      if (events.some(e => e.id === eventId)) {
+        datesWithEvent.push(d);
+        console.log("Найдено в дне:", d);
+      }
     }
+    
+    if (datesWithEvent.length === 0) {
+      alert("Событие не найдено!");
+      return;
+    }
+    
+    // Удаляем событие из всех найденных дней
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
-      if (eventsDB[d].length === 0) delete eventsDB[d];
+      if (eventsDB[d].length === 0) {
+        delete eventsDB[d];
+      }
     }
-    if (selectedEventId === eventId) { selectedEventId = null; selectedDate = ""; }
+    
+    // Сбрасываем выбранное событие
+    if (selectedEventId === eventId) {
+      selectedEventId = null;
+      selectedDate = "";
+    }
+    
+    // Сохраняем в Firebase
     await saveToFirebase();
+    
+    // Перерисовываем календарь
     renderCalendar();
+    
+    // Очищаем нижнюю панель
     const detailsSection = document.getElementById('detailsSection');
     if (detailsSection) {
       detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
       setTimeout(() => {
-        if (detailsSection && !selectedDate) detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+        if (detailsSection && !selectedDate) {
+          detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+        }
       }, 2000);
     }
+    
     alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
