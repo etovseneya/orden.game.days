@@ -11,7 +11,6 @@
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
     body { background: #e8e0d0; padding: 12px; min-height: 100vh; }
     .container { max-width: 100%; margin: 0 auto; background: #f5f0e8; border-radius: 24px; padding: 16px; border: 1px solid #d4c9b0; }
-    h1 { font-size: 1.6rem; color: #4a5b3a; text-align: center; margin-bottom: 8px; }
     .mode-badge { display: inline-block; background: #e0d8c8; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; color: #4a5b3a; }
     .status-bar { background: #e8e0d0; padding: 5px 10px; border-radius: 12px; margin: 8px 0; font-size: 0.7rem; text-align: center; color: #5a6b4a; }
     .admin-panel { background: #e0d8c0; padding: 10px; border-radius: 14px; margin: 12px 0; display: none; }
@@ -31,16 +30,10 @@
     .details-section { background: #f0ece0; border-radius: 20px; padding: 16px; margin-top: 16px; }
     .event-title { font-size: 1.2rem; font-weight: bold; color: #4a5b3a; }
     .event-desc { color: #6a7b5a; font-size: 0.85rem; padding-bottom: 8px; border-bottom: 1px solid #d0c8b0; margin-bottom: 12px; }
-    .vote-buttons { display: flex; gap: 15px; justify-content: center; margin: 12px 0; }
     .vote-btn { border: none; border-radius: 30px; padding: 6px 20px; font-size: 0.8rem; cursor: pointer; background: #e8e4d8; border: 1px solid #c0b8a0; }
     .vote-btn.yes { background: #d0e8c0; }
     .vote-btn.no { background: #e8c0c0; }
     .vote-btn.disabled { opacity: 0.5; cursor: not-allowed; }
-    .vote-columns { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 12px; }
-    .vote-col { flex: 1; background: #faf8f0; border-radius: 14px; padding: 8px; }
-    .vote-col.green { background: #d0e8c0; }
-    .vote-col.red { background: #e8c0c0; }
-    .vote-col-title { font-weight: bold; text-align: center; padding: 5px; font-size: 0.75rem; background: rgba(0,0,0,0.1); border-radius: 10px; margin-bottom: 8px; }
     .attendee-item { padding: 4px 6px; font-size: 0.7rem; border-bottom: 1px solid rgba(0,0,0,0.05); }
     .attendee-num { color: #8a9e6a; font-weight: 600; margin-right: 6px; }
     .no-votes { text-align: center; padding: 10px; font-size: 0.65rem; color: #b0a890; }
@@ -52,8 +45,6 @@
     .edit-form.show { display: block; }
     .edit-form input, .edit-form textarea { width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0; }
     .edit-form button { background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer; }
-    .change-btn { background: #c0b8a0; border: none; border-radius: 30px; padding: 6px; font-size: 0.7rem; cursor: pointer; width: 100%; margin-top: 12px; }
-    .event-select { width: 100%; padding: 10px; border-radius: 14px; margin: 10px 0; border: 1px solid #d0c8b0; }
     .add-form { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; }
     .add-form input, .add-form textarea { padding: 10px; border-radius: 14px; border: 1px solid #d0c8b0; }
     .add-form button { background: #8a9e6a; color: white; border: none; padding: 10px; border-radius: 14px; cursor: pointer; }
@@ -79,7 +70,6 @@
       background: #faf8f0;
     }
     .login-box input:first-of-type { width: 100px; }
-    .login-box input:last-of-type { width: 100px; }
     .login-box button {
       background: #c0b8a0;
       color: #4a5b3a;
@@ -92,7 +82,17 @@
       margin-top: 0;
     }
     .login-box button:hover { background: #8a9e6a; color: white; }
-    .refresh-note { text-align: center; font-size: 0.65rem; color: #8a9e6a; margin-top: 8px; }
+    .refresh-note {
+      text-align: center;
+      font-size: 0.65rem;
+      color: #8a9e6a;
+      margin-top: 8px;
+      opacity: 0.4;
+      transition: opacity 0.3s ease;
+    }
+    .refresh-note:hover { opacity: 1; }
+    #saveIndicator { opacity: 0.4; transition: opacity 0.3s ease; }
+    #saveIndicator:hover { opacity: 1; }
     @media (max-width: 500px) { .day-cell { min-height: 70px; } .event-badge { font-size: 0.5rem; white-space: normal; } .vote-buttons { gap: 8px; } .vote-btn { padding: 4px 12px; font-size: 0.7rem; } }
     .event-list-item { transition: all 0.2s ease; }
     .event-list-item:active { transform: scale(0.99); }
@@ -112,23 +112,9 @@
 </head>
 <body>
 <div class="container">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
     <h1 style="margin-bottom: 0;">⚔️ КАЛЕНДАРЬ ИГР</h1>
-    <button onclick="location.reload();" style="
-      background: #8a9e6a;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 36px;
-      height: 36px;
-      font-size: 1.2rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.2s ease;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
-    " onmouseover="this.style.transform='rotate(90deg)'; this.style.background='#6a8e4a';" onmouseout="this.style.transform='rotate(0deg)'; this.style.background='#8a9e6a';">🔄</button>
+    <button onclick="location.reload();" style="background: #8a9e6a; color: white; border: none; border-radius: 50%; width: 36px; height: 36px; font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 1px 3px rgba(0,0,0,0.2);" onmouseover="this.style.transform='rotate(90deg)'; this.style.background='#6a8e4a';" onmouseout="this.style.transform='rotate(0deg)'; this.style.background='#8a9e6a';">🔄</button>
   </div>
   <div class="mode-badge" id="modeBadge">🗳️ РЕЖИМ ГОЛОСОВАНИЯ</div>
   <div class="status-bar" id="statusBar">🔄 ПОДКЛЮЧЕНИЕ К FIREBASE...</div>
@@ -178,13 +164,13 @@
       </div>
     </div>
   </div>
-    <div id="loginBox" class="login-box">
+  <div id="loginBox" class="login-box">
     <div>🔐 ДОСТУП К РЕЖИМУ РЕДАКТИРОВАНИЯ</div>
     <input type="password" id="adminCode" placeholder="КОД ДОСТУПА">
     <button onclick="checkAdmin()">ВОЙТИ</button>
   </div>
   <div class="refresh-note">🔄 ВСЕ ИЗМЕНЕНИЯ СОХРАНЯЮТСЯ АВТОМАТИЧЕСКИ</div>
-  <div class="refresh-note" id="saveIndicator" style="display:none;">💾 Сохранено: <span id="lastSaved">—</span></div>
+  <div class="refresh-note" id="saveIndicator">💾 Сохранено: <span id="lastSaved">—</span></div>
 </div>
 
 <script>
@@ -248,9 +234,15 @@
       }
       await batch.commit();
       updateStatus("💾 СОХРАНЕНО В ОБЛАКО");
-      document.getElementById('saveIndicator').style.display = 'block';
-      document.getElementById('lastSaved').textContent = new Date().toLocaleTimeString();
-      setTimeout(() => document.getElementById('saveIndicator').style.display = 'none', 2000);
+      const saveIndicator = document.getElementById('saveIndicator');
+      const lastSavedSpan = document.getElementById('lastSaved');
+      if (lastSavedSpan) lastSavedSpan.textContent = new Date().toLocaleTimeString();
+      if (saveIndicator) {
+        saveIndicator.style.opacity = '1';
+        setTimeout(() => {
+          if (saveIndicator) saveIndicator.style.opacity = '0.4';
+        }, 1500);
+      }
     } catch (error) {
       console.error("Ошибка сохранения:", error);
       updateStatus("❌ ОШИБКА СОХРАНЕНИЯ", true);
@@ -325,16 +317,34 @@
     for (const [d, events] of Object.entries(eventsDB)) {
       if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
     }
+    const uname = userName.toUpperCase();
     for (const d of datesWithEvent) {
       const ev = eventsDB[d]?.find(e => e.id === eventId);
       if (ev) {
-        const uname = userName.toUpperCase();
         ev.yesVotes = ev.yesVotes.filter(v => v !== uname);
         ev.noVotes = ev.noVotes.filter(v => v !== uname);
         if (type === 'yes') ev.yesVotes.push(uname);
         else if (type === 'no') ev.noVotes.push(uname);
         ev.yesVotes.sort();
         ev.noVotes.sort();
+        
+        const allEventsInDay = eventsDB[d] || [];
+        for (const otherEvent of allEventsInDay) {
+          if (otherEvent.id === eventId) continue;
+          if (type === 'yes') {
+            otherEvent.yesVotes = otherEvent.yesVotes.filter(v => v !== uname);
+            otherEvent.noVotes = otherEvent.noVotes.filter(v => v !== uname);
+            otherEvent.noVotes.push(uname);
+            otherEvent.yesVotes.sort();
+            otherEvent.noVotes.sort();
+          } else if (type === 'no') {
+            otherEvent.yesVotes = otherEvent.yesVotes.filter(v => v !== uname);
+            otherEvent.noVotes = otherEvent.noVotes.filter(v => v !== uname);
+            otherEvent.yesVotes.push(uname);
+            otherEvent.yesVotes.sort();
+            otherEvent.noVotes.sort();
+          }
+        }
       }
     }
     await saveToFirebase();
@@ -350,93 +360,39 @@
     }
   }
 
-      async function deleteEvent(eventId, date) {
-    if (!isAdmin) { 
-      alert("ТОЛЬКО АДМИН!"); 
-      return; 
-    }
-    
-    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) {
-      return;
-    }
-    
-    console.log("=== НАЧАЛО УДАЛЕНИЯ ===");
-    console.log("Удаляем событие ID:", eventId);
-    console.log("Текущий eventsDB ДО удаления:", JSON.parse(JSON.stringify(eventsDB)));
-    
-    // 1. Находим все дни, где есть это событие
+  async function deleteEvent(eventId, date) {
+    if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
+    if (!confirm("🗑 ВЫ УВЕРЕНЫ, ЧТО ХОТИТЕ УДАЛИТЬ ЭТО СОБЫТИЕ?")) return;
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) {
-        datesWithEvent.push(d);
-        console.log("Событие найдено в дне:", d);
-      }
+      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
     }
-    
-    if (datesWithEvent.length === 0) {
-      alert("Событие не найдено в текущей сессии!");
-      return;
-    }
-    
-    // 2. Удаляем событие из всех найденных дней
+    if (datesWithEvent.length === 0) { alert("Событие не найдено!"); return; }
     for (const d of datesWithEvent) {
       eventsDB[d] = eventsDB[d].filter(e => e.id !== eventId);
-      console.log(`После удаления в дне ${d}:`, eventsDB[d]);
-      if (eventsDB[d].length === 0) {
-        delete eventsDB[d];
-        console.log(`День ${d} удалён (стал пустым)`);
-      }
+      if (eventsDB[d].length === 0) delete eventsDB[d];
     }
-    
-    console.log("eventsDB ПОСЛЕ удаления:", eventsDB);
-    
-    // 3. Сохраняем в Firebase (принудительно перезаписываем)
+    if (selectedEventId === eventId) { selectedEventId = null; selectedDate = ""; }
     try {
       const batch = db.batch();
-      // Удаляем документы для пустых дней
       for (const d of datesWithEvent) {
         if (!eventsDB[d] || eventsDB[d].length === 0) {
-          const docRef = db.collection("events").doc(d);
-          batch.delete(docRef);
-          console.log(`Документ ${d} помечен на удаление из Firebase`);
+          batch.delete(db.collection("events").doc(d));
         } else {
-          const docRef = db.collection("events").doc(d);
-          batch.set(docRef, { events: eventsDB[d], updatedAt: new Date() });
-          console.log(`Документ ${d} обновлён в Firebase`);
+          batch.set(db.collection("events").doc(d), { events: eventsDB[d], updatedAt: new Date() });
         }
       }
       await batch.commit();
-      console.log("Batch коммит выполнен");
-    } catch (error) {
-      console.error("Ошибка при сохранении в Firebase:", error);
-      alert("Ошибка при удалении из базы данных!");
-      return;
-    }
-    
-    // 4. Сбрасываем выбранное событие
-    if (selectedEventId === eventId) {
-      selectedEventId = null;
-      selectedDate = "";
-    }
-    
-    // 5. Принудительно перезагружаем данные из Firebase (чтобы убедиться)
+    } catch (error) { console.error("Ошибка при удалении:", error); alert("Ошибка при удалении!"); return; }
     await loadFromFirebase();
-    
-    // 6. Перерисовываем календарь
     renderCalendar();
-    
-    // 7. Очищаем нижнюю панель
     const detailsSection = document.getElementById('detailsSection');
     if (detailsSection) {
       detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">🗑 СОБЫТИЕ УДАЛЕНО</div>';
       setTimeout(() => {
-        if (detailsSection && !selectedDate) {
-          detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
-        }
+        if (detailsSection && !selectedDate) detailsSection.innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
       }, 2000);
     }
-    
-    console.log("=== УДАЛЕНИЕ ЗАВЕРШЕНО ===");
     alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
@@ -554,7 +510,7 @@
     }
   }
 
-       function renderEventDetailsInline(date, eventId, containerId) {
+  function renderEventDetailsInline(date, eventId, containerId) {
     const ev = eventsDB[date]?.find(e => e.id === eventId);
     if (!ev) return;
     const container = document.getElementById(containerId);
@@ -571,13 +527,12 @@
       default: formatBg = '#e8a0a0';
     }
     let voteStatusText = hasYes ? '✅ ВЫ ПРОГОЛОСОВАЛИ "УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?' : (hasNo ? '❌ ВЫ ПРОГОЛОСОВАЛИ "НЕ УЧАСТВУЮ" | УДАЛИТЬ ГОЛОС?' : '🗳️ ПРОГОЛОСОВАТЬ ИЛИ ИЗМЕНИТЬ МНЕНИЕ');
-    
     let adminBtns = '';
     if (isAdmin) {
       adminBtns = `
         <div class='action-btns' style='display: flex; gap: 8px; margin-top: 12px;'>
-          <button class='action-btn edit' onclick='window.toggleEditForm(${ev.id})' style='background: #8aae6a; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>✏️ РЕДАКТИРОВАТЬ</button>
-          <button class='action-btn delete' onclick='window.deleteEvent(${ev.id},"${date}")' style='background: #c08080; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>🗑 УДАЛИТЬ</button>
+          <button class='action-btn edit' onclick='toggleEditForm(${ev.id})' style='background: #8aae6a; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>✏️ РЕДАКТИРОВАТЬ</button>
+          <button class='action-btn delete' onclick='deleteEvent(${ev.id},"${date}")' style='background: #c08080; color: white; border: none; border-radius: 30px; padding: 5px 12px; font-size: 0.7rem; cursor: pointer; flex: 1; text-align: center;'>🗑 УДАЛИТЬ</button>
         </div>
         <div id='editForm-${ev.id}' class='edit-form' style='background: #e8e4d8; border-radius: 14px; padding: 12px; margin-top: 12px; display: none;'>
           <input type='text' id='editName-${ev.id}' value='${ev.name.replace(/"/g, "&quot;")}' style='width: 100%; padding: 8px; margin-bottom: 8px; border-radius: 12px; border: 1px solid #c0b8a0;'>
@@ -589,43 +544,24 @@
             <option value='away' ${ev.format === 'away' ? 'selected' : ''}>🚌 ВЫЕЗДНАЯ ИГРА</option>
           </select>
           <select id='editDuration-${ev.id}' style='width:100%; padding:8px; margin-bottom:8px; border-radius:12px; border:1px solid #c0b8a0;'>
-            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option>
-            <option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
-            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option>
-            <option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
-            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option>
-            <option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
+            <option value='1' ${ev.duration === 1 ? 'selected' : ''}>📅 1 ДЕНЬ</option><option value='2' ${ev.duration === 2 ? 'selected' : ''}>📅 2 ДНЯ</option>
+            <option value='3' ${ev.duration === 3 ? 'selected' : ''}>📅 3 ДНЯ</option><option value='4' ${ev.duration === 4 ? 'selected' : ''}>📅 4 ДНЯ</option>
+            <option value='5' ${ev.duration === 5 ? 'selected' : ''}>📅 5 ДНЕЙ</option><option value='6' ${ev.duration === 6 ? 'selected' : ''}>📅 6 ДНЕЙ</option>
             <option value='7' ${ev.duration === 7 ? 'selected' : ''}>📅 7 ДНЕЙ</option>
           </select>
           <div style='display: flex; gap: 8px; margin-top: 8px;'>
-            <button onclick='window.saveEdit(${ev.id},"${date}")' style='background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>💾 СОХРАНИТЬ</button>
-            <button onclick='window.toggleEditForm(${ev.id})' style='background: #c0b8a0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>❌ ОТМЕНА</button>
+            <button onclick='saveEdit(${ev.id},"${date}")' style='background: #8a9e6a; color: white; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>💾 СОХРАНИТЬ</button>
+            <button onclick='toggleEditForm(${ev.id})' style='background: #c0b8a0; border: none; padding: 6px 12px; border-radius: 20px; cursor: pointer;'>❌ ОТМЕНА</button>
           </div>
         </div>
       `;
     }
-    
-    container.innerHTML = `<div style='background: #f5f0e8; border-radius: 12px; padding: 12px; border-left: 3px solid ${formatBg}; margin-bottom: 4px;'>${ev.description ? `<div class='event-desc' style='font-size: 0.8rem; color: #6a7b5a; margin-bottom: 8px;'>📝 ${ev.description}</div>` : ''}${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}<div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'><div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; opacity: ${hasNo ? 0.5 : 1}; transition: opacity 0.3s ease;'>${!isPastEvent(date) ? `<button onclick='window.voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='background: ${hasYes ? '#6b8c5e' : '#5a7a4e'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasYes ? 0.7 : 1};'>✅ УЧАСТВУЮ</button>` : `<div style='background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.9); margin-bottom: 5px; text-align: center; text-shadow: 0 0 2px rgba(0,0,0,0.3);'>УЧАСТНИКИ (${yesList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white; text-shadow: 0 0 1px rgba(0,0,0,0.3);'><span style='color: #e0ffe0; margin-right: 6px; text-shadow: 0 0 1px rgba(0,0,0,0.3);'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0; text-shadow: 0 0 1px rgba(0,0,0,0.3);">😴 ПОКА НИКТО</div>'}</div></div><div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; opacity: ${hasYes ? 0.5 : 1}; transition: opacity 0.3s ease;'>${!isPastEvent(date) ? `<button onclick='window.voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='background: ${hasNo ? '#9a6a5a' : '#8a5a4a'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasNo ? 0.7 : 1};'>❌ НЕ УЧАСТВУЮ</button>` : `<div style='background: #b88a7a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.9); margin-bottom: 5px; text-align: center; text-shadow: 0 0 2px rgba(0,0,0,0.3);'>НЕ УЧАСТВУЮТ (${noList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white; text-shadow: 0 0 1px rgba(0,0,0,0.3);'><span style='color: #ffe0e0; margin-right: 6px; text-shadow: 0 0 1px rgba(0,0,0,0.3);'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0; text-shadow: 0 0 1px rgba(0,0,0,0.3);">😴 ПОКА НИКТО</div>'}</div></div></div>${!isPastEvent(date) ? `<div style='margin-top: 12px; width: 100%;'><button onclick='window.changeVoteInline(${ev.id},"${date}", "${containerId}")' style='background: #c0b8a0; border: none; border-radius: 30px; padding: 6px 12px; font-size: 0.7rem; cursor: pointer; width: 100%; color: #4a5b3a;'>${voteStatusText}</button></div>` : `<div style='margin-top: 12px; width: 100%; text-align: center;'><span style='background: #e0d8c0; border-radius: 20px; padding: 6px 12px; font-size: 0.65rem; color: #8a9e6a;'>🔒 СОБЫТИЕ ПРОШЛО • ГОЛОСОВАНИЕ ЗАКРЫТО</span></div>`}${adminBtns}</div>`;
+    container.innerHTML = `<div style='background: #f5f0e8; border-radius: 12px; padding: 12px; border-left: 3px solid ${formatBg}; margin-bottom: 4px;'>${ev.description ? `<div class='event-desc' style='font-size: 0.8rem; color: #6a7b5a; margin-bottom: 8px;'>📝 ${ev.description}</div>` : ''}${ev.link ? `<div class='event-link' style='margin-bottom: 8px;'>🔗 <a href='${ev.link}' target='_blank' style='color: #8a9e6a;'>ССЫЛКА</a></div>` : ''}${ev.duration && ev.duration > 1 ? `<div style='font-size: 0.7rem; color: #8a9e6a; margin-bottom: 12px;'>📅 ДЛИТСЯ ${ev.duration} ДНЕЙ</div>` : ''}<div class='vote-columns' style='display: flex; gap: 12px; flex-wrap: wrap; margin-top: 8px;'><div style='flex: 1; background: #8bac7c; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; opacity: ${hasNo ? 0.5 : 1}; transition: opacity 0.3s ease;'>${!isPastEvent(date) ? `<button onclick='voteClickInline(${ev.id},"${date}","yes", "${containerId}")' style='background: ${hasYes ? '#6b8c5e' : '#5a7a4e'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasYes ? 0.7 : 1};'>✅ УЧАСТВУЮ</button>` : `<div style='background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.9); margin-bottom: 5px; text-align: center; text-shadow: 0 0 2px rgba(0,0,0,0.3);'>УЧАСТНИКИ (${yesList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${yesList.length ? yesList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white; text-shadow: 0 0 1px rgba(0,0,0,0.3);'><span style='color: #e0ffe0; margin-right: 6px; text-shadow: 0 0 1px rgba(0,0,0,0.3);'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #e0ffe0; text-shadow: 0 0 1px rgba(0,0,0,0.3);">😴 ПОКА НИКТО</div>'}</div></div><div style='flex: 1; background: #b88a7a; border-radius: 14px; padding: 8px; display: flex; flex-direction: column; opacity: ${hasYes ? 0.5 : 1}; transition: opacity 0.3s ease;'>${!isPastEvent(date) ? `<button onclick='voteClickInline(${ev.id},"${date}","no", "${containerId}")' style='background: ${hasNo ? '#9a6a5a' : '#8a5a4a'}; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; cursor: pointer; margin-bottom: 10px; width: 100%; opacity: ${hasNo ? 0.7 : 1};'>❌ НЕ УЧАСТВУЮ</button>` : `<div style='background: #b88a7a; color: white; border: none; border-radius: 30px; padding: 8px 12px; font-size: 0.75rem; font-weight: bold; margin-bottom: 10px; width: 100%; text-align: center; opacity: 0.5;'>🔒 ГОЛОСОВАНИЕ ЗАКРЫТО</div>`}<div style='font-weight: bold; font-size: 0.65rem; color: rgba(255,255,255,0.9); margin-bottom: 5px; text-align: center; text-shadow: 0 0 2px rgba(0,0,0,0.3);'>НЕ УЧАСТВУЮТ (${noList.length})</div><div style='background: rgba(255,255,255,0.1); border-radius: 10px; padding: 6px; max-height: 120px; overflow-y: auto;'>${noList.length ? noList.map((n,i) => `<div style='padding: 3px 6px; font-size: 0.7rem; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.15); color: white; text-shadow: 0 0 1px rgba(0,0,0,0.3);'><span style='color: #ffe0e0; margin-right: 6px; text-shadow: 0 0 1px rgba(0,0,0,0.3);'>${i+1}.</span> ${n}</div>`).join('') : '<div style="text-align: center; padding: 8px; font-size: 0.65rem; color: #ffe0e0; text-shadow: 0 0 1px rgba(0,0,0,0.3);">😴 ПОКА НИКТО</div>'}</div></div></div>${!isPastEvent(date) ? `<div style='margin-top: 12px; width: 100%;'><button onclick='changeVoteInline(${ev.id},"${date}", "${containerId}")' style='background: #c0b8a0; border: none; border-radius: 30px; padding: 6px 12px; font-size: 0.7rem; cursor: pointer; width: 100%; color: #4a5b3a;'>${voteStatusText}</button></div>` : `<div style='margin-top: 12px; width: 100%; text-align: center;'><span style='background: #e0d8c0; border-radius: 20px; padding: 6px 12px; font-size: 0.65rem; color: #8a9e6a;'>🔒 СОБЫТИЕ ПРОШЛО • ГОЛОСОВАНИЕ ЗАКРЫТО</span></div>`}${adminBtns}</div>`;
   }
 
-     window.toggleEditForm = (id) => {
-    console.log("toggleEditForm вызван для id:", id);
+  window.toggleEditForm = (id) => {
     const form = document.getElementById(`editForm-${id}`);
-    if (form) {
-      console.log("Форма найдена, текущий display:", form.style.display);
-      if (form.style.display === 'none' || form.style.display === '') {
-        form.style.display = 'block';
-        console.log("Форма показана");
-      } else {
-        form.style.display = 'none';
-        console.log("Форма скрыта");
-      }
-    } else {
-      console.log("Форма НЕ найдена! Ищем элемент с id:", `editForm-${id}`);
-      // Проверяем, есть ли вообще такой элемент в DOM
-      const allForms = document.querySelectorAll('[id^="editForm-"]');
-      console.log("Все editForm в DOM:", allForms.length);
-    }
+    if (form) form.classList.toggle('show');
   };
 
   window.saveEdit = async (id, date) => {
@@ -636,7 +572,7 @@
     const newDuration = parseInt(document.getElementById(`editDuration-${id}`).value);
     if (!newName.trim()) { alert("ВВЕДИТЕ НАЗВАНИЕ!"); return; }
     await editEvent(id, date, newName, newDesc, newLink, newFormat, newDuration);
-    toggleEditForm(id);
+    window.toggleEditForm(id);
     renderCalendar();
     if (selectedDate) showDayEvents(selectedDate);
   };
@@ -681,7 +617,7 @@
     }
   };
 
-    function checkAdmin() {
+  function checkAdmin() {
     const code = document.getElementById('adminCode').value;
     if (code !== ADMIN_PASSWORD) { alert("❌ НЕВЕРНЫЙ КОД!"); return; }
     isAdmin = true;
