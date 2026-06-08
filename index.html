@@ -312,12 +312,18 @@
     showDayEvents(date);
   }
 
-  async function vote(eventId, date, userName, type) {
+   async function vote(eventId, date, userName, type) {
+    // Находим все дни, где есть это событие
     const datesWithEvent = [];
     for (const [d, events] of Object.entries(eventsDB)) {
-      if (events.some(e => e.id === eventId)) datesWithEvent.push(d);
+      if (events.some(e => e.id === eventId)) {
+        datesWithEvent.push(d);
+      }
     }
+    
     const uname = userName.toUpperCase();
+    
+    // Обновляем голос только для текущего события
     for (const d of datesWithEvent) {
       const ev = eventsDB[d]?.find(e => e.id === eventId);
       if (ev) {
@@ -327,26 +333,9 @@
         else if (type === 'no') ev.noVotes.push(uname);
         ev.yesVotes.sort();
         ev.noVotes.sort();
-        
-        const allEventsInDay = eventsDB[d] || [];
-        for (const otherEvent of allEventsInDay) {
-          if (otherEvent.id === eventId) continue;
-          if (type === 'yes') {
-            otherEvent.yesVotes = otherEvent.yesVotes.filter(v => v !== uname);
-            otherEvent.noVotes = otherEvent.noVotes.filter(v => v !== uname);
-            otherEvent.noVotes.push(uname);
-            otherEvent.yesVotes.sort();
-            otherEvent.noVotes.sort();
-          } else if (type === 'no') {
-            otherEvent.yesVotes = otherEvent.yesVotes.filter(v => v !== uname);
-            otherEvent.noVotes = otherEvent.noVotes.filter(v => v !== uname);
-            otherEvent.yesVotes.push(uname);
-            otherEvent.yesVotes.sort();
-            otherEvent.noVotes.sort();
-          }
-        }
       }
     }
+    
     await saveToFirebase();
     renderCalendar();
     if (selectedDate) {
@@ -606,13 +595,15 @@
     }
   };
 
-  window.changeVoteInline = async (id, date, containerId) => {
+    window.changeVoteInline = async (id, date, containerId) => {
     let name = prompt("ВВЕДИТЕ ПОЗЫВНОЙ ДЛЯ ОТМЕНЫ", localStorage.getItem('userName') || "");
     if (name && name.trim()) {
       const uname = name.trim().toUpperCase();
       const datesWithEvent = [];
       for (const [d, events] of Object.entries(eventsDB)) {
-        if (events.some(e => e.id === id)) datesWithEvent.push(d);
+        if (events.some(e => e.id === id)) {
+          datesWithEvent.push(d);
+        }
       }
       for (const d of datesWithEvent) {
         const ev = eventsDB[d]?.find(e => e.id === id);
@@ -623,7 +614,13 @@
       }
       await saveToFirebase();
       renderCalendar();
-      if (selectedDate) showDayEvents(selectedDate);
+      if (selectedDate) {
+        showDayEvents(selectedDate);
+        setTimeout(() => {
+          const selectedItem = document.querySelector(`.event-list-item[data-event-id='${id}']`);
+          if (selectedItem) selectedItem.click();
+        }, 50);
+      }
       alert("ГОЛОС УДАЛЕН!");
     }
   };
