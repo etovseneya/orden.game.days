@@ -554,7 +554,7 @@
       });
     });
   }
-    function renderYearView() {
+  function renderYearView() {
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     
@@ -589,19 +589,26 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
     
-    let html = '<div class="year-view-container">';
+    // Сетка 3x4
+    let html = `
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; flex-wrap: wrap;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
+        <h2 style="color: #4a5b3a; margin: 0;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
+      </div>
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+    `;
     
     for (let month = 0; month < 12; month++) {
       const events = eventsByMonth[month];
-      const monthDate = new Date(currentYear, month, 15);
       const monthName = monthNames[month];
       
-      html += `<div class='month-card' data-month='${month}'>`;
-      html += `<h3>${monthName} ${currentYear}</h3>`;
-      html += `<div class='month-events-list'>`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 16px; padding: 12px; border: 1px solid #d4c9b0;">`;
+      html += `<h3 style="background: #e0d8c0; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 0.9rem; color: #4a5b3a; text-align: center;">${monthName}</h3>`;
+      html += `<div class='month-events-list' style="max-height: 250px; overflow-y: auto;">`;
       
       if (events.length === 0) {
-        html += `<div class='no-events-month'>😴 НЕТ СОБЫТИЙ</div>`;
+        html += `<div class='no-events-month' style="text-align: center; padding: 20px; color: #b0a890; font-size: 0.7rem;">😴 НЕТ СОБЫТИЙ</div>`;
       } else {
         events.forEach(ev => {
           const eventDate = new Date(currentYear, month, ev.day);
@@ -621,11 +628,11 @@
           }
           
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' style='border-left-color: ${formatColor};'>
-              <span class='year-event-date'>${ev.day}</span>
-              <span class='year-event-weekday'>${weekday}</span>
-              <span class='year-event-name'>${formatIcon} ${ev.name}</span>
-              <span class='year-event-votes'>✅${ev.yesCount} ❌${ev.noCount}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' style="background: #e8e4d8; border-radius: 10px; padding: 6px 10px; margin-bottom: 6px; font-size: 0.7rem; border-left: 3px solid ${formatColor}; cursor: pointer; transition: all 0.2s ease;">
+              <span style="font-weight: bold; color: #4a5b3a; display: inline-block; min-width: 35px;">${ev.day}</span>
+              <span style="color: #8a9e6a; font-size: 0.65rem; margin-right: 6px;">${weekday}</span>
+              <span style="font-weight: bold; color: #4a5b3a;">${formatIcon} ${ev.name.length > 20 ? ev.name.substring(0, 18) + '..' : ev.name}</span>
+              <span style="font-size: 0.6rem; color: #8a9e6a; margin-left: 6px;">✅${ev.yesCount} ❌${ev.noCount}</span>
             </div>
           `;
         });
@@ -634,7 +641,7 @@
       html += `</div></div>`;
     }
     
-    html += '</div>';
+    html += `</div>`;
     grid.innerHTML = html;
     
     // Скрываем детали и легенду
@@ -642,26 +649,46 @@
     const legend = document.querySelector('.legend');
     if (legend) legend.style.display = 'none';
     
+    // Убираем старую кнопку возврата если есть
+    const oldBackBtn = document.getElementById('backToMonthBtn');
+    if (oldBackBtn) oldBackBtn.remove();
+    
     // Добавляем кнопку возврата
-    let backBtn = document.getElementById('backToMonthBtn');
-    if (!backBtn) {
-      backBtn = document.createElement('button');
-      backBtn.id = 'backToMonthBtn';
-      backBtn.className = 'back-to-month-btn';
-      backBtn.innerHTML = '◀ ВЕРНУТЬСЯ К МЕСЯЦУ';
-      backBtn.onclick = () => {
-        isYearView = false;
-        document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
-        document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
-        if (detailsSection) detailsSection.style.display = 'block';
-        if (legend) legend.style.display = 'flex';
-        renderCalendar();
-        if (selectedDate) showDayEvents(selectedDate);
-        else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
-      };
-      document.querySelector('.month-nav').insertAdjacentElement('afterend', backBtn);
-    } else {
-      backBtn.style.display = 'block';
+    const backBtn = document.createElement('button');
+    backBtn.id = 'backToMonthBtn';
+    backBtn.className = 'back-to-month-btn';
+    backBtn.innerHTML = '◀ ВЕРНУТЬСЯ К МЕСЯЦУ';
+    backBtn.style.cssText = 'background: #c0b8a0; color: #4a5b3a; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; margin-top: 16px; width: 100%; transition: all 0.2s ease;';
+    backBtn.onmouseover = () => backBtn.style.background = '#b0a890';
+    backBtn.onmouseout = () => backBtn.style.background = '#c0b8a0';
+    backBtn.onclick = () => {
+      isYearView = false;
+      document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
+      document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
+      if (detailsSection) detailsSection.style.display = 'block';
+      if (legend) legend.style.display = 'flex';
+      renderCalendar();
+      if (selectedDate) showDayEvents(selectedDate);
+      else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+    };
+    grid.insertAdjacentElement('afterend', backBtn);
+    
+    // Обработчики для переключения годов
+    const yearPrevBtn = document.getElementById('yearPrevBtn');
+    const yearNextBtn = document.getElementById('yearNextBtn');
+    
+    if (yearPrevBtn) {
+      yearPrevBtn.addEventListener('click', () => {
+        currentYear--;
+        renderYearView();
+      });
+    }
+    
+    if (yearNextBtn) {
+      yearNextBtn.addEventListener('click', () => {
+        currentYear++;
+        renderYearView();
+      });
     }
     
     // Добавляем обработчики кликов на события
