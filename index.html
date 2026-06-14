@@ -122,6 +122,90 @@
     }
     .legend-item { display: flex; align-items: center; gap: 8px; font-size: 0.7rem; }
     .legend-color { width: 20px; height: 20px; border-radius: 6px; }
+        /* Годовой обзор */
+    .year-view-container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .month-card {
+      background: #f5f0e8;
+      border-radius: 16px;
+      padding: 12px;
+      border: 1px solid #d4c9b0;
+      margin-bottom: 8px;
+    }
+    .month-card h3 {
+      background: #e0d8c0;
+      padding: 8px 12px;
+      border-radius: 12px;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      color: #4a5b3a;
+      text-align: center;
+    }
+    .month-events-list {
+      max-height: 200px;
+      overflow-y: auto;
+    }
+    .year-event-item {
+      background: #e8e4d8;
+      border-radius: 10px;
+      padding: 6px 10px;
+      margin-bottom: 6px;
+      font-size: 0.7rem;
+      border-left: 3px solid;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .year-event-item:hover {
+      transform: translateX(4px);
+      background: #e0d8c8;
+    }
+    .year-event-date {
+      font-weight: bold;
+      color: #4a5b3a;
+      display: inline-block;
+      min-width: 45px;
+    }
+    .year-event-weekday {
+      color: #8a9e6a;
+      font-size: 0.65rem;
+      margin-right: 8px;
+    }
+    .year-event-name {
+      font-weight: bold;
+      color: #4a5b3a;
+    }
+    .year-event-votes {
+      font-size: 0.6rem;
+      color: #8a9e6a;
+      margin-left: 8px;
+    }
+    .no-events-month {
+      text-align: center;
+      padding: 20px;
+      color: #b0a890;
+      font-size: 0.7rem;
+    }
+    .back-to-month-btn {
+      background: #c0b8a0;
+      color: #4a5b3a;
+      border: none;
+      border-radius: 30px;
+      padding: 8px 16px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      margin-bottom: 16px;
+      transition: all 0.2s ease;
+    }
+    .back-to-month-btn:hover {
+      background: #b0a890;
+      transform: scale(1.02);
+    }
+    .year-view-btn-active {
+      background: #6a8e4a !important;
+    }
   </style>
 </head>
 <body>
@@ -135,10 +219,11 @@
   <div class="admin-panel" id="adminPanel">
     <button class="admin-toggle" onclick="exitAdminMode()">🔒 ВЫЙТИ ИЗ РЕЖИМА РЕДАКТИРОВАНИЯ</button>
   </div>
-  <div class="month-nav">
+    <div class="month-nav">
     <button id="prevMonthBtn">◀</button>
     <span class="current-month" id="currentMonthLabel"></span>
     <button id="nextMonthBtn">▶</button>
+    <button id="yearViewBtn" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; margin-left: auto; transition: all 0.2s ease;">📅 ГОДОВОЙ ОБЗОР</button>
   </div>
   <div class="calendar-grid" id="calendarGrid"></div>
   <div class="legend">
@@ -205,6 +290,7 @@
   let currentYear = 2026, currentMonth = 5;
   let selectedDate = "", selectedEventId = null;
   let isAdmin = false;
+  let isYearView = false;
 
   function formatDate(dateStr) {
     let p = dateStr.split('-');
@@ -399,7 +485,13 @@
     alert("✅ СОБЫТИЕ УДАЛЕНО!");
   }
 
-  function renderCalendar() {
+   function renderCalendar() {
+    // Если включён годовой обзор - показываем его
+    if (isYearView) {
+      renderYearView();
+      return;
+    }
+    
     const firstDay = new Date(currentYear, currentMonth, 1);
     let offset = firstDay.getDay() - 1;
     if (offset === -1) offset = 6;
@@ -459,6 +551,137 @@
         selectedEventId = null;
         renderCalendar();
         showDayEvents(selectedDate);
+      });
+    });
+  }
+    function renderYearView() {
+    const grid = document.getElementById("calendarGrid");
+    const detailsSection = document.getElementById('detailsSection');
+    
+    // Собираем все события по месяцам
+    const eventsByMonth = {};
+    for (let month = 0; month < 12; month++) {
+      eventsByMonth[month] = [];
+    }
+    
+    for (const [dateKey, events] of Object.entries(eventsDB)) {
+      const [year, month, day] = dateKey.split('-').map(Number);
+      if (year === currentYear) {
+        events.forEach(ev => {
+          eventsByMonth[month - 1].push({
+            day: day,
+            dateKey: dateKey,
+            name: ev.name,
+            format: ev.format,
+            yesCount: ev.yesVotes?.length || 0,
+            noCount: ev.noVotes?.length || 0,
+            eventId: ev.id
+          });
+        });
+      }
+    }
+    
+    // Сортируем события в каждом месяце по дням
+    for (let month = 0; month < 12; month++) {
+      eventsByMonth[month].sort((a, b) => a.day - b.day);
+    }
+    
+    const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
+    const weekdays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    
+    let html = '<div class="year-view-container">';
+    
+    for (let month = 0; month < 12; month++) {
+      const events = eventsByMonth[month];
+      const monthDate = new Date(currentYear, month, 15);
+      const monthName = monthNames[month];
+      
+      html += `<div class='month-card' data-month='${month}'>`;
+      html += `<h3>${monthName} ${currentYear}</h3>`;
+      html += `<div class='month-events-list'>`;
+      
+      if (events.length === 0) {
+        html += `<div class='no-events-month'>😴 НЕТ СОБЫТИЙ</div>`;
+      } else {
+        events.forEach(ev => {
+          const eventDate = new Date(currentYear, month, ev.day);
+          const weekday = weekdays[eventDate.getDay()];
+          
+          let formatColor = '#e8a0a0';
+          let formatIcon = '⚔️';
+          if (ev.format === 'training') {
+            formatColor = '#87CEEB';
+            formatIcon = '🏋️';
+          } else if (ev.format === 'sunday') {
+            formatColor = '#DDA0DD';
+            formatIcon = '⛪';
+          } else if (ev.format === 'away') {
+            formatColor = '#e8a0a0';
+            formatIcon = '🚌';
+          }
+          
+          html += `
+            <div class='year-event-item' data-date='${ev.dateKey}' style='border-left-color: ${formatColor};'>
+              <span class='year-event-date'>${ev.day}</span>
+              <span class='year-event-weekday'>${weekday}</span>
+              <span class='year-event-name'>${formatIcon} ${ev.name}</span>
+              <span class='year-event-votes'>✅${ev.yesCount} ❌${ev.noCount}</span>
+            </div>
+          `;
+        });
+      }
+      
+      html += `</div></div>`;
+    }
+    
+    html += '</div>';
+    grid.innerHTML = html;
+    
+    // Скрываем детали и легенду
+    if (detailsSection) detailsSection.style.display = 'none';
+    const legend = document.querySelector('.legend');
+    if (legend) legend.style.display = 'none';
+    
+    // Добавляем кнопку возврата
+    let backBtn = document.getElementById('backToMonthBtn');
+    if (!backBtn) {
+      backBtn = document.createElement('button');
+      backBtn.id = 'backToMonthBtn';
+      backBtn.className = 'back-to-month-btn';
+      backBtn.innerHTML = '◀ ВЕРНУТЬСЯ К МЕСЯЦУ';
+      backBtn.onclick = () => {
+        isYearView = false;
+        document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
+        document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
+        if (detailsSection) detailsSection.style.display = 'block';
+        if (legend) legend.style.display = 'flex';
+        renderCalendar();
+        if (selectedDate) showDayEvents(selectedDate);
+        else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+      };
+      document.querySelector('.month-nav').insertAdjacentElement('afterend', backBtn);
+    } else {
+      backBtn.style.display = 'block';
+    }
+    
+    // Добавляем обработчики кликов на события
+    document.querySelectorAll('.year-event-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const date = item.dataset.date;
+        if (date) {
+          isYearView = false;
+          document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
+          document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
+          if (detailsSection) detailsSection.style.display = 'block';
+          if (legend) legend.style.display = 'flex';
+          selectedDate = date;
+          selectedEventId = null;
+          const [year, month, day] = date.split('-');
+          currentYear = parseInt(year);
+          currentMonth = parseInt(month) - 1;
+          renderCalendar();
+          showDayEvents(selectedDate);
+        }
       });
     });
   }
@@ -726,6 +949,28 @@
     document.getElementById("newEventDuration").value = "1";
   });
 
+    // Кнопка годового обзора
+  const yearViewBtn = document.getElementById('yearViewBtn');
+  if (yearViewBtn) {
+    yearViewBtn.addEventListener('click', () => {
+      isYearView = !isYearView;
+      if (isYearView) {
+        yearViewBtn.innerHTML = '📅 МЕСЯЧНЫЙ ОБЗОР';
+        yearViewBtn.classList.add('year-view-btn-active');
+        renderYearView();
+      } else {
+        yearViewBtn.innerHTML = '📅 ГОДОВОЙ ОБЗОР';
+        yearViewBtn.classList.remove('year-view-btn-active');
+        const detailsSection = document.getElementById('detailsSection');
+        const legend = document.querySelector('.legend');
+        if (detailsSection) detailsSection.style.display = 'block';
+        if (legend) legend.style.display = 'flex';
+        renderCalendar();
+        if (selectedDate) showDayEvents(selectedDate);
+        else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+      }
+    });
+  }
   async function init() {
     await loadFromFirebase();
     checkStoredAdmin();
