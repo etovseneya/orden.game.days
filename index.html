@@ -554,7 +554,7 @@
       });
     });
   }
-    function renderYearView() {
+  function renderYearView() {
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     const monthNav = document.querySelector('.month-nav');
@@ -562,7 +562,7 @@
     // Скрываем навигацию по месяцам
     if (monthNav) monthNav.style.display = 'none';
     
-    const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
+    const monthNames = ['ЯНВ', 'ФЕВ', 'МАР', 'АПР', 'МАЙ', 'ИЮН', 'ИЮЛ', 'АВГ', 'СЕН', 'ОКТ', 'НОЯ', 'ДЕК'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
     // Собираем дни с событиями (только выездные)
@@ -576,8 +576,6 @@
             if (!eventDays[key]) eventDays[key] = [];
             eventDays[key].push({
               name: ev.name,
-              yesCount: ev.yesVotes?.length || 0,
-              noCount: ev.noVotes?.length || 0,
               dateKey: dateKey,
               day: day,
               month: month - 1,
@@ -593,14 +591,21 @@
       eventDays[key].sort((a, b) => a.day - b.day);
     }
     
+    // Проверяем ширину экрана
+    const isMobile = window.innerWidth < 600;
+    const cols = isMobile ? 2 : 3;
+    const cardPadding = isMobile ? '6px' : '10px';
+    const fontSize = isMobile ? '0.5rem' : '0.6rem';
+    const daySize = isMobile ? '20px' : '24px';
+    
     let html = `
-      <div style="display: flex; justify-content: center; align-items: center; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; padding: 0 4px;">
-        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
-        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.4rem;">${currentYear}</h2>
-        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
-        <button id="backToMonthFromYear" style="background: #c0b8a0; color: #4a5b3a; border: none; border-radius: 30px; padding: 6px 14px; font-size: 0.7rem; cursor: pointer;">✕ ЗАКРЫТЬ</button>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; padding: 0 4px;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer;">◀ ${currentYear - 1}</button>
+        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.2rem;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 14px; font-size: 0.8rem; cursor: pointer;">${currentYear + 1} ▶</button>
+        <button id="backToMonthFromYear" style="background: #c0b8a0; color: #4a5b3a; border: none; border-radius: 30px; padding: 4px 12px; font-size: 0.65rem; cursor: pointer;">✕</button>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; max-width: 100%;">
+      <div style="display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: 10px; max-width: 100%;">
     `;
     
     for (let month = 0; month < 12; month++) {
@@ -610,22 +615,22 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 14px; padding: 10px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
-      html += `<h3 style="text-align: center; font-size: 0.75rem; color: #4a5b3a; margin-bottom: 6px; font-weight: bold;">${monthNames[month]}</h3>`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 12px; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div style="text-align: center; font-size: 0.7rem; color: #4a5b3a; font-weight: bold; margin-bottom: 4px;">${monthNames[month]}</div>`;
       
       // Сетка дней недели
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.5rem; text-align: center; margin-bottom: 4px;">`;
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: 0.45rem; text-align: center; margin-bottom: 2px;">`;
       weekdays.forEach(wd => {
-        html += `<div style="color: #b0a890; font-weight: 600; padding: 2px 0;">${wd}</div>`;
+        html += `<div style="color: #b0a890; font-weight: 600; padding: 1px 0;">${wd}</div>`;
       });
       html += `</div>`;
       
       // Сетка чисел
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.6rem; text-align: center;">`;
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center;">`;
       
       // Пустые ячейки до первого дня
       for (let i = 0; i < offset; i++) {
-        html += `<div style="padding: 2px 0; color: #d0c8b0;"></div>`;
+        html += `<div style="padding: 1px 0; color: #d0c8b0;"></div>`;
       }
       
       for (let d = 1; d <= daysInMonth; d++) {
@@ -634,7 +639,7 @@
         const hasEvent = eventDays[key] && eventDays[key].length > 0;
         const isToday = dateKey === today;
         
-        let bg = '';
+        let bg = 'transparent';
         let textColor = '#4a5b3a';
         let fontWeight = 'normal';
         
@@ -647,12 +652,12 @@
           bg = '#fff4c4';
         }
         
-        html += `<div style="padding: 2px 0; background: ${bg || 'transparent'}; border-radius: 50%; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+        html += `<div style="padding: 2px 0; background: ${bg}; border-radius: 50%; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: ${daySize}; height: ${daySize}; margin: 0 auto; display: flex; align-items: center; justify-content: center;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
       }
       
       html += `</div>`;
       
-      // Список событий под месяцем
+      // Список событий под месяцем (ВСЕ выездные, полные названия)
       const monthEvents = [];
       for (const key in eventDays) {
         const [m, d] = key.split('-').map(Number);
@@ -665,21 +670,24 @@
       monthEvents.sort((a, b) => a.day - b.day);
       
       if (monthEvents.length > 0) {
-        html += `<div style="margin-top: 6px; border-top: 1px solid #e0d8c0; padding-top: 4px;">`;
-        monthEvents.slice(0, 3).forEach(ev => {
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 3px; max-height: 80px; overflow-y: auto;">`;
+        monthEvents.forEach(ev => {
+          // Форматируем дату с учётом длительности
+          let dateDisplay = ev.day;
+          if (ev.duration > 1) {
+            const endDay = ev.day + ev.duration - 1;
+            dateDisplay = `${ev.day}-${endDay}`;
+          }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 2px 4px; border-radius: 4px; margin-bottom: 2px; background: #e8e4d8; color: #4a5b3a; cursor: pointer; display: flex; justify-content: space-between; align-items: center;" onmouseover="this.style.background='#e0d8c8'" onmouseout="this.style.background='#e8e4d8'">
-              <span><strong>${ev.day}</strong> ${ev.name}</span>
-              <span style="font-size: 0.45rem; color: #8a9e6a;">✅${ev.yesCount}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 1px 4px; border-radius: 3px; margin-bottom: 1px; background: #e8e4d8; color: #4a5b3a; cursor: pointer; display: flex; align-items: center; gap: 4px;" onmouseover="this.style.background='#e0d8c8'" onmouseout="this.style.background='#e8e4d8'">
+              <span style="font-weight: bold; min-width: 28px; font-size: 0.45rem;">${dateDisplay}</span>
+              <span style="font-size: 0.5rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
         });
-        if (monthEvents.length > 3) {
-          html += `<div style="font-size: 0.45rem; color: #b0a890; text-align: center; padding: 2px;">+${monthEvents.length - 3} ещё</div>`;
-        }
         html += `</div>`;
       } else {
-        html += `<div style="margin-top: 6px; border-top: 1px solid #e0d8c0; padding-top: 4px; font-size: 0.45rem; color: #d0c8b0; text-align: center;">—</div>`;
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 3px; font-size: 0.4rem; color: #d0c8b0; text-align: center;">—</div>`;
       }
       
       html += `</div>`;
@@ -722,8 +730,8 @@
     // Клик по карточке месяца — переход в месячный обзор
     document.querySelectorAll('.month-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        // Если кликнули по событию внутри карточки — не срабатывает
         if (e.target.closest('.year-event-item')) return;
+        if (e.target.closest('[data-date]')) return;
         const month = parseInt(card.dataset.month);
         if (!isNaN(month)) {
           isYearView = false;
