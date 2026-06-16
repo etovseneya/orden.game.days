@@ -558,30 +558,42 @@
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     const monthNav = document.querySelector('.month-nav');
+    const legend = document.querySelector('.legend');
     
-    // Скрываем навигацию по месяцам
+    // Скрываем навигацию по месяцам и легенду
     if (monthNav) monthNav.style.display = 'none';
+    if (legend) legend.style.display = 'none';
+    if (detailsSection) detailsSection.style.display = 'none';
     
-    // Собираем все события по месяцам (только выездные)
-    const eventsByMonth = {};
+    // Собираем дни с выездными событиями
+    const eventsByDay = {};
+    const monthEventsData = {};
     for (let month = 0; month < 12; month++) {
-      eventsByMonth[month] = [];
+      monthEventsData[month] = [];
     }
     
     for (const [dateKey, events] of Object.entries(eventsDB)) {
       const [year, month, day] = dateKey.split('-').map(Number);
       if (year === currentYear) {
         events.forEach(ev => {
-          // ТОЛЬКО ВЫЕЗДНЫЕ ИГРЫ (away)
           if (ev.format === 'away') {
-            eventsByMonth[month - 1].push({
+            const monthIdx = month - 1;
+            const key = `${monthIdx}-${day}`;
+            if (!eventsByDay[key]) {
+              eventsByDay[key] = [];
+            }
+            eventsByDay[key].push({
+              name: ev.name,
               day: day,
               dateKey: dateKey,
+              duration: ev.duration || 1,
+              month: monthIdx
+            });
+            // Сохраняем для списка под месяцем
+            monthEventsData[monthIdx].push({
+              day: day,
               name: ev.name,
-              format: ev.format,
-              yesCount: ev.yesVotes?.length || 0,
-              noCount: ev.noVotes?.length || 0,
-              eventId: ev.id,
+              dateKey: dateKey,
               duration: ev.duration || 1
             });
           }
@@ -589,68 +601,110 @@
       }
     }
     
-    // Сортируем события в каждом месяце по дням
+    // Сортируем события по дням
+    for (const key in eventsByDay) {
+      eventsByDay[key].sort((a, b) => a.day - b.day);
+    }
     for (let month = 0; month < 12; month++) {
-      eventsByMonth[month].sort((a, b) => a.day - b.day);
+      monthEventsData[month].sort((a, b) => a.day - b.day);
     }
     
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
-    const weekdays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+    const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Сетка 3x4
     let html = `
-      <div style="display: flex; justify-content: center; align-items: center; margin-bottom: 16px; gap: 16px; flex-wrap: wrap;">
-        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
-        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.3rem;">${currentYear}</h2>
-        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
-        <button id="backToMonthFromYear" style="background: #c0b8a0; color: #4a5b3a; border: none; border-radius: 30px; padding: 6px 14px; font-size: 0.7rem; cursor: pointer;">✕ ЗАКРЫТЬ</button>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; padding: 0 4px;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">◀</button>
+        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.4rem;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">▶</button>
+        <button id="backToMonthFromYear" style="background: #c0b8a0; color: #4a5b3a; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.8rem; cursor: pointer;">✕ ЗАКРЫТЬ</button>
       </div>
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; width: 100%;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; width: 100%;">
     `;
     
     for (let month = 0; month < 12; month++) {
-      const events = eventsByMonth[month];
-      const monthName = monthNames[month];
+      const firstDay = new Date(currentYear, month, 1);
+      let offset = firstDay.getDay() - 1;
+      if (offset === -1) offset = 6;
+      const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
+      const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 16px; padding: 12px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
-      html += `<h3 style="background: #e0d8c0; padding: 8px 12px; border-radius: 12px; margin-bottom: 10px; font-size: 0.85rem; color: #4a5b3a; text-align: center;">${monthName}</h3>`;
-      html += `<div class='month-events-list' style="max-height: 300px; overflow-y: auto;">`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 14px; padding: 10px 8px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div style="text-align: center; font-size: 0.75rem; color: #4a5b3a; font-weight: bold; margin-bottom: 6px;">${monthNames[month]}</div>`;
       
-      if (events.length === 0) {
-        html += `<div class='no-events-month' style="text-align: center; padding: 15px; color: #b0a890; font-size: 0.7rem;">—</div>`;
-      } else {
-        events.forEach(ev => {
-          const eventDate = new Date(currentYear, month, ev.day);
-          const weekday = weekdays[eventDate.getDay()];
-          
-          // Форматируем дату с учётом длительности
+      // Сетка дней недели
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: 0.45rem; text-align: center; margin-bottom: 2px;">`;
+      weekdays.forEach(wd => {
+        html += `<div style="color: #b0a890; font-weight: 600; padding: 1px 0;">${wd}</div>`;
+      });
+      html += `</div>`;
+      
+      // Сетка чисел
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: 0.6rem; text-align: center;">`;
+      
+      // Пустые ячейки до первого дня
+      for (let i = 0; i < offset; i++) {
+        html += `<div style="padding: 2px 0; color: #d0c8b0;"></div>`;
+      }
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateKey = `${currentYear}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const key = `${month}-${d}`;
+        const hasEvent = eventsByDay[key] && eventsByDay[key].length > 0;
+        const isToday = dateKey === today;
+        
+        let bg = 'transparent';
+        let textColor = '#4a5b3a';
+        let fontWeight = 'normal';
+        let borderRadius = '0';
+        
+        if (hasEvent) {
+          bg = '#e8a0a0';
+          textColor = 'white';
+          fontWeight = 'bold';
+          borderRadius = '50%';
+        }
+        if (isToday && !hasEvent) {
+          bg = '#fff4c4';
+          borderRadius = '50%';
+        }
+        
+        html += `<div style="padding: 2px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.15)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+      }
+      
+      html += `</div>`;
+      
+      // Список событий под месяцем
+      const monthEvents = monthEventsData[month] || [];
+      
+      if (monthEvents.length > 0) {
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; max-height: 60px; overflow-y: auto;">`;
+        monthEvents.slice(0, 3).forEach(ev => {
           let dateDisplay = ev.day;
           if (ev.duration > 1) {
-            const endDate = new Date(currentYear, month, ev.day + ev.duration - 1);
-            dateDisplay = `${ev.day}-${endDate.getDate()}`;
+            const endDay = ev.day + ev.duration - 1;
+            dateDisplay = `${ev.day}-${endDay}`;
           }
-          
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' style="background: #e8a0a0; border-radius: 10px; padding: 6px 10px; margin-bottom: 6px; font-size: 0.7rem; border-left: 3px solid #c04040; cursor: pointer; transition: all 0.2s ease; color: white;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
-              <span style="font-weight: bold; display: inline-block; min-width: 50px;">${dateDisplay}</span>
-              <span style="color: rgba(255,255,255,0.8); font-size: 0.65rem; margin-right: 6px;">${weekday}</span>
-              <span style="font-weight: bold;">${ev.name}</span>
-              <span style="font-size: 0.6rem; margin-left: 6px; color: rgba(255,255,255,0.7);">✅${ev.yesCount}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 1px 4px; border-radius: 3px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+              <span style="font-weight: bold; min-width: 28px; font-size: 0.5rem;">${dateDisplay}</span>
+              <span style="font-size: 0.5rem; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
         });
+        if (monthEvents.length > 3) {
+          html += `<div style="font-size: 0.4rem; color: #b0a890; text-align: center; padding: 1px;">+${monthEvents.length - 3}</div>`;
+        }
+        html += `</div>`;
+      } else {
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 6px; font-size: 0.4rem; color: #d0c8b0; text-align: center;">—</div>`;
       }
       
-      html += `</div></div>`;
+      html += `</div>`;
     }
     
     html += `</div>`;
     grid.innerHTML = html;
-    
-    // Скрываем детали и легенду
-    if (detailsSection) detailsSection.style.display = 'none';
-    const legend = document.querySelector('.legend');
-    if (legend) legend.style.display = 'none';
     
     // Обработчики для переключения годов
     document.getElementById('yearPrevBtn')?.addEventListener('click', (e) => {
@@ -671,8 +725,8 @@
       document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
       document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
       if (monthNav) monthNav.style.display = 'flex';
-      if (detailsSection) detailsSection.style.display = 'block';
       if (legend) legend.style.display = 'flex';
+      if (detailsSection) detailsSection.style.display = 'block';
       renderCalendar();
       if (selectedDate) showDayEvents(selectedDate);
       else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
@@ -681,15 +735,17 @@
     // Клик по карточке месяца — переход в месячный обзор
     document.querySelectorAll('.month-card').forEach(card => {
       card.addEventListener('click', (e) => {
+        // Если кликнули по внутреннему элементу — не срабатывает
         if (e.target.closest('.year-event-item')) return;
+        if (e.target.closest('[data-date]')) return;
         const month = parseInt(card.dataset.month);
         if (!isNaN(month)) {
           isYearView = false;
           document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
           document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
           if (monthNav) monthNav.style.display = 'flex';
-          if (detailsSection) detailsSection.style.display = 'block';
           if (legend) legend.style.display = 'flex';
+          if (detailsSection) detailsSection.style.display = 'block';
           currentMonth = month;
           selectedDate = "";
           selectedEventId = null;
@@ -699,23 +755,44 @@
       });
     });
     
+    // Клик по числу — переход в месячный обзор на этот день
+    document.querySelectorAll('.month-card [data-date]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const date = el.dataset.date;
+        const month = parseInt(el.dataset.month);
+        if (date && !isNaN(month)) {
+          isYearView = false;
+          document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
+          document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
+          if (monthNav) monthNav.style.display = 'flex';
+          if (legend) legend.style.display = 'flex';
+          if (detailsSection) detailsSection.style.display = 'block';
+          currentMonth = month;
+          selectedDate = date;
+          selectedEventId = null;
+          renderCalendar();
+          showDayEvents(selectedDate);
+        }
+      });
+    });
+    
     // Клик по событию — переход в месячный обзор с открытием события
     document.querySelectorAll('.year-event-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
         const date = item.dataset.date;
-        if (date) {
+        const month = parseInt(item.dataset.month);
+        if (date && !isNaN(month)) {
           isYearView = false;
           document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
           document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
           if (monthNav) monthNav.style.display = 'flex';
-          if (detailsSection) detailsSection.style.display = 'block';
           if (legend) legend.style.display = 'flex';
+          if (detailsSection) detailsSection.style.display = 'block';
+          currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
-          const [year, month, day] = date.split('-');
-          currentYear = parseInt(year);
-          currentMonth = parseInt(month) - 1;
           renderCalendar();
           showDayEvents(selectedDate);
         }
