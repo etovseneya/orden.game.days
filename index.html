@@ -554,7 +554,7 @@
       });
     });
   }
-   function renderYearView() {
+  function renderYearView() {
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     const monthNav = document.querySelector('.month-nav');
@@ -565,9 +565,11 @@
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
-    // Собираем дни с выездными событиями
+    // Собираем дни с выездными событиями (уникальные события по ID)
     const eventsByDay = {};
     const monthEventsData = {};
+    const uniqueEvents = {}; // Для дедупликации многодневных событий
+    
     for (let month = 0; month < 12; month++) {
       monthEventsData[month] = [];
     }
@@ -579,6 +581,8 @@
           if (ev.format === 'away') {
             const monthIdx = month - 1;
             const key = `${monthIdx}-${day}`;
+            
+            // Для отображения дней с событиями (красные кружочки)
             if (!eventsByDay[key]) {
               eventsByDay[key] = [];
             }
@@ -587,15 +591,36 @@
               day: day,
               dateKey: dateKey,
               duration: ev.duration || 1,
-              month: monthIdx
+              month: monthIdx,
+              eventId: ev.id
             });
-            // Сохраняем для списка под месяцем
-            monthEventsData[monthIdx].push({
-              day: day,
-              name: ev.name,
-              dateKey: dateKey,
-              duration: ev.duration || 1
-            });
+            
+            // Для списка под месяцем — уникальные события по ID
+            if (!uniqueEvents[ev.id]) {
+              uniqueEvents[ev.id] = {
+                day: day,
+                name: ev.name,
+                dateKey: dateKey,
+                duration: ev.duration || 1,
+                month: monthIdx,
+                eventId: ev.id,
+                startDay: day,
+                endDay: day + (ev.duration || 1) - 1
+              };
+              // Сохраняем только первый день события
+              monthEventsData[monthIdx].push(uniqueEvents[ev.id]);
+            } else {
+              // Обновляем endDay если текущий день больше
+              const existing = uniqueEvents[ev.id];
+              if (day > existing.endDay) {
+                existing.endDay = day;
+              }
+              // Обновляем startDay если текущий день меньше
+              if (day < existing.startDay) {
+                existing.startDay = day;
+                existing.day = day;
+              }
+            }
           }
         });
       }
@@ -613,7 +638,7 @@
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
     let html = `
-               <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; padding: 0 4px;">
+      <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-bottom: 20px; flex-wrap: wrap; padding: 0 4px; width: 100%;">
         <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
         <h2 style="color: #4a5b3a; margin: 0; font-size: 1.4rem;">${currentYear}</h2>
         <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
@@ -674,16 +699,16 @@
       
       html += `</div>`;
       
-      // Список событий под месяцем
+      // Список событий под месяцем (уникальные события)
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
         html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; max-height: 60px; overflow-y: auto;">`;
         monthEvents.slice(0, 3).forEach(ev => {
-          let dateDisplay = ev.day;
+          // Форматируем дату с учётом длительности
+          let dateDisplay = ev.startDay;
           if (ev.duration > 1) {
-            const endDay = ev.day + ev.duration - 1;
-            dateDisplay = `${ev.day}-${endDay}`;
+            dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
             <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 1px 4px; border-radius: 3px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
@@ -719,7 +744,7 @@
       renderYearView();
     });
     
-    // Кнопка закрытия годового обзора
+    // Кнопка возврата
     document.getElementById('backToMonthFromYear')?.addEventListener('click', () => {
       isYearView = false;
       document.getElementById('yearViewBtn').innerHTML = '📅 ГОДОВОЙ ОБЗОР';
@@ -732,10 +757,9 @@
       else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
     });
     
-    // Клик по карточке месяца — переход в месячный обзор
+    // Клик по карточке месяца
     document.querySelectorAll('.month-card').forEach(card => {
       card.addEventListener('click', (e) => {
-        // Если кликнули по внутреннему элементу — не срабатывает
         if (e.target.closest('.year-event-item')) return;
         if (e.target.closest('[data-date]')) return;
         const month = parseInt(card.dataset.month);
@@ -755,7 +779,7 @@
       });
     });
     
-    // Клик по числу — переход в месячный обзор на этот день
+    // Клик по числу
     document.querySelectorAll('.month-card [data-date]').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -777,7 +801,7 @@
       });
     });
     
-    // Клик по событию — переход в месячный обзор с открытием события
+    // Клик по событию
     document.querySelectorAll('.year-event-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
