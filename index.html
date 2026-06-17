@@ -635,14 +635,20 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Проверяем ширину экрана для адаптации
-    const isMobile = window.innerWidth < 600;
-    const cardPadding = isMobile ? '8px 4px' : '12px 8px';
-    const fontSize = isMobile ? '0.55rem' : '0.7rem';
-    const daySize = isMobile ? '18px' : '24px';
+    // Адаптация под размер экрана
+    const containerWidth = grid.parentElement.clientWidth - 32;
+    const cardWidth = (containerWidth - 16) / 3;
+    const cardHeight = Math.min(cardWidth * 1.4, 350);
+    const isMobile = window.innerWidth < 500;
+    const fontSize = isMobile ? '0.45rem' : '0.55rem';
+    const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
+    const dayFontSize = isMobile ? '0.4rem' : '0.5rem';
+    const eventFontSize = isMobile ? '0.35rem' : '0.45rem';
+    const gap = isMobile ? '4px' : '8px';
+    const cardPadding = isMobile ? '4px 2px' : '8px 4px';
     
     let html = `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${isMobile ? '6px' : '12px'}; width: 100%;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; max-width: 100%; overflow: hidden;">
     `;
     
     for (let month = 0; month < 12; month++) {
@@ -652,16 +658,16 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${isMobile ? '10px' : '14px'}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
-      html += `<div style="text-align: center; font-size: ${isMobile ? '0.6rem' : '0.75rem'}; color: #4a5b3a; font-weight: bold; margin-bottom: 4px;">${monthNames[month]}</div>`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${isMobile ? '8px' : '12px'}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
       
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${isMobile ? '0.35rem' : '0.45rem'}; text-align: center; margin-bottom: 2px;">`;
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
       weekdays.forEach(wd => {
-        html += `<div style="color: #b0a890; font-weight: 600; padding: 1px 0;">${wd}</div>`;
+        html += `<div style="color: #b0a890; font-weight: 600; padding: 1px 0; font-size: ${fontSize};">${wd}</div>`;
       });
       html += `</div>`;
       
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${isMobile ? '0.45rem' : '0.6rem'}; text-align: center;">`;
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${dayFontSize}; text-align: center;">`;
       
       for (let i = 0; i < offset; i++) {
         html += `<div style="padding: 1px 0; color: #d0c8b0;"></div>`;
@@ -689,31 +695,35 @@
           borderRadius = '50%';
         }
         
-        html += `<div style="padding: 1px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: ${isMobile ? '0.45rem' : '0.6rem'};" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+        html += `<div style="padding: 1px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: ${dayFontSize};" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
       }
       
       html += `</div>`;
       
-      // Список событий под месяцем — ВСЕ события
+      // Список событий под месяцем
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
-        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; max-height: ${isMobile ? '50px' : '80px'}; overflow-y: auto;">`;
-        monthEvents.forEach(ev => {
+        const maxHeight = isMobile ? '40px' : '60px';
+        html += `<div style="margin-top: 3px; border-top: 1px solid #e0d8c0; padding-top: 3px; max-height: ${maxHeight}; overflow-y: auto;">`;
+        monthEvents.slice(0, isMobile ? 2 : 3).forEach(ev => {
           let dateDisplay = ev.startDay;
           if (ev.duration > 1) {
             dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${isMobile ? '0.4rem' : '0.5rem'}; padding: 1px 4px; border-radius: 3px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
-              <span style="font-weight: bold; min-width: ${isMobile ? '22px' : '28px'}; font-size: ${isMobile ? '0.4rem' : '0.5rem'}; flex-shrink: 0;">${dateDisplay}</span>
-              <span style="font-size: ${isMobile ? '0.4rem' : '0.5rem'}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 3px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+              <span style="font-weight: bold; min-width: ${isMobile ? '16px' : '22px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
+              <span style="font-size: ${eventFontSize}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
         });
+        if (monthEvents.length > (isMobile ? 2 : 3)) {
+          html += `<div style="font-size: ${eventFontSize}; color: #b0a890; text-align: center; padding: 1px;">+${monthEvents.length - (isMobile ? 2 : 3)}</div>`;
+        }
         html += `</div>`;
       } else {
-        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; font-size: ${isMobile ? '0.35rem' : '0.4rem'}; color: #d0c8b0; text-align: center; padding-bottom: 4px;">—</div>`;
+        html += `<div style="margin-top: 3px; border-top: 1px solid #e0d8c0; padding-top: 3px; font-size: ${eventFontSize}; color: #d0c8b0; text-align: center; padding-bottom: 3px;">—</div>`;
       }
       
       html += `</div>`;
@@ -723,10 +733,10 @@
     
     // Добавляем панель переключения годов под календарём
     html += `
-      <div id="yearViewNavPanel" style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 16px; flex-wrap: wrap; padding: 8px 12px; background: #e8e4d8; border-radius: 30px; width: 100%; max-width: 100%; box-sizing: border-box;">
-        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer; flex-shrink: 0;">◀ ${currentYear - 1}</button>
-        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.2rem; flex-shrink: 0;">${currentYear}</h2>
-        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer; flex-shrink: 0;">${currentYear + 1} ▶</button>
+      <div id="yearViewNavPanel" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; padding: 6px 10px; background: #e8e4d8; border-radius: 30px; width: 100%; max-width: 100%; box-sizing: border-box;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 4px 12px; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; cursor: pointer; flex-shrink: 0;">◀ ${currentYear - 1}</button>
+        <h2 style="color: #4a5b3a; margin: 0; font-size: ${isMobile ? '1rem' : '1.2rem'}; flex-shrink: 0;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 4px 12px; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; cursor: pointer; flex-shrink: 0;">${currentYear + 1} ▶</button>
       </div>
     `;
     
@@ -758,7 +768,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          // Удаляем панель навигации
           const nav = document.getElementById('yearViewNavPanel');
           if (nav) nav.remove();
           currentMonth = month;
