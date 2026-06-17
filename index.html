@@ -712,18 +712,18 @@
     }
     
     html += `</div>`;
-    grid.innerHTML = html;
     
-    // Добавляем панель навигации под календарём
-    const navPanel = document.createElement('div');
-    navPanel.style.cssText = 'display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; padding: 0 4px;';
-    navPanel.innerHTML = `
-      <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
-      <h2 style="color: #4a5b3a; margin: 0; font-size: 1.4rem;">${currentYear}</h2>
-      <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
-      <button id="backToMonthFromYear" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.8rem; cursor: pointer;">◀ ВЕРНУТЬСЯ</button>
+    // Добавляем панель навигации под календарём прямо в HTML
+    html += `
+      <div style="display: flex; justify-content: center; align-items: center; gap: 14px; margin-top: 20px; flex-wrap: wrap; padding: 0 4px; width: 100%;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">◀ ${currentYear - 1}</button>
+        <h2 style="color: #4a5b3a; margin: 0; font-size: 1.4rem;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.9rem; cursor: pointer;">${currentYear + 1} ▶</button>
+        <button id="backToMonthFromYear" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 6px 16px; font-size: 0.8rem; cursor: pointer;">◀ ВЕРНУТЬСЯ</button>
+      </div>
     `;
-    grid.parentNode.insertBefore(navPanel, grid.nextSibling);
+    
+    grid.innerHTML = html;
     
     // Обработчики для переключения годов
     document.getElementById('yearPrevBtn')?.addEventListener('click', (e) => {
@@ -746,9 +746,6 @@
       if (monthNav) monthNav.style.display = 'flex';
       if (legend) legend.style.display = 'flex';
       if (detailsSection) detailsSection.style.display = 'block';
-      // Удаляем панель навигации
-      const nav = document.querySelector('#yearPrevBtn')?.closest('div');
-      if (nav && nav.parentNode) nav.remove();
       renderCalendar();
       if (selectedDate) showDayEvents(selectedDate);
       else document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
@@ -767,8 +764,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.querySelector('#yearPrevBtn')?.closest('div');
-          if (nav && nav.parentNode) nav.remove();
           currentMonth = month;
           selectedDate = "";
           selectedEventId = null;
@@ -791,8 +786,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.querySelector('#yearPrevBtn')?.closest('div');
-          if (nav && nav.parentNode) nav.remove();
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
@@ -815,8 +808,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.querySelector('#yearPrevBtn')?.closest('div');
-          if (nav && nav.parentNode) nav.remove();
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
