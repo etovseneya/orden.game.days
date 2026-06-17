@@ -565,10 +565,6 @@
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
-    // Удаляем старую панель навигации если есть
-    const oldNav = document.getElementById('yearViewNavPanel');
-    if (oldNav) oldNav.remove();
-    
     // Собираем дни с выездными событиями
     const eventsByDay = {};
     const monthEventsData = {};
@@ -638,7 +634,6 @@
     // Определяем размеры в зависимости от ширины
     const containerWidth = grid.parentElement.clientWidth - 32;
     const gap = containerWidth < 500 ? 4 : 8;
-    const cardWidth = (containerWidth - gap * 2) / 3;
     const isMobile = containerWidth < 500;
     const fontSize = isMobile ? '0.4rem' : '0.5rem';
     const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
@@ -732,31 +727,7 @@
     
     html += `</div>`;
     
-    // Добавляем панель переключения годов под календарём
-    const navFontSize = isMobile ? '0.65rem' : '0.9rem';
-    const navPadding = isMobile ? '4px 8px' : '6px 10px';
-    html += `
-      <div id="yearViewNavPanel" style="display: flex; justify-content: center; align-items: center; gap: ${isMobile ? '8px' : '12px'}; margin-top: 12px; flex-wrap: wrap; padding: ${navPadding}; background: #e8e4d8; border-radius: 30px; width: 100%; max-width: 100%; box-sizing: border-box;">
-        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: ${isMobile ? '2px 10px' : '4px 12px'}; font-size: ${navFontSize}; cursor: pointer; flex-shrink: 0;">◀ ${currentYear - 1}</button>
-        <h2 style="color: #4a5b3a; margin: 0; font-size: ${isMobile ? '0.9rem' : '1.2rem'}; flex-shrink: 0;">${currentYear}</h2>
-        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: ${isMobile ? '2px 10px' : '4px 12px'}; font-size: ${navFontSize}; cursor: pointer; flex-shrink: 0;">${currentYear + 1} ▶</button>
-      </div>
-    `;
-    
     grid.innerHTML = html;
-    
-    // Обработчики для переключения годов
-    document.getElementById('yearPrevBtn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      currentYear--;
-      renderYearView();
-    });
-    
-    document.getElementById('yearNextBtn')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      currentYear++;
-      renderYearView();
-    });
     
     // Клик по карточке месяца
     document.querySelectorAll('.month-card').forEach(card => {
@@ -771,8 +742,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.getElementById('yearViewNavPanel');
-          if (nav) nav.remove();
           currentMonth = month;
           selectedDate = "";
           selectedEventId = null;
@@ -795,8 +764,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.getElementById('yearViewNavPanel');
-          if (nav) nav.remove();
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
@@ -819,8 +786,6 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
-          const nav = document.getElementById('yearViewNavPanel');
-          if (nav) nav.remove();
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
