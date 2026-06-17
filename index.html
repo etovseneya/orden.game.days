@@ -635,20 +635,20 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Адаптация под размер экрана
+    // Определяем размеры в зависимости от ширины
     const containerWidth = grid.parentElement.clientWidth - 32;
-    const cardWidth = (containerWidth - 16) / 3;
-    const cardHeight = Math.min(cardWidth * 1.4, 350);
-    const isMobile = window.innerWidth < 500;
-    const fontSize = isMobile ? '0.45rem' : '0.55rem';
+    const gap = containerWidth < 500 ? 4 : 8;
+    const cardWidth = (containerWidth - gap * 2) / 3;
+    const isMobile = containerWidth < 500;
+    const fontSize = isMobile ? '0.4rem' : '0.5rem';
     const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
     const dayFontSize = isMobile ? '0.4rem' : '0.5rem';
     const eventFontSize = isMobile ? '0.35rem' : '0.45rem';
-    const gap = isMobile ? '4px' : '8px';
     const cardPadding = isMobile ? '4px 2px' : '8px 4px';
+    const borderRadius = isMobile ? '6px' : '10px';
     
     let html = `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}; width: 100%; max-width: 100%; overflow: hidden;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}px; width: 100%; max-width: 100%; box-sizing: border-box; padding: 0;">
     `;
     
     for (let month = 0; month < 12; month++) {
@@ -658,8 +658,8 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${isMobile ? '8px' : '12px'}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
-      html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
       
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
       weekdays.forEach(wd => {
@@ -682,20 +682,20 @@
         let bg = 'transparent';
         let textColor = '#4a5b3a';
         let fontWeight = 'normal';
-        let borderRadius = '0';
+        let borderRadius2 = '0';
         
         if (hasEvent) {
           bg = '#e8a0a0';
           textColor = 'white';
           fontWeight = 'bold';
-          borderRadius = '50%';
+          borderRadius2 = '50%';
         }
         if (isToday && !hasEvent) {
           bg = '#fff4c4';
-          borderRadius = '50%';
+          borderRadius2 = '50%';
         }
         
-        html += `<div style="padding: 1px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: ${dayFontSize};" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+        html += `<div style="padding: 1px 0; background: ${bg}; border-radius: ${borderRadius2}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: ${dayFontSize};" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
       }
       
       html += `</div>`;
@@ -704,26 +704,27 @@
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
-        const maxHeight = isMobile ? '40px' : '60px';
-        html += `<div style="margin-top: 3px; border-top: 1px solid #e0d8c0; padding-top: 3px; max-height: ${maxHeight}; overflow-y: auto;">`;
-        monthEvents.slice(0, isMobile ? 2 : 3).forEach(ev => {
+        const maxHeight = isMobile ? '35px' : '55px';
+        html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; max-height: ${maxHeight}; overflow-y: auto;">`;
+        const showCount = isMobile ? 2 : 3;
+        monthEvents.slice(0, showCount).forEach(ev => {
           let dateDisplay = ev.startDay;
           if (ev.duration > 1) {
             dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 3px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 2px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
               <span style="font-weight: bold; min-width: ${isMobile ? '16px' : '22px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
               <span style="font-size: ${eventFontSize}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
         });
-        if (monthEvents.length > (isMobile ? 2 : 3)) {
-          html += `<div style="font-size: ${eventFontSize}; color: #b0a890; text-align: center; padding: 1px;">+${monthEvents.length - (isMobile ? 2 : 3)}</div>`;
+        if (monthEvents.length > showCount) {
+          html += `<div style="font-size: ${eventFontSize}; color: #b0a890; text-align: center; padding: 1px;">+${monthEvents.length - showCount}</div>`;
         }
         html += `</div>`;
       } else {
-        html += `<div style="margin-top: 3px; border-top: 1px solid #e0d8c0; padding-top: 3px; font-size: ${eventFontSize}; color: #d0c8b0; text-align: center; padding-bottom: 3px;">—</div>`;
+        html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; font-size: ${eventFontSize}; color: #d0c8b0; text-align: center; padding-bottom: 2px;">—</div>`;
       }
       
       html += `</div>`;
@@ -732,11 +733,13 @@
     html += `</div>`;
     
     // Добавляем панель переключения годов под календарём
+    const navFontSize = isMobile ? '0.65rem' : '0.9rem';
+    const navPadding = isMobile ? '4px 8px' : '6px 10px';
     html += `
-      <div id="yearViewNavPanel" style="display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 16px; flex-wrap: wrap; padding: 6px 10px; background: #e8e4d8; border-radius: 30px; width: 100%; max-width: 100%; box-sizing: border-box;">
-        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 4px 12px; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; cursor: pointer; flex-shrink: 0;">◀ ${currentYear - 1}</button>
-        <h2 style="color: #4a5b3a; margin: 0; font-size: ${isMobile ? '1rem' : '1.2rem'}; flex-shrink: 0;">${currentYear}</h2>
-        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: 4px 12px; font-size: ${isMobile ? '0.7rem' : '0.9rem'}; cursor: pointer; flex-shrink: 0;">${currentYear + 1} ▶</button>
+      <div id="yearViewNavPanel" style="display: flex; justify-content: center; align-items: center; gap: ${isMobile ? '8px' : '12px'}; margin-top: 12px; flex-wrap: wrap; padding: ${navPadding}; background: #e8e4d8; border-radius: 30px; width: 100%; max-width: 100%; box-sizing: border-box;">
+        <button id="yearPrevBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: ${isMobile ? '2px 10px' : '4px 12px'}; font-size: ${navFontSize}; cursor: pointer; flex-shrink: 0;">◀ ${currentYear - 1}</button>
+        <h2 style="color: #4a5b3a; margin: 0; font-size: ${isMobile ? '0.9rem' : '1.2rem'}; flex-shrink: 0;">${currentYear}</h2>
+        <button id="yearNextBtn" style="background: #d0c8b0; border: none; border-radius: 30px; padding: ${isMobile ? '2px 10px' : '4px 12px'}; font-size: ${navFontSize}; cursor: pointer; flex-shrink: 0;">${currentYear + 1} ▶</button>
       </div>
     `;
     
