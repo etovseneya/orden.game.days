@@ -570,12 +570,12 @@
     const monthNav = document.querySelector('.month-nav');
     const legend = document.querySelector('.legend');
     
-    // Скрываем навигацию по месяцам и легенду
+    // Скрываем навигацию
     if (monthNav) monthNav.style.display = 'none';
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
-    // Собираем дни с выездными событиями
+    // Собираем данные
     const eventsByDay = {};
     const monthEventsData = {};
     const uniqueEvents = {};
@@ -641,19 +641,45 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Получаем реальную ширину контейнера
+    // Получаем ширину контейнера
     const container = grid.parentElement;
     const containerWidth = container.clientWidth - 0;
-    const isMobile = containerWidth < 500;
-    const gap = isMobile ? 4 : 8;
-    const cardPadding = isMobile ? '4px 2px' : '8px 4px';
-    const borderRadius = isMobile ? '6px' : '10px';
     
-    // Размеры шрифтов
-    const fontSize = isMobile ? '0.35rem' : '0.5rem';
-    const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
-    const dayFontSize = isMobile ? '0.4rem' : '0.5rem';
-    const eventFontSize = isMobile ? '0.35rem' : '0.45rem';
+    // Вычисляем ширину одной ячейки месяца (всегда делим на 3)
+    const cardWidth = containerWidth / 3;
+    
+    // Динамический размер шрифта в зависимости от ширины ячейки
+    let fontSize, headerFontSize, dayFontSize, eventFontSize;
+    
+    if (cardWidth < 80) {
+      // Очень узкий экран
+      fontSize = '0.3rem';
+      headerFontSize = '0.4rem';
+      dayFontSize = '0.35rem';
+      eventFontSize = '0.3rem';
+    } else if (cardWidth < 120) {
+      // Узкий экран
+      fontSize = '0.4rem';
+      headerFontSize = '0.5rem';
+      dayFontSize = '0.45rem';
+      eventFontSize = '0.35rem';
+    } else if (cardWidth < 160) {
+      // Средний экран
+      fontSize = '0.5rem';
+      headerFontSize = '0.6rem';
+      dayFontSize = '0.55rem';
+      eventFontSize = '0.4rem';
+    } else {
+      // Широкий экран
+      fontSize = '0.6rem';
+      headerFontSize = '0.75rem';
+      dayFontSize = '0.65rem';
+      eventFontSize = '0.5rem';
+    }
+    
+    const gap = cardWidth < 100 ? 4 : 8;
+    const cardPadding = cardWidth < 100 ? '4px 2px' : '8px 4px';
+    const borderRadius = cardWidth < 100 ? '6px' : '10px';
     
     let html = `
       <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}px; width: 100%; box-sizing: border-box;">
@@ -712,17 +738,17 @@
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
-        const maxHeight = isMobile ? '30px' : '50px';
+        const maxHeight = cardWidth < 100 ? '30px' : (cardWidth < 160 ? '40px' : '55px');
         html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; max-height: ${maxHeight}; overflow-y: auto;">`;
-        const showCount = isMobile ? 2 : 3;
+        const showCount = cardWidth < 100 ? 2 : (cardWidth < 160 ? 2 : 3);
         monthEvents.slice(0, showCount).forEach(ev => {
           let dateDisplay = ev.startDay;
           if (ev.duration > 1) {
             dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 2px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
-              <span style="font-weight: bold; min-width: ${isMobile ? '14px' : '20px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 3px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+              <span style="font-weight: bold; min-width: ${cardWidth < 100 ? '14px' : '20px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
               <span style="font-size: ${eventFontSize}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
