@@ -520,7 +520,7 @@
     const rem = (7 - (total % 7)) % 7;
     for (let i = 0; i < rem; i++) html += `<div class='day-cell' style='background:#e8e4d8;'><div class='empty-day'></div></div>`;
     grid.innerHTML = html;
-    const months = ['ЯНВ','ФЕВ','МАР','АПР','МАЙ','ИЮНЬ','ИЮЛЬ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
+    const months = ['ЯНВ','ФЕВ','МАРТ','АПР','МАЙ','ИЮНЬ','ИЮЛЬ','АВГ','СЕН','ОКТ','НОЯ','ДЕК'];
     document.getElementById("currentMonthLabel").innerHTML = `${months[currentMonth]} ${currentYear}`;
     document.querySelectorAll('.day-cell[data-date]').forEach(cell => {
       cell.addEventListener('click', () => {
