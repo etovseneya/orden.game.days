@@ -639,12 +639,11 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Получаем ширину контейнера (как у строки "ЗАГРУЖЕНО...")
+    // Получаем ширину контейнера
     const containerWidth = grid.parentElement.clientWidth;
-    // Ширина одной ячейки = ширина контейнера / 3
-    const cardWidth = containerWidth / 3;
     
-    // Динамические размеры
+    // Динамический размер шрифта в зависимости от ширины ячейки
+    const cardWidth = containerWidth / 3;
     let fontSize, headerFontSize, dayFontSize, eventFontSize;
     
     if (cardWidth < 80) {
@@ -684,7 +683,7 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box; width: 100%; height: auto;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; box-sizing: border-box; width: 100%;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
       html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
       
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
