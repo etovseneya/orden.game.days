@@ -169,6 +169,13 @@
       min-width: 60px;
       text-align: center;
     }
+    #todayFromYearBtn {
+      background: #8a9e6a !important;
+      color: white !important;
+    }
+    #todayFromYearBtn:hover {
+      background: #6a8e4a !important;
+    }
   </style>
 </head>
 <body>
@@ -186,7 +193,7 @@
     <button id="prevMonthBtn">◀</button>
     <span class="current-month" id="currentMonthLabel"></span>
     <button id="nextMonthBtn">▶</button>
-    <button id="yearViewBtn" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; margin-left: auto; transition: all 0.2s ease;">📅 переход к месяцам</button>
+    <button id="yearViewBtn" style="background: #8a9e6a; color: white; border: none; border-radius: 30px; padding: 8px 16px; font-size: 0.8rem; cursor: pointer; margin-left: auto; transition: all 0.2s ease;">📅 К МЕСЯЦАМ</button>
   </div>
   <div class="calendar-grid" id="calendarGrid"></div>
   <!-- Панель переключения годов (видна только в годовом обзоре) -->
@@ -194,6 +201,7 @@
     <button id="yearPrevBtn">◀</button>
     <span id="currentYearLabel">2026</span>
     <button id="yearNextBtn">▶</button>
+    <button id="todayFromYearBtn">📅 СЕГОДНЯ</button>
   </div>
   <div class="legend">
     <div class="legend-item"><div class="legend-color" style="background: #87CEEB;"></div><span>🏋️ Тренировка</span></div>
@@ -455,7 +463,7 @@
   }
 
    function renderCalendar() {
-    // Если включён переход к месяцам - показываем его
+    // Если включён К МЕСЯЦАМ - показываем его
     if (isYearView) {
       renderYearView();
       return;
@@ -701,7 +709,7 @@
         const month = parseInt(card.dataset.month);
         if (!isNaN(month)) {
           isYearView = false;
-          document.getElementById('yearViewBtn').innerHTML = '📅 переход к месяцам';
+          document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
           document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
@@ -727,7 +735,7 @@
         const month = parseInt(el.dataset.month);
         if (date && !isNaN(month)) {
           isYearView = false;
-          document.getElementById('yearViewBtn').innerHTML = '📅 переход к месяцам';
+          document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
           document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
@@ -753,7 +761,7 @@
         const month = parseInt(item.dataset.month);
         if (date && !isNaN(month)) {
           isYearView = false;
-          document.getElementById('yearViewBtn').innerHTML = '📅 переход к месяцам';
+          document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
           document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
@@ -990,6 +998,7 @@
   const yearPrevBtn = document.getElementById('yearPrevBtn');
   const yearNextBtn = document.getElementById('yearNextBtn');
   const currentYearLabel = document.getElementById('currentYearLabel');
+  const todayFromYearBtn = document.getElementById('todayFromYearBtn');
 
   function updateYearLabel() {
     if (currentYearLabel) currentYearLabel.textContent = currentYear;
@@ -1015,6 +1024,40 @@
     });
   }
 
+  // Кнопка "СЕГОДНЯ" в годовом обзоре
+  if (todayFromYearBtn) {
+    todayFromYearBtn.addEventListener('click', () => {
+      const today = new Date();
+      currentYear = today.getFullYear();
+      currentMonth = today.getMonth();
+      updateYearLabel();
+      
+      // Выходим из годового обзора
+      isYearView = false;
+      document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
+      document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
+      
+      const detailsSection = document.getElementById('detailsSection');
+      const legend = document.querySelector('.legend');
+      const yearNavPanel = document.getElementById('yearNavPanel');
+      const grid = document.getElementById('calendarGrid');
+      
+      if (detailsSection) detailsSection.style.display = 'block';
+      if (legend) legend.style.display = 'flex';
+      if (yearNavPanel) yearNavPanel.style.display = 'none';
+      
+      // Возвращаем стили контейнера
+      grid.style.display = 'grid';
+      grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+      grid.style.gap = '4px';
+      
+      selectedDate = "";
+      selectedEventId = null;
+      renderCalendar();
+      document.getElementById('detailsSection').innerHTML = '<div style="text-align:center;padding:20px;color:#b0a890;">👈 НАЖМИТЕ НА ДЕНЬ</div>';
+    });
+  }
+
   document.getElementById("addEventBtn")?.addEventListener("click", async () => {
     if (!isAdmin) { alert("ТОЛЬКО АДМИН!"); return; }
     if (!selectedDate) { alert("СНАЧАЛА ВЫБЕРИТЕ ДЕНЬ!"); return; }
@@ -1036,7 +1079,7 @@
   document.getElementById("prevMonthBtn").addEventListener("click", () => {
     if (isYearView) {
       isYearView = false;
-      document.getElementById('yearViewBtn').innerHTML = '📅 переход к месяцам';
+      document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
       document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
       const yearNavPanel = document.getElementById('yearNavPanel');
       if (yearNavPanel) yearNavPanel.style.display = 'none';
@@ -1060,7 +1103,7 @@
   document.getElementById("nextMonthBtn").addEventListener("click", () => {
     if (isYearView) {
       isYearView = false;
-      document.getElementById('yearViewBtn').innerHTML = '📅 переход к месяцам';
+      document.getElementById('yearViewBtn').innerHTML = '📅 К МЕСЯЦАМ';
       document.getElementById('yearViewBtn').classList.remove('year-view-btn-active');
       const yearNavPanel = document.getElementById('yearNavPanel');
       if (yearNavPanel) yearNavPanel.style.display = 'none';
@@ -1105,7 +1148,7 @@
         yearViewBtn.classList.add('year-view-btn-active');
         renderYearView();
       } else {
-        yearViewBtn.innerHTML = '📅 переход к месяцам';
+        yearViewBtn.innerHTML = '📅 К МЕСЯЦАМ';
         yearViewBtn.classList.remove('year-view-btn-active');
         const detailsSection = document.getElementById('detailsSection');
         const legend = document.querySelector('.legend');
