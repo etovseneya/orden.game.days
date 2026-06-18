@@ -24,7 +24,17 @@
   <style>
     * { box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 0; }
     body { background: #e8e0d0; padding: 12px; min-height: 100vh; }
-    .container { max-width: 100%; margin: 0 auto; background: #f5f0e8; border-radius: 24px; padding: 16px; border: 1px solid #d4c9b0; }
+        .container { 
+      max-width: 100%; 
+      margin: 0 auto; 
+      background: #f5f0e8; 
+      border-radius: 24px; 
+      padding: 16px; 
+      border: 1px solid #d4c9b0; 
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
     .mode-badge { display: inline-block; background: #e0d8c8; padding: 4px 12px; border-radius: 20px; font-size: 0.7rem; color: #4a5b3a; }
     .status-bar { background: #e8e0d0; padding: 5px 10px; border-radius: 12px; margin: 8px 0; font-size: 0.7rem; text-align: center; color: #5a6b4a; }
     .admin-panel { background: #e0d8c0; padding: 10px; border-radius: 14px; margin: 12px 0; display: none; }
@@ -631,19 +641,22 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Определяем размеры в зависимости от ширины
-    const containerWidth = grid.parentElement.clientWidth - 32;
-    const gap = containerWidth < 500 ? 4 : 8;
+    // Получаем реальную ширину контейнера
+    const container = grid.parentElement;
+    const containerWidth = container.clientWidth - 0;
     const isMobile = containerWidth < 500;
-    const fontSize = isMobile ? '0.4rem' : '0.5rem';
-    const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
-    const dayFontSize = isMobile ? '0.4rem' : '0.5rem';
-    const eventFontSize = isMobile ? '0.35rem' : '0.45rem';
+    const gap = isMobile ? 4 : 8;
     const cardPadding = isMobile ? '4px 2px' : '8px 4px';
     const borderRadius = isMobile ? '6px' : '10px';
     
+    // Размеры шрифтов
+    const fontSize = isMobile ? '0.35rem' : '0.5rem';
+    const headerFontSize = isMobile ? '0.5rem' : '0.65rem';
+    const dayFontSize = isMobile ? '0.4rem' : '0.5rem';
+    const eventFontSize = isMobile ? '0.35rem' : '0.45rem';
+    
     let html = `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}px; width: 100%; max-width: 100%; box-sizing: border-box; padding: 0;">
+      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}px; width: 100%; box-sizing: border-box;">
     `;
     
     for (let month = 0; month < 12; month++) {
@@ -653,7 +666,7 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box; width: 100%;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
       html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
       
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
@@ -699,7 +712,7 @@
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
-        const maxHeight = isMobile ? '35px' : '55px';
+        const maxHeight = isMobile ? '30px' : '50px';
         html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; max-height: ${maxHeight}; overflow-y: auto;">`;
         const showCount = isMobile ? 2 : 3;
         monthEvents.slice(0, showCount).forEach(ev => {
@@ -709,7 +722,7 @@
           }
           html += `
             <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 2px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
-              <span style="font-weight: bold; min-width: ${isMobile ? '16px' : '22px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
+              <span style="font-weight: bold; min-width: ${isMobile ? '14px' : '20px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
               <span style="font-size: ${eventFontSize}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
@@ -726,7 +739,6 @@
     }
     
     html += `</div>`;
-    
     grid.innerHTML = html;
     
     // Клик по карточке месяца
