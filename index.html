@@ -570,12 +570,14 @@
     const monthNav = document.querySelector('.month-nav');
     const legend = document.querySelector('.legend');
     
-    // Скрываем навигацию и легенду
     if (monthNav) monthNav.style.display = 'none';
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
-    // Собираем данные о событиях (только выездные)
+    // === ПЕРЕОПРЕДЕЛЯЕМ СТИЛИ КОНТЕЙНЕРА ===
+    grid.style.display = 'block';
+    grid.style.width = '100%';
+    
     const eventsByDay = {};
     const monthEventsData = {};
     const uniqueEvents = {};
@@ -641,12 +643,8 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // ===== ТАКАЯ ЖЕ СЕТКА КАК В МЕСЯЧНОМ КАЛЕНДАРЕ =====
-    // В месячном календаре: grid-template-columns: repeat(7, 1fr)
-    // Здесь будет: 3 колонки по 4 месяца (всего 12)
-    // НО каждая ячейка месяца — это тоже сетка 7x7 (дни недели + числа)
-    
-    let html = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;">`;
+    // === ГЛАВНАЯ СЕТКА 3×4 — растягивается на всю ширину ===
+    let html = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%; box-sizing: border-box; margin: 0; padding: 0;">`;
     
     for (let month = 0; month < 12; month++) {
       const firstDay = new Date(currentYear, month, 1);
@@ -655,23 +653,18 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      // === КАЖДЫЙ МЕСЯЦ — ЭТО КАК МАЛЕНЬКИЙ МЕСЯЧНЫЙ КАЛЕНДАРЬ ===
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 12px; padding: 8px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 12px; padding: 8px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; box-sizing: border-box; width: 100%;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
       
-      // Название месяца
       html += `<div style="text-align: center; font-size: 0.7rem; font-weight: bold; color: #4a5b3a; margin-bottom: 4px;">${monthNames[month]}</div>`;
       
-      // === СЕТКА ДНЕЙ НЕДЕЛИ (7 колонок) ===
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.5rem; text-align: center; margin-bottom: 2px;">`;
       weekdays.forEach(wd => {
         html += `<div style="color: #b0a890; font-weight: 600; padding: 2px 0;">${wd}</div>`;
       });
       html += `</div>`;
       
-      // === СЕТКА ЧИСЕЛ (7 колонок) ===
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.55rem; text-align: center;">`;
       
-      // Пустые ячейки до первого дня
       for (let i = 0; i < offset; i++) {
         html += `<div style="padding: 2px 0; color: #d0c8b0;"></div>`;
       }
@@ -698,12 +691,11 @@
           borderRadius = '50%';
         }
         
-        html += `<div style="padding: 2px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+        html += `<div style="padding: 2px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: 0.55rem;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
       }
       
       html += `</div>`;
       
-      // === СПИСОК СОБЫТИЙ ПОД МЕСЯЦЕМ ===
       const monthEvents = monthEventsData[month] || [];
       if (monthEvents.length > 0) {
         html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; max-height: 55px; overflow-y: auto;">`;
@@ -713,7 +705,7 @@
             dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem !important; padding: 2px 4px !important; border-radius: 3px !important; margin-bottom: 2px !important; background: #e8a0a0 !important; color: white !important; cursor: pointer !important; display: flex !important; align-items: center !important; gap: 4px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; border-left: none !important;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
               <span style="font-weight: bold; min-width: 22px; font-size: 0.5rem;">${dateDisplay}</span>
               <span style="font-size: 0.5rem; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
@@ -733,7 +725,7 @@
     html += `</div>`;
     grid.innerHTML = html;
     
-    // ===== ОБРАБОТЧИКИ КЛИКОВ (как в месячном календаре) =====
+    // Обработчики кликов
     document.querySelectorAll('.month-card').forEach(card => {
       card.addEventListener('click', (e) => {
         if (e.target.closest('.year-event-item')) return;
@@ -746,6 +738,10 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
+          // Возвращаем стили контейнера
+          grid.style.display = 'grid';
+          grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+          grid.style.gap = '4px';
           currentMonth = month;
           selectedDate = "";
           selectedEventId = null;
@@ -767,6 +763,10 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
+          // Возвращаем стили контейнера
+          grid.style.display = 'grid';
+          grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+          grid.style.gap = '4px';
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
@@ -788,6 +788,10 @@
           if (monthNav) monthNav.style.display = 'flex';
           if (legend) legend.style.display = 'flex';
           if (detailsSection) detailsSection.style.display = 'block';
+          // Возвращаем стили контейнера
+          grid.style.display = 'grid';
+          grid.style.gridTemplateColumns = 'repeat(7, 1fr)';
+          grid.style.gap = '4px';
           currentMonth = month;
           selectedDate = date;
           selectedEventId = null;
