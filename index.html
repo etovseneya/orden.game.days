@@ -564,18 +564,16 @@
       });
     });
   }
-  function renderYearView() {
+   function renderYearView() {
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     const monthNav = document.querySelector('.month-nav');
     const legend = document.querySelector('.legend');
     
-    // Скрываем навигацию
     if (monthNav) monthNav.style.display = 'none';
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
-    // Собираем данные
     const eventsByDay = {};
     const monthEventsData = {};
     const uniqueEvents = {};
@@ -641,36 +639,30 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Получаем ширину контейнера
-    const container = grid.parentElement;
-    const containerWidth = container.clientWidth - 0;
-    
-    // Вычисляем ширину одной ячейки месяца (всегда делим на 3)
+    // Получаем ширину контейнера (как у строки "ЗАГРУЖЕНО...")
+    const containerWidth = grid.parentElement.clientWidth;
+    // Ширина одной ячейки = ширина контейнера / 3
     const cardWidth = containerWidth / 3;
     
-    // Динамический размер шрифта в зависимости от ширины ячейки
+    // Динамические размеры
     let fontSize, headerFontSize, dayFontSize, eventFontSize;
     
     if (cardWidth < 80) {
-      // Очень узкий экран
       fontSize = '0.3rem';
       headerFontSize = '0.4rem';
       dayFontSize = '0.35rem';
       eventFontSize = '0.3rem';
     } else if (cardWidth < 120) {
-      // Узкий экран
       fontSize = '0.4rem';
       headerFontSize = '0.5rem';
       dayFontSize = '0.45rem';
       eventFontSize = '0.35rem';
     } else if (cardWidth < 160) {
-      // Средний экран
       fontSize = '0.5rem';
       headerFontSize = '0.6rem';
       dayFontSize = '0.55rem';
       eventFontSize = '0.4rem';
     } else {
-      // Широкий экран
       fontSize = '0.6rem';
       headerFontSize = '0.75rem';
       dayFontSize = '0.65rem';
@@ -692,7 +684,7 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box; width: 100%;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; min-width: 0; box-sizing: border-box; width: 100%; height: auto;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
       html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
       
       html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
@@ -734,7 +726,6 @@
       
       html += `</div>`;
       
-      // Список событий под месяцем
       const monthEvents = monthEventsData[month] || [];
       
       if (monthEvents.length > 0) {
@@ -789,7 +780,6 @@
       });
     });
     
-    // Клик по числу
     document.querySelectorAll('.month-card [data-date]').forEach(el => {
       el.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -811,7 +801,6 @@
       });
     });
     
-    // Клик по событию
     document.querySelectorAll('.year-event-item').forEach(item => {
       item.addEventListener('click', (e) => {
         e.stopPropagation();
