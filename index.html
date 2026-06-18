@@ -564,16 +564,18 @@
       });
     });
   }
-   function renderYearView() {
+  function renderYearView() {
     const grid = document.getElementById("calendarGrid");
     const detailsSection = document.getElementById('detailsSection');
     const monthNav = document.querySelector('.month-nav');
     const legend = document.querySelector('.legend');
     
+    // Скрываем навигацию и легенду
     if (monthNav) monthNav.style.display = 'none';
     if (legend) legend.style.display = 'none';
     if (detailsSection) detailsSection.style.display = 'none';
     
+    // Собираем данные о событиях (только выездные)
     const eventsByDay = {};
     const monthEventsData = {};
     const uniqueEvents = {};
@@ -639,42 +641,12 @@
     const monthNames = ['ЯНВАРЬ', 'ФЕВРАЛЬ', 'МАРТ', 'АПРЕЛЬ', 'МАЙ', 'ИЮНЬ', 'ИЮЛЬ', 'АВГУСТ', 'СЕНТЯБРЬ', 'ОКТЯБРЬ', 'НОЯБРЬ', 'ДЕКАБРЬ'];
     const weekdays = ['ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ', 'ВС'];
     
-    // Получаем ширину контейнера
-    const containerWidth = grid.parentElement.clientWidth;
+    // ===== ТАКАЯ ЖЕ СЕТКА КАК В МЕСЯЧНОМ КАЛЕНДАРЕ =====
+    // В месячном календаре: grid-template-columns: repeat(7, 1fr)
+    // Здесь будет: 3 колонки по 4 месяца (всего 12)
+    // НО каждая ячейка месяца — это тоже сетка 7x7 (дни недели + числа)
     
-    // Динамический размер шрифта в зависимости от ширины ячейки
-    const cardWidth = containerWidth / 3;
-    let fontSize, headerFontSize, dayFontSize, eventFontSize;
-    
-    if (cardWidth < 80) {
-      fontSize = '0.3rem';
-      headerFontSize = '0.4rem';
-      dayFontSize = '0.35rem';
-      eventFontSize = '0.3rem';
-    } else if (cardWidth < 120) {
-      fontSize = '0.4rem';
-      headerFontSize = '0.5rem';
-      dayFontSize = '0.45rem';
-      eventFontSize = '0.35rem';
-    } else if (cardWidth < 160) {
-      fontSize = '0.5rem';
-      headerFontSize = '0.6rem';
-      dayFontSize = '0.55rem';
-      eventFontSize = '0.4rem';
-    } else {
-      fontSize = '0.6rem';
-      headerFontSize = '0.75rem';
-      dayFontSize = '0.65rem';
-      eventFontSize = '0.5rem';
-    }
-    
-    const gap = cardWidth < 100 ? 4 : 8;
-    const cardPadding = cardWidth < 100 ? '4px 2px' : '8px 4px';
-    const borderRadius = cardWidth < 100 ? '6px' : '10px';
-    
-    let html = `
-      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: ${gap}px; width: 100%; box-sizing: border-box;">
-    `;
+    let html = `<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; width: 100%;">`;
     
     for (let month = 0; month < 12; month++) {
       const firstDay = new Date(currentYear, month, 1);
@@ -683,19 +655,25 @@
       const daysInMonth = new Date(currentYear, month + 1, 0).getDate();
       const today = new Date().toISOString().split('T')[0];
       
-      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: ${borderRadius}; padding: ${cardPadding}; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden; box-sizing: border-box; width: 100%;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
-      html += `<div style="text-align: center; font-size: ${headerFontSize}; color: #4a5b3a; font-weight: bold; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${monthNames[month]}</div>`;
+      // === КАЖДЫЙ МЕСЯЦ — ЭТО КАК МАЛЕНЬКИЙ МЕСЯЧНЫЙ КАЛЕНДАРЬ ===
+      html += `<div class='month-card' data-month='${month}' style="background: #f5f0e8; border-radius: 12px; padding: 8px; border: 1px solid #d4c9b0; cursor: pointer; transition: all 0.2s ease; overflow: hidden;" onmouseover="this.style.transform='scale(1.02)'; this.style.boxShadow='0 2px 8px rgba(0,0,0,0.1)';" onmouseout="this.style.transform='scale(1)'; this.style.boxShadow='none';">`;
       
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${fontSize}; text-align: center; margin-bottom: 2px;">`;
+      // Название месяца
+      html += `<div style="text-align: center; font-size: 0.7rem; font-weight: bold; color: #4a5b3a; margin-bottom: 4px;">${monthNames[month]}</div>`;
+      
+      // === СЕТКА ДНЕЙ НЕДЕЛИ (7 колонок) ===
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.5rem; text-align: center; margin-bottom: 2px;">`;
       weekdays.forEach(wd => {
-        html += `<div style="color: #b0a890; font-weight: 600; padding: 1px 0; font-size: ${fontSize};">${wd}</div>`;
+        html += `<div style="color: #b0a890; font-weight: 600; padding: 2px 0;">${wd}</div>`;
       });
       html += `</div>`;
       
-      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 1px; font-size: ${dayFontSize}; text-align: center;">`;
+      // === СЕТКА ЧИСЕЛ (7 колонок) ===
+      html += `<div style="display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; font-size: 0.55rem; text-align: center;">`;
       
+      // Пустые ячейки до первого дня
       for (let i = 0; i < offset; i++) {
-        html += `<div style="padding: 1px 0; color: #d0c8b0;"></div>`;
+        html += `<div style="padding: 2px 0; color: #d0c8b0;"></div>`;
       }
       
       for (let d = 1; d <= daysInMonth; d++) {
@@ -707,48 +685,46 @@
         let bg = 'transparent';
         let textColor = '#4a5b3a';
         let fontWeight = 'normal';
-        let borderRadius2 = '0';
+        let borderRadius = '0';
         
         if (hasEvent) {
           bg = '#e8a0a0';
           textColor = 'white';
           fontWeight = 'bold';
-          borderRadius2 = '50%';
+          borderRadius = '50%';
         }
         if (isToday && !hasEvent) {
           bg = '#fff4c4';
-          borderRadius2 = '50%';
+          borderRadius = '50%';
         }
         
-        html += `<div style="padding: 1px 0; background: ${bg}; border-radius: ${borderRadius2}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; font-size: ${dayFontSize};" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
+        html += `<div style="padding: 2px 0; background: ${bg}; border-radius: ${borderRadius}; color: ${textColor}; font-weight: ${fontWeight}; cursor: pointer; transition: all 0.2s ease; width: 100%; aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center;" data-day="${d}" data-month="${month}" data-date="${dateKey}" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">${d}</div>`;
       }
       
       html += `</div>`;
       
+      // === СПИСОК СОБЫТИЙ ПОД МЕСЯЦЕМ ===
       const monthEvents = monthEventsData[month] || [];
-      
       if (monthEvents.length > 0) {
-        const maxHeight = cardWidth < 100 ? '30px' : (cardWidth < 160 ? '40px' : '55px');
-        html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; max-height: ${maxHeight}; overflow-y: auto;">`;
-        const showCount = cardWidth < 100 ? 2 : (cardWidth < 160 ? 2 : 3);
-        monthEvents.slice(0, showCount).forEach(ev => {
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; max-height: 55px; overflow-y: auto;">`;
+        monthEvents.slice(0, 3).forEach(ev => {
           let dateDisplay = ev.startDay;
           if (ev.duration > 1) {
             dateDisplay = `${ev.startDay}-${ev.endDay}`;
           }
           html += `
-            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: ${eventFontSize}; padding: 1px 3px; border-radius: 2px; margin-bottom: 1px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
-              <span style="font-weight: bold; min-width: ${cardWidth < 100 ? '14px' : '20px'}; font-size: ${eventFontSize}; flex-shrink: 0;">${dateDisplay}</span>
-              <span style="font-size: ${eventFontSize}; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
+            <div class='year-event-item' data-date='${ev.dateKey}' data-month='${month}' style="font-size: 0.5rem; padding: 2px 4px; border-radius: 3px; margin-bottom: 2px; background: #e8a0a0; color: white; cursor: pointer; display: flex; align-items: center; gap: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" onmouseover="this.style.filter='brightness(1.1)'" onmouseout="this.style.filter='brightness(1)'">
+              <span style="font-weight: bold; min-width: 22px; font-size: 0.5rem;">${dateDisplay}</span>
+              <span style="font-size: 0.5rem; overflow: hidden; text-overflow: ellipsis;">${ev.name}</span>
             </div>
           `;
         });
-        if (monthEvents.length > showCount) {
-          html += `<div style="font-size: ${eventFontSize}; color: #b0a890; text-align: center; padding: 1px;">+${monthEvents.length - showCount}</div>`;
+        if (monthEvents.length > 3) {
+          html += `<div style="font-size: 0.45rem; color: #b0a890; text-align: center;">+${monthEvents.length - 3}</div>`;
         }
         html += `</div>`;
       } else {
-        html += `<div style="margin-top: 2px; border-top: 1px solid #e0d8c0; padding-top: 2px; font-size: ${eventFontSize}; color: #d0c8b0; text-align: center; padding-bottom: 2px;">—</div>`;
+        html += `<div style="margin-top: 4px; border-top: 1px solid #e0d8c0; padding-top: 4px; font-size: 0.45rem; color: #d0c8b0; text-align: center;">—</div>`;
       }
       
       html += `</div>`;
@@ -757,7 +733,7 @@
     html += `</div>`;
     grid.innerHTML = html;
     
-    // Клик по карточке месяца
+    // ===== ОБРАБОТЧИКИ КЛИКОВ (как в месячном календаре) =====
     document.querySelectorAll('.month-card').forEach(card => {
       card.addEventListener('click', (e) => {
         if (e.target.closest('.year-event-item')) return;
